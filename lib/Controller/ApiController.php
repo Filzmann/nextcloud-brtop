@@ -11,6 +11,7 @@ use OCA\BrTop\Service\AgendaMutationService;
 use OCA\BrTop\Service\AgendaTemplateService;
 use OCA\BrTop\Service\BrtopLogger;
 use OCA\BrTop\Service\BrtopSettingsService;
+use OCA\BrTop\Service\DemoDataService;
 use OCA\BrTop\Service\DocumentGenerationService;
 use OCA\BrTop\Service\MeetingService;
 use OCA\BrTop\Service\MeetingStateService;
@@ -32,6 +33,7 @@ class ApiController extends Controller {
         private MeetingStateService $meetingStateService,
         private DocumentGenerationService $documentGenerationService,
         private MeetingService $meetingService,
+        private DemoDataService $demoDataService,
         private ProtocolBlockService $protocolBlockService
     ) {
         parent::__construct(Application::APP_ID, $request);
@@ -314,28 +316,7 @@ class ApiController extends Controller {
     }
 
     public function seedDemo(): DataResponse {
-        $meeting = $this->createMeeting(
-            'Ordentliche BR-Sitzung',
-            date('Y-m-d', strtotime('+7 days')),
-            '10:00',
-            'BR-Büro / Videokonferenz'
-        )->getData();
-
-        $id = (int)$meeting['id'];
-
-        $this->addTop($id, 'protocol', 'Protokoll der letzten Sitzung', '', '', 'Wer stimmt dem Protokoll der letzten Sitzung zu?', true);
-
-        $this->addTop($id, 'personnel_99', 'Einstellung Hans Müller', 'Hans Müller', '§ 99 BetrVG', 'Wer verweigert die Zustimmung zur Einstellung von Hans Müller gemäß § 99 BetrVG?', true);
-        $this->addTop($id, 'personnel_99', 'Eingruppierung Max Muster', 'Max Muster', '§ 99 BetrVG', 'Wer verweigert die Zustimmung zur Eingruppierung von Max Muster gemäß § 99 BetrVG?', true);
-
-        $this->addTop($id, 'personnel_100', 'Vorläufige Einstellung Mathilda Müßig', 'Mathilda Müßig', '§ 100 BetrVG', 'Wer bestreitet, dass die vorläufige Durchführung der personellen Maßnahme aus sachlichen Gründen dringend erforderlich ist?', true);
-
-        $this->addTop($id, 'personnel_102', 'Anhörung Kündigung Nina Narrativ', 'Nina Narrativ', '§ 102 BetrVG', 'Wer widerspricht der beabsichtigten Kündigung von Nina Narrativ gemäß § 102 BetrVG?', true);
-
-        $this->addTop($id, 'organisation', 'Planung nächste Sitzung', '', '', '', false);
-        $this->addTop($id, 'consultation_report', 'Bericht aus den Sprechstunden seit der letzten Sitzung', '', '', '', false);
-
-        return new DataResponse(['ok' => true, 'meetingId' => $id]);
+        return new DataResponse(['ok' => true] + $this->demoDataService->seedForOwner($this->uid()));
     }
 
     public function generateInvitation(int $meetingId): DataResponse {

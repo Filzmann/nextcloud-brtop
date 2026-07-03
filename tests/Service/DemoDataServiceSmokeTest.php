@@ -1,0 +1,106 @@
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../../lib/Service/MeetingService.php';
+require __DIR__ . '/../../lib/Service/AgendaMutationService.php';
+require __DIR__ . '/../../lib/Service/DemoDataService.php';
+
+use OCA\BrTop\Service\AgendaMutationService;
+use OCA\BrTop\Service\DemoDataService;
+use OCA\BrTop\Service\MeetingService;
+
+$checkSame = static function ($expected, $actual, string $message): void {
+    if ($expected !== $actual) {
+        fwrite(STDERR, $message . PHP_EOL);
+        fwrite(STDERR, 'Expected: ' . var_export($expected, true) . PHP_EOL);
+        fwrite(STDERR, 'Actual:   ' . var_export($actual, true) . PHP_EOL);
+        exit(1);
+    }
+};
+
+$meetingService = new class extends MeetingService {
+    public array $created = [];
+
+    public function __construct() {
+    }
+
+    public function create(
+        string $uid,
+        string $title,
+        string $meetingDate,
+        string $meetingTime,
+        string $location,
+        string $meetingType,
+        string $committeeCode
+    ): int {
+        $this->created = compact(
+            'uid',
+            'title',
+            'meetingDate',
+            'meetingTime',
+            'location',
+            'meetingType',
+            'committeeCode'
+        );
+
+        return 23;
+    }
+};
+
+$agendaMutationService = new class extends AgendaMutationService {
+    public array $items = [];
+
+    public function __construct() {
+    }
+
+    public function addItem(
+        int $meetingId,
+        string $type,
+        string $subject,
+        string $personName,
+        string $legalBasis,
+        string $resolutionText,
+        bool $requiresResolution,
+        string $agendaItemKind,
+        int $parentId,
+        string $protocolContent,
+        string $invitationNote,
+        string $attachmentPaths,
+        int $resolutionCount
+    ): int {
+        $this->items[] = compact(
+            'meetingId',
+            'type',
+            'subject',
+            'personName',
+            'legalBasis',
+            'resolutionText',
+            'requiresResolution',
+            'agendaItemKind',
+            'parentId',
+            'protocolContent',
+            'invitationNote',
+            'attachmentPaths',
+            'resolutionCount'
+        );
+
+        return count($this->items);
+    }
+};
+
+$service = new DemoDataService($meetingService, $agendaMutationService);
+$result = $service->seedForOwner('simon');
+
+$checkSame(['meetingId' => 23], $result, 'Demo seeding should return the created meeting id.');
+$checkSame('simon', $meetingService->created['uid'], 'Demo meeting should be created for the current user.');
+$checkSame('Ordentliche BR-Sitzung', $meetingService->created['title'], 'Demo meeting should keep the existing title.');
+$checkSame('10:00', $meetingService->created['meetingTime'], 'Demo meeting should keep the existing time.');
+$checkSame('custom', $meetingService->created['meetingType'], 'Demo meeting should keep the existing meeting type.');
+$checkSame(7, count($agendaMutationService->items), 'Demo seeding should create the existing seven agenda items.');
+$checkSame('protocol', $agendaMutationService->items[0]['type'], 'Demo seeding should start with the protocol TOP.');
+$checkSame('consultation_report', $agendaMutationService->items[6]['type'], 'Demo seeding should keep the consultation report TOP.');
+$checkSame(1, $agendaMutationService->items[1]['resolutionCount'], 'Resolution demo TOPs should create one resolution.');
+$checkSame(0, $agendaMutationService->items[6]['resolutionCount'], 'Non-resolution demo TOPs should not create resolutions.');
+
+echo 'DemoDataService smoke tests passed' . PHP_EOL;
