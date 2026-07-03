@@ -22,17 +22,18 @@ cd /var/www/vhosts/betriebsrat-ad.de/cloud.betriebsrat-ad.de/apps
 unzip /pfad/zu/brtop-0.1.0.zip
 cd /var/www/vhosts/betriebsrat-ad.de/cloud.betriebsrat-ad.de
 sudo -u betriebsrat php occ app:enable brtop
-sudo -u betriebsrat php occ migrations:migrate brtop
+sudo -u betriebsrat php occ status
 ```
 
 Falls deine Nextcloud nicht unter diesem Pfad liegt, den Pfad entsprechend anpassen.
+Nextcloud 34 hat keinen `occ migrations:migrate`-Befehl. App-Migrationen laufen beim Aktivieren der App bzw. ueber `occ upgrade`, wenn `occ status` `needsDbUpgrade: true` meldet.
 
 ## Test
 
 ```bash
 cd /var/www/vhosts/betriebsrat-ad.de/cloud.betriebsrat-ad.de
 sudo -u betriebsrat php occ app:list | grep brtop
-sudo -u betriebsrat php occ migrations:status brtop
+sudo -u betriebsrat php occ status
 ```
 
 Dann in Nextcloud öffnen:

@@ -102,6 +102,8 @@ Wichtige Pruefungen:
     ddev exec -d /var/www/html/html php occ app:list
     ddev exec -d /var/www/html/html php occ upgrade
 
+Diese lokale Nextcloud-Version hat keinen `occ migrations:migrate`-Befehl. App-Migrationen laufen beim Aktivieren der App bzw. ueber `occ upgrade`, wenn Nextcloud einen DB-Upgrade-Bedarf meldet.
+
 In Codex-Sessions koennen DDEV-Befehle im normalen Sandbox-Kontext nicht zuverlaessig auf Docker zugreifen. Wenn `ddev` mit Docker-/Stream-FD-Fehlern scheitert, den gleichen Befehl mit eskaliertem Zugriff erneut ausfuehren.
 
 ## Architekturregeln
