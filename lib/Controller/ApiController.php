@@ -167,6 +167,7 @@ class ApiController extends Controller {
                 $resolutionText,
                 $requiresResolution,
                 $agendaItemKind,
+                $parentId,
                 $protocolContent,
                 $invitationNote,
                 $attachmentPaths,

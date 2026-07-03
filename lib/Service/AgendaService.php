@@ -94,7 +94,11 @@ class AgendaService {
         string $attachmentPaths = '',
         int $resolutionCount = 0
     ): int {
-        $position = count($this->agendaItemRepository->findForMeeting($meetingId)) + 1;
+        $items = $this->agendaItemRepository->findForMeeting($meetingId);
+        $position = count($items) + 1;
+        $parent = $this->parentForNewItem($items, $parentId);
+        $parentId = $parent === null ? null : (int)$parent['id'];
+        $level = $parent === null ? 1 : (int)$parent['level'] + 1;
 
         if ($legalBasis === '') {
             $legalBasis = $this->defaultLegalBasis($type);
@@ -115,8 +119,8 @@ class AgendaService {
             'legal_basis' => $legalBasis,
             'resolution_text' => $resolutionText,
             'requires_resolution' => $requiresResolution,
-            'parent_id' => null,
-            'level' => 1,
+            'parent_id' => $parentId,
+            'level' => $level,
             'agenda_item_kind' => $agendaItemKind,
             'protocol_content' => $protocolContent,
             'invitation_note' => $invitationNote,
@@ -287,6 +291,23 @@ class AgendaService {
             'personnel_102' => '§ 102 BetrVG',
             default => '',
         };
+    }
+
+    private function parentForNewItem(array $items, int $parentId): ?array {
+        if ($parentId <= 0) {
+            return null;
+        }
+
+        $parent = $this->agendaTreeService->findItem($items, $parentId);
+        if ($parent === null) {
+            throw new \InvalidArgumentException('Parent-TOP nicht gefunden.');
+        }
+
+        if ((int)$parent['level'] >= 3) {
+            throw new \InvalidArgumentException('Sub-TOPs sind nur bis Ebene 3 möglich.');
+        }
+
+        return $parent;
     }
 
     private function normalizeHierarchy(int $meetingId): void {
