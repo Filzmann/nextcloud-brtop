@@ -7,7 +7,6 @@ namespace OCA\BrTop\Controller;
 use OCA\BrTop\AppInfo\Application;
 use OCA\BrTop\Exception\DocumentGenerationException;
 use OCA\BrTop\Model\Meeting;
-use OCA\BrTop\Service\AgendaService;
 use OCA\BrTop\Service\AgendaMutationService;
 use OCA\BrTop\Service\AgendaTemplateService;
 use OCA\BrTop\Service\BrtopLogger;
@@ -15,7 +14,7 @@ use OCA\BrTop\Service\BrtopSettingsService;
 use OCA\BrTop\Service\DocumentGenerationService;
 use OCA\BrTop\Service\MeetingService;
 use OCA\BrTop\Service\MeetingStateService;
-use OCA\BrTop\Store\ProtocolBlockStore;
+use OCA\BrTop\Service\ProtocolBlockService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -29,12 +28,11 @@ class ApiController extends Controller {
         private BrtopLogger $logger,
         private BrtopSettingsService $settings,
         private AgendaTemplateService $agendaTemplateService,
-        private AgendaService $agendaService,
         private AgendaMutationService $agendaMutationService,
         private MeetingStateService $meetingStateService,
         private DocumentGenerationService $documentGenerationService,
         private MeetingService $meetingService,
-        private ProtocolBlockStore $protocolBlockStore
+        private ProtocolBlockService $protocolBlockService
     ) {
         parent::__construct(Application::APP_ID, $request);
     }
@@ -279,17 +277,14 @@ class ApiController extends Controller {
     ): DataResponse {
         $this->assertMeetingOwner($meetingId);
 
-        if ($this->agendaService->itemForMeeting($meetingId, $topId) === null) {
+        try {
+            $block = $this->protocolBlockService->addBlock($meetingId, $topId, $blockType, $content);
+        } catch (\OutOfBoundsException $e) {
             return new DataResponse([
                 'ok' => false,
-                'message' => 'TOP nicht gefunden.',
+                'message' => $e->getMessage(),
             ], Http::STATUS_NOT_FOUND);
         }
-
-        if ($blockType !== 'text') {
-            $blockType = 'text';
-        }
-        $block = $this->protocolBlockStore->addBlock($meetingId, $topId, $blockType, $content);
 
         return new DataResponse([
             'ok' => true,
@@ -305,18 +300,12 @@ class ApiController extends Controller {
     ): DataResponse {
         $this->assertMeetingOwner($meetingId);
 
-        if ($this->agendaService->itemForMeeting($meetingId, $topId) === null) {
+        try {
+            $this->protocolBlockService->updateBlockContent($meetingId, $topId, $blockId, $content);
+        } catch (\OutOfBoundsException $e) {
             return new DataResponse([
                 'ok' => false,
-                'message' => 'TOP nicht gefunden.',
-            ], Http::STATUS_NOT_FOUND);
-        }
-
-        $updated = $this->protocolBlockStore->updateContent($meetingId, $topId, $blockId, $content);
-        if (!$updated) {
-            return new DataResponse([
-                'ok' => false,
-                'message' => 'Protokollblock nicht gefunden.',
+                'message' => $e->getMessage(),
             ], Http::STATUS_NOT_FOUND);
         }
 
