@@ -12,6 +12,74 @@ Nextcloud-App-ID:
 
     brtop
 
+## Zielsetzung
+
+BRTop soll den wiederkehrenden Sitzungs- und Dokumentprozess des Betriebsrats abbilden, nicht nur einzelne Dateien erzeugen.
+
+Kernprozess:
+
+- Es gibt einen Betriebsrat mit `n` Mitgliedern; die Mitgliederzahl ist eine Setup- bzw. Konfigurationsvariable.
+- Ein BR-Mitglied ist ein Nextcloud-User in der Gruppe `Betriebsrat`.
+- Listen, Ersatzmitglieder und Nachladungen bleiben zu Beginn bewusst aussen vor, muessen aber spaeter wieder aufgegriffen werden.
+- Die regulaere BR-Sitzung findet in einem konfigurierbaren Rhythmus statt, zunaechst typischerweise woechentlich am Dienstag zu einer konfigurierbaren Uhrzeit.
+- Die Einladung erfolgt an einem konfigurierbaren Wochentag vor der Sitzung, zunaechst typischerweise am Freitag vorher.
+- Sitzungen werden nicht automatisch vorerzeugt, sondern ueber "naechste Sitzung planen" angelegt.
+- Beim Erzeugen einer Einladung wird die Ladungsliste als rechtssicherer Snapshot gespeichert; spaetere Gruppenaenderungen duerfen alte Einladungen nicht veraendern.
+- Standard-TOPs, Sitzungstypen und Ausschuesse sollen konfigurierbar werden.
+- TOPs und Sub-TOPs werden bis Ebene 3 mit Ueberschrift, Reihenfolge, fachlicher TOP-Art und spaeterem Protokollinhalt in der Datenbank gespeichert.
+- Aus denselben gespeicherten Sitzungs- und TOP-Daten werden TOP-Liste fuer Einladung, Mailtext, Protokollvorlage und Dokumente erzeugt.
+- Alte Einladungen, Protokolle und Beschlussdokumente sollen ueber eine eigene Dokumentuebersicht mit DB-Metadaten auffindbar sein, nicht nur ueber Dateipfade.
+- E-Mail-Versand soll mittelfristig direkt aus der App moeglich sein; die Absenderadresse muss konfigurierbar sein.
+
+Start-Sitzungstypen:
+
+- regulaere BR-Sitzung
+- Monatsgespraech
+- Betriebsausschuss
+- Ausschuss / AG
+- freie Sitzung
+
+Aktuelle Ausschuss- bzw. AG-Codes:
+
+- ASA
+- DPA
+- IKT
+- BA
+- IBF
+
+Architekturfolge: Refactorings sollen zuerst dieses Prozessmodell, Sitzungstypen, Konfiguration, Agenda-Templates, Ladungssnapshots und Dokumentmetadaten beruecksichtigen, bevor Renderer- oder Controller-Details grossflaechig umgebaut werden.
+
+## Fachliche BR-Logik
+
+Standardstruktur einer regulaeren BR-Sitzung:
+
+1. Protokolle
+2. Personelle Angelegenheiten
+3. Arbeitsorganisatorisches
+4. Bericht aus den Sprechstunden seit der letzten Sitzung
+5. Weitere Tagesordnungspunkte
+
+Unter TOP 2 derzeit beruecksichtigt:
+
+- Personelle Einzelmassnahmen nach Paragraf 99 BetrVG.
+- Vorlaeufige personelle Massnahmen nach Paragraf 100 BetrVG.
+- Anhoerungen zu Kuendigungen nach Paragraf 102 BetrVG.
+
+Einladung:
+
+- Paragraf-99-, Paragraf-100- und Paragraf-102-Faelle duerfen kompakt unter "Personelle Angelegenheiten" zusammengefasst werden.
+
+Protokoll:
+
+- Paragraf-99-, Paragraf-100- und Paragraf-102-Faelle muessen getrennt aufgefuehrt werden.
+- Nicht jeder TOP ist beschlussrelevant. TOPs koennen fachlich Gliederungspunkte, Berichte, Beratungen oder Beschluesse sein.
+- Ein TOP kann mehrere Beschluesse erfordern.
+
+Beschluesse:
+
+- Jeder beschlussrelevante Fall erhaelt ein eigenes Beschlussdokument.
+- Das gilt auch dann, wenn mehrere Faelle gemeinsam abgestimmt wurden.
+
 ## Git- und Arbeitsregeln
 
 - Dieses Verzeichnis ist ein eigenstaendiges Git-Repository fuer die BR-App `brtop`.
@@ -20,6 +88,7 @@ Nextcloud-App-ID:
 - Vor Commits immer `git status --short`, `git diff --stat` und `git diff --name-only` zeigen.
 - Nicht `git add .` verwenden; Dateien gezielt stagen.
 - Aenderungen klein, pruefbar und rueckbaubar halten.
+- Fuer groessere Refactorings, neue Datenmodelle oder neue Services soll ein eigener Branch vorgeschlagen werden.
 
 ## DDEV
 
@@ -49,6 +118,14 @@ In Codex-Sessions koennen DDEV-Befehle im normalen Sandbox-Kontext nicht zuverla
 - Keine Architekturabstraktion wird vorsorglich gebaut. Auslagerung erfolgt, wenn sie konkrete Duplizierung, Testbarkeit oder Wartbarkeit verbessert.
 
 Diese Regeln gelten sinngemaess auch fuer andere eigene Nextcloud-Apps; die fachlichen Anwendungsfaelle bleiben aber getrennt.
+
+## Learnings pflegen
+
+- Wenn bei der Arbeit ein echtes, wiederverwendbares Projekt-Learning entsteht, soll Codex vorschlagen, es in dieser `AGENTS.md` zu ergaenzen.
+- Die Ergaenzung erfolgt erst nach ausdruecklicher Freigabe.
+- App-spezifische Learnings werden in diesem App-Repo gespeichert.
+- App-uebergreifende Learnings werden im Parent-Workspace dokumentiert und bei Bedarf in die App-`AGENTS.md` uebertragen.
+- Neue Regeln muessen dort stehen, wo sie gebraucht werden: BRTop-Fachlogik hier, DDEV-/Repo-/Neue-App-Regeln im Parent bzw. in allen betroffenen App-Repos.
 
 ## Zielstruktur
 
