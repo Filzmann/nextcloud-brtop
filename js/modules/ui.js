@@ -1,5 +1,5 @@
 (function() {
-    const { Notice, byId, errorMessage, esc } = window.LocalBase.ui;
+    const { Notice, byId, esc } = window.LocalBase.ui;
     const noticeBox = new Notice('brtop-notice', {
         baseClass: 'brtop-notice',
         typeClassPrefix: 'brtop-notice-'
@@ -127,16 +127,18 @@
     };
 
     const showError = (error, fallback = 'Fehler') => {
-        showNotice(errorMessage(error, fallback), 'error');
+        noticeBox.error(error, fallback);
     };
 
     const showDocumentResult = (result, fallback) => {
         const text = documentResultText(result) || fallback;
-        const type = result && Array.isArray(result.warnings) && result.warnings.length > 0
-            ? 'warning'
-            : 'success';
 
-        showNotice(text, type);
+        if (result && Array.isArray(result.warnings) && result.warnings.length > 0) {
+            noticeBox.warning(text);
+            return;
+        }
+
+        noticeBox.success(text);
     };
 
     window.BRTop = window.BRTop || {};
