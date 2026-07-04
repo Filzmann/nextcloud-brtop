@@ -1,5 +1,6 @@
 (function() {
-    const { Model, ProtocolBlock } = window.BRTop.models;
+    const { Model } = window.LocalBase.models;
+    const { ProtocolBlock } = window.BRTop.models;
 
     class AgendaItem extends Model {
         constructor(data = {}) {

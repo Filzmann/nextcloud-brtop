@@ -4,7 +4,7 @@ use OCA\BrTop\View\UiComponents;
 script('brtop', 'modules/api');
 script('brtop', 'modules/ui');
 script('brtop', 'modules/view-router');
-script('brtop', 'models/model');
+script('localbase', 'models/model');
 script('brtop', 'models/protocol-block');
 script('brtop', 'models/agenda-item');
 script('brtop', 'models/generated-document');

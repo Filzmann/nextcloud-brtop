@@ -1,5 +1,6 @@
 (function() {
-    const { Model, AgendaItem, GeneratedDocument } = window.BRTop.models;
+    const { Model } = window.LocalBase.models;
+    const { AgendaItem, GeneratedDocument } = window.BRTop.models;
 
     class Meeting extends Model {
         constructor(data = {}) {

@@ -1,5 +1,5 @@
 (function() {
-    const { Model } = window.BRTop.models;
+    const { Model } = window.LocalBase.models;
 
     class ProtocolBlock extends Model {
         constructor(data = {}) {

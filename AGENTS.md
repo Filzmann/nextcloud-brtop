@@ -96,8 +96,11 @@ Die gemeinsame lokale Nextcloud-DDEV-Umgebung liegt ausserhalb dieses Repos:
 
     ~/projects/br-nextcloud-apps/nextcloud-dev
 
+BRTop nutzt gemeinsame Basisbausteine aus der Hilfsapp `localbase`. In der lokalen Nextcloud muss `localbase` aktiviert sein, bevor BRTop vollstaendig lauffaehig ist.
+
 Wichtige Pruefungen:
 
+    ddev exec -d /var/www/html/html php occ app:list | grep -i localbase
     ddev exec -d /var/www/html/html php occ status
     ddev exec -d /var/www/html/html php occ app:list
     ddev exec -d /var/www/html/html php occ upgrade

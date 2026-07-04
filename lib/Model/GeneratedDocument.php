@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\BrTop\Model;
 
+use OCA\LocalBase\Model\ModelApiTrait;
+
 class GeneratedDocument {
     use ModelApiTrait;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../../lib/Model/ModelApiTrait.php';
+require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
 require __DIR__ . '/../../lib/Model/AgendaItem.php';
 require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
 require __DIR__ . '/../../lib/Service/ProtocolBlockService.php';

@@ -1,5 +1,5 @@
 (function() {
-    const { Model } = window.BRTop.models;
+    const { Model } = window.LocalBase.models;
 
     class GeneratedDocument extends Model {
         constructor(data = {}) {
