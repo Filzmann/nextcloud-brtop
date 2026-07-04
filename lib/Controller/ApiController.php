@@ -16,6 +16,7 @@ use OCA\BrTop\Service\DocumentGenerationService;
 use OCA\BrTop\Service\MeetingService;
 use OCA\BrTop\Service\MeetingStateService;
 use OCA\BrTop\Service\ProtocolBlockService;
+use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -34,7 +35,8 @@ class ApiController extends Controller {
         private DocumentGenerationService $documentGenerationService,
         private MeetingService $meetingService,
         private DemoDataService $demoDataService,
-        private ProtocolBlockService $protocolBlockService
+        private ProtocolBlockService $protocolBlockService,
+        private ApiResponder $responder
     ) {
         parent::__construct(Application::APP_ID, $request);
     }
@@ -71,10 +73,8 @@ class ApiController extends Controller {
         string $memberGroupName,
         string $regularAgendaTemplateJson = ''
     ): DataResponse {
-        try {
-            $regularAgendaTemplateJson = $this->agendaTemplateService->normalizeJsonForStorage($regularAgendaTemplateJson);
-
-            $this->settings->save(
+        return $this->responder->respond(
+            function () use (
                 $defaultMeetingTitle,
                 $regularMeetingWeekday,
                 $invitationWeekday,
@@ -82,25 +82,29 @@ class ApiController extends Controller {
                 $defaultLocation,
                 $memberGroupName,
                 $regularAgendaTemplateJson
-            );
+            ): array {
+                $regularAgendaTemplateJson = $this->agendaTemplateService->normalizeJsonForStorage($regularAgendaTemplateJson);
 
-            return new DataResponse([
-                'ok' => true,
-                'settings' => $this->settingsPayload(),
-            ]);
-        } catch (\InvalidArgumentException $e) {
-            return new DataResponse([
-                'ok' => false,
-                'message' => $e->getMessage(),
-            ], Http::STATUS_BAD_REQUEST);
-        } catch (\Throwable $e) {
-            $this->logger->error('update_settings', $e);
+                $this->settings->save(
+                    $defaultMeetingTitle,
+                    $regularMeetingWeekday,
+                    $invitationWeekday,
+                    $defaultMeetingTime,
+                    $defaultLocation,
+                    $memberGroupName,
+                    $regularAgendaTemplateJson
+                );
 
-            return new DataResponse([
-                'ok' => false,
-                'message' => 'Die Einstellungen konnten nicht gespeichert werden. Details stehen im Nextcloud-Log.',
-            ], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
+                return [
+                    'ok' => true,
+                    'settings' => $this->settingsPayload(),
+                ];
+            },
+            [$this->logger, 'error'],
+            'update_settings',
+            [],
+            'Die Einstellungen konnten nicht gespeichert werden. Details stehen im Nextcloud-Log.'
+        );
     }
 
     public function createMeeting(
@@ -126,20 +130,19 @@ class ApiController extends Controller {
     }
 
     public function planNextRegularMeeting(): DataResponse {
-        try {
-            $planned = $this->meetingService->planNextRegular($this->uid());
+        return $this->responder->respond(
+            function (): array {
+                $planned = $this->meetingService->planNextRegular($this->uid());
 
-            return new DataResponse([
-                'ok' => true,
-            ] + $planned);
-        } catch (\Throwable $e) {
-            $this->logger->error('plan_next_regular_meeting', $e);
-
-            return new DataResponse([
-                'ok' => false,
-                'message' => 'Die nächste BR-Sitzung konnte nicht geplant werden. Details stehen im Nextcloud-Log.',
-            ], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
+                return [
+                    'ok' => true,
+                ] + $planned;
+            },
+            [$this->logger, 'error'],
+            'plan_next_regular_meeting',
+            [],
+            'Die nächste BR-Sitzung konnte nicht geplant werden. Details stehen im Nextcloud-Log.'
+        );
     }
 
     public function addTop(
@@ -224,20 +227,18 @@ class ApiController extends Controller {
     }
 
     public function deleteMeeting(int $meetingId): DataResponse {
-        $this->assertMeetingOwner($meetingId);
+        return $this->responder->respond(
+            function () use ($meetingId): array {
+                $this->assertMeetingOwner($meetingId);
+                $this->meetingService->delete($meetingId);
 
-        try {
-            $this->meetingService->delete($meetingId);
-        } catch (\Throwable $e) {
-            $this->logger->error('delete_meeting', $e, ['meeting_id' => $meetingId]);
-
-            return new DataResponse([
-                'ok' => false,
-                'message' => 'Die Sitzung konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.',
-            ], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
-
-        return new DataResponse(['ok' => true]);
+                return ['ok' => true];
+            },
+            [$this->logger, 'error'],
+            'delete_meeting',
+            ['meeting_id' => $meetingId],
+            'Die Sitzung konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.'
+        );
     }
 
     public function addProtocolBlock(
