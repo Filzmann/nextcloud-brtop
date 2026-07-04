@@ -157,9 +157,21 @@ class ApiController extends Controller {
         string $attachmentPaths = '',
         int $resolutionCount = 0
     ): DataResponse {
-        $this->assertMeetingOwner($meetingId);
-
-        try {
+        return $this->agendaMutationResponse($meetingId, function () use (
+            $meetingId,
+            $type,
+            $subject,
+            $personName,
+            $legalBasis,
+            $resolutionText,
+            $requiresResolution,
+            $agendaItemKind,
+            $parentId,
+            $protocolContent,
+            $invitationNote,
+            $attachmentPaths,
+            $resolutionCount
+        ): void {
             $this->agendaMutationService->addItem(
                 $meetingId,
                 $type,
@@ -175,84 +187,40 @@ class ApiController extends Controller {
                 $attachmentPaths,
                 $resolutionCount
             );
-        } catch (\InvalidArgumentException $e) {
-            return new DataResponse([
-                'ok' => false,
-                'message' => $e->getMessage(),
-            ], Http::STATUS_BAD_REQUEST);
-        }
-
-        return new DataResponse(['ok' => true]);
+        });
     }
 
     public function moveTop(int $meetingId, int $topId, string $direction): DataResponse {
-        $this->assertMeetingOwner($meetingId);
-
-        try {
+        return $this->agendaMutationResponse($meetingId, function () use ($meetingId, $topId, $direction): void {
             $this->agendaMutationService->moveItem($meetingId, $topId, $direction);
-        } catch (\InvalidArgumentException $e) {
-            return new DataResponse([
-                'ok' => false,
-                'message' => $e->getMessage(),
-            ], Http::STATUS_BAD_REQUEST);
-        }
-
-        return new DataResponse(['ok' => true]);
+        });
     }
 
     public function changeTopDepth(int $meetingId, int $topId, string $direction): DataResponse {
-        $this->assertMeetingOwner($meetingId);
-
-        try {
+        return $this->agendaMutationResponse($meetingId, function () use ($meetingId, $topId, $direction): void {
             $this->agendaMutationService->changeItemDepth($meetingId, $topId, $direction);
-        } catch (\InvalidArgumentException $e) {
-            return new DataResponse([
-                'ok' => false,
-                'message' => $e->getMessage(),
-            ], Http::STATUS_BAD_REQUEST);
-        }
-
-        return new DataResponse(['ok' => true]);
+        });
     }
 
     public function updateTopSubject(int $meetingId, int $topId, string $subject): DataResponse {
-        $this->assertMeetingOwner($meetingId);
-
-        try {
+        return $this->agendaMutationResponse($meetingId, function () use ($meetingId, $topId, $subject): void {
             $this->agendaMutationService->updateItemSubject($meetingId, $topId, $subject);
-        } catch (\InvalidArgumentException $e) {
-            return new DataResponse([
-                'ok' => false,
-                'message' => $e->getMessage(),
-            ], Http::STATUS_BAD_REQUEST);
-        }
-
-        return new DataResponse(['ok' => true]);
+        });
     }
 
     public function deleteTop(int $meetingId, int $topId): DataResponse {
-        $this->assertMeetingOwner($meetingId);
-
-        try {
-            $this->agendaMutationService->deleteItemWithProtocolBlocks($meetingId, $topId);
-        } catch (\InvalidArgumentException $e) {
-            return new DataResponse([
-                'ok' => false,
-                'message' => $e->getMessage(),
-            ], Http::STATUS_BAD_REQUEST);
-        } catch (\Throwable $e) {
-            $this->logger->error('delete_top', $e, [
+        return $this->agendaMutationResponse(
+            $meetingId,
+            function () use ($meetingId, $topId): void {
+                $this->agendaMutationService->deleteItemWithProtocolBlocks($meetingId, $topId);
+            },
+            'delete_top',
+            'Der TOP konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.',
+            [
                 'meeting_id' => $meetingId,
                 'top_id' => $topId,
-            ]);
-
-            return new DataResponse([
-                'ok' => false,
-                'message' => 'Der TOP konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.',
-            ], Http::STATUS_INTERNAL_SERVER_ERROR);
-        }
-
-        return new DataResponse(['ok' => true]);
+            ]
+        );
     }
 
     public function deleteMeeting(int $meetingId): DataResponse {
@@ -373,6 +341,38 @@ class ApiController extends Controller {
         }
 
         return [];
+    }
+
+    private function agendaMutationResponse(
+        int $meetingId,
+        callable $mutation,
+        ?string $serverErrorAction = null,
+        string $serverErrorMessage = '',
+        array $serverErrorContext = []
+    ): DataResponse {
+        $this->assertMeetingOwner($meetingId);
+
+        try {
+            $mutation();
+        } catch (\InvalidArgumentException $e) {
+            return new DataResponse([
+                'ok' => false,
+                'message' => $e->getMessage(),
+            ], Http::STATUS_BAD_REQUEST);
+        } catch (\Throwable $e) {
+            if ($serverErrorAction === null) {
+                throw $e;
+            }
+
+            $this->logger->error($serverErrorAction, $e, $serverErrorContext);
+
+            return new DataResponse([
+                'ok' => false,
+                'message' => $serverErrorMessage,
+            ], Http::STATUS_INTERNAL_SERVER_ERROR);
+        }
+
+        return new DataResponse(['ok' => true]);
     }
 
     private function documentErrorResponse(
