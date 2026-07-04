@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
 require __DIR__ . '/../../lib/Model/AgendaItem.php';
 require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
@@ -14,26 +15,8 @@ use OCA\BrTop\Model\ProtocolBlock;
 use OCA\BrTop\Service\AgendaService;
 use OCA\BrTop\Service\ProtocolBlockService;
 use OCA\BrTop\Store\ProtocolBlockStore;
-
-$checkSame = static function ($expected, $actual, string $message): void {
-    if ($expected !== $actual) {
-        fwrite(STDERR, $message . PHP_EOL);
-        fwrite(STDERR, 'Expected: ' . var_export($expected, true) . PHP_EOL);
-        fwrite(STDERR, 'Actual:   ' . var_export($actual, true) . PHP_EOL);
-        exit(1);
-    }
-};
-
-$checkThrows = static function (callable $callback, string $message): void {
-    try {
-        $callback();
-    } catch (\OutOfBoundsException) {
-        return;
-    }
-
-    fwrite(STDERR, $message . PHP_EOL);
-    exit(1);
-};
+use function OCA\BrTop\Tests\assertSameValue;
+use function OCA\BrTop\Tests\assertThrows;
 
 $agendaService = new class extends AgendaService {
     public bool $itemExists = true;
@@ -82,20 +65,22 @@ $protocolBlockStore = new class extends ProtocolBlockStore {
 $service = new ProtocolBlockService($agendaService, $protocolBlockStore);
 
 $block = $service->addBlock(3, 7, 'unknown', 'Notiz');
-$checkSame('text', $protocolBlockStore->lastBlockType, 'Unknown protocol block types should be normalized to text.');
-$checkSame('Notiz', $block->content, 'Added protocol blocks should keep the submitted content.');
+assertSameValue('text', $protocolBlockStore->lastBlockType, 'Unknown protocol block types should be normalized to text.');
+assertSameValue('Notiz', $block->content, 'Added protocol blocks should keep the submitted content.');
 
 $service->updateBlockContent(3, 7, 5, 'Aktualisierte Notiz');
 
 $protocolBlockStore->updateResult = false;
-$checkThrows(
+assertThrows(
     static fn() => $service->updateBlockContent(3, 7, 404, 'fehlt'),
+    \OutOfBoundsException::class,
     'Missing protocol blocks should throw a not-found exception.'
 );
 
 $agendaService->itemExists = false;
-$checkThrows(
+assertThrows(
     static fn() => $service->addBlock(3, 7, 'text', 'Notiz'),
+    \OutOfBoundsException::class,
     'Missing agenda items should throw a not-found exception.'
 );
 
