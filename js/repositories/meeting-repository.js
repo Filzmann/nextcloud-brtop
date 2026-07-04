@@ -1,11 +1,8 @@
 (function() {
+    const { Repository } = window.LocalBase.repositories;
     const { Meeting } = window.BRTop.models;
 
-    class MeetingRepository {
-        constructor(request) {
-            this.request = request;
-        }
-
+    class MeetingRepository extends Repository {
         async state() {
             const data = await this.request('/api/state');
 
@@ -17,65 +14,47 @@
         }
 
         createNextRegular() {
-            return this.request('/api/meetings/next-regular', { method: 'POST' });
+            return this.post('/api/meetings/next-regular');
         }
 
         deleteMeeting(meetingId) {
-            return this.request(`/api/meetings/${meetingId}/delete`, { method: 'POST' });
+            return this.post(`/api/meetings/${meetingId}/delete`);
         }
 
         createInvitation(meetingId) {
-            return this.request(`/api/meetings/${meetingId}/invitation`, { method: 'POST' });
+            return this.post(`/api/meetings/${meetingId}/invitation`);
         }
 
         createProtocol(meetingId) {
-            return this.request(`/api/meetings/${meetingId}/protocol`, { method: 'POST' });
+            return this.post(`/api/meetings/${meetingId}/protocol`);
         }
 
         addTop(meetingId, payload) {
-            return this.request(`/api/meetings/${meetingId}/tops`, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
+            return this.post(`/api/meetings/${meetingId}/tops`, payload);
         }
 
         moveTop(meetingId, topId, direction) {
-            return this.request(`/api/meetings/${meetingId}/tops/${topId}/move`, {
-                method: 'POST',
-                body: JSON.stringify({ direction })
-            });
+            return this.post(`/api/meetings/${meetingId}/tops/${topId}/move`, { direction });
         }
 
         changeTopDepth(meetingId, topId, direction) {
-            return this.request(`/api/meetings/${meetingId}/tops/${topId}/depth`, {
-                method: 'POST',
-                body: JSON.stringify({ direction })
-            });
+            return this.post(`/api/meetings/${meetingId}/tops/${topId}/depth`, { direction });
         }
 
         saveTopSubject(meetingId, topId, subject) {
-            return this.request(`/api/meetings/${meetingId}/tops/${topId}/subject`, {
-                method: 'POST',
-                body: JSON.stringify({ subject })
-            });
+            return this.post(`/api/meetings/${meetingId}/tops/${topId}/subject`, { subject });
         }
 
         deleteTop(meetingId, topId) {
-            return this.request(`/api/meetings/${meetingId}/tops/${topId}/delete`, { method: 'POST' });
+            return this.post(`/api/meetings/${meetingId}/tops/${topId}/delete`);
         }
 
         addProtocolBlock(meetingId, topId) {
-            return this.request(`/api/meetings/${meetingId}/tops/${topId}/protocol-blocks`, {
-                method: 'POST',
-                body: JSON.stringify({ blockType: 'text', content: '' })
-            });
+            return this.post(`/api/meetings/${meetingId}/tops/${topId}/protocol-blocks`, { blockType: 'text', content: '' });
         }
 
         saveProtocolBlock(meetingId, topId, blockId, content) {
-            return this.request(`/api/meetings/${meetingId}/tops/${topId}/protocol-blocks/${blockId}`, {
-                method: 'POST',
-                body: JSON.stringify({ content })
-            });
+            return this.post(`/api/meetings/${meetingId}/tops/${topId}/protocol-blocks/${blockId}`, { content });
         }
     }
 

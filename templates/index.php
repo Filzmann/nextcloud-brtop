@@ -11,6 +11,7 @@ script('brtop', 'models/protocol-block');
 script('brtop', 'models/agenda-item');
 script('brtop', 'models/generated-document');
 script('brtop', 'models/meeting');
+script('localbase', 'repositories/repository');
 script('brtop', 'repositories/meeting-repository');
 script('brtop', 'components/meeting-list');
 script('brtop', 'components/agenda-list');
