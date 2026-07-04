@@ -3,6 +3,7 @@
 
     class GeneratedDocument extends Model {
         constructor(data = {}) {
+            super();
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id || data.meetingId || 0;
             this.document_type = data.document_type || data.documentType || '';

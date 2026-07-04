@@ -4,6 +4,7 @@
 
     class Meeting extends Model {
         constructor(data = {}) {
+            super();
             this.id = data.id ?? null;
             this.owner_uid = data.owner_uid || data.ownerUid || '';
             this.title = data.title || '';

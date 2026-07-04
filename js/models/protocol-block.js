@@ -3,6 +3,7 @@
 
     class ProtocolBlock extends Model {
         constructor(data = {}) {
+            super();
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id || data.meetingId || 0;
             this.top_id = data.top_id || data.topId || 0;

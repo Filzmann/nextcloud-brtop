@@ -4,6 +4,7 @@
 
     class AgendaItem extends Model {
         constructor(data = {}) {
+            super();
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id ?? data.meetingId ?? null;
             this.position = Number(data.position || 0);
