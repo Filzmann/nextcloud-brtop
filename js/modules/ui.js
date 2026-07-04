@@ -1,9 +1,5 @@
 (function() {
-    const byId = (id) => document.getElementById(id);
-
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    }[m]));
+    const { byId, esc } = window.LocalBase.ui;
 
     const fmtDate = (date) => {
         const value = String(date || '');

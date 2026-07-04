@@ -3,6 +3,7 @@ use OCA\BrTop\View\UiComponents;
 
 script('localbase', 'api/api-client');
 script('brtop', 'modules/api');
+script('localbase', 'ui/ui');
 script('brtop', 'modules/ui');
 script('brtop', 'modules/view-router');
 script('localbase', 'models/model');
