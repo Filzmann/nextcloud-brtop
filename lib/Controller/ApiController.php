@@ -19,6 +19,7 @@ use OCA\BrTop\Service\ProtocolBlockService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 use OCP\IUserSession;
@@ -49,6 +50,7 @@ class ApiController extends Controller {
         return $user->getUID();
     }
 
+    #[NoAdminRequired]
     public function state(): DataResponse {
         return new DataResponse([
             'meetings' => $this->meetingStateService->meetingsForOwner($this->uid()),
@@ -64,6 +66,7 @@ class ApiController extends Controller {
         return $settings;
     }
 
+    #[NoAdminRequired]
     public function updateSettings(
         string $defaultMeetingTitle,
         int $regularMeetingWeekday,
@@ -107,6 +110,7 @@ class ApiController extends Controller {
         );
     }
 
+    #[NoAdminRequired]
     public function createMeeting(
         string $title,
         string $meetingDate,
@@ -129,6 +133,7 @@ class ApiController extends Controller {
         ]);
     }
 
+    #[NoAdminRequired]
     public function planNextRegularMeeting(): DataResponse {
         return $this->responder->respond(
             function (): array {
@@ -145,6 +150,7 @@ class ApiController extends Controller {
         );
     }
 
+    #[NoAdminRequired]
     public function addTop(
         int $meetingId,
         string $type,
@@ -193,24 +199,28 @@ class ApiController extends Controller {
         });
     }
 
+    #[NoAdminRequired]
     public function moveTop(int $meetingId, int $topId, string $direction): DataResponse {
         return $this->agendaMutationResponse($meetingId, function () use ($meetingId, $topId, $direction): void {
             $this->agendaMutationService->moveItem($meetingId, $topId, $direction);
         });
     }
 
+    #[NoAdminRequired]
     public function changeTopDepth(int $meetingId, int $topId, string $direction): DataResponse {
         return $this->agendaMutationResponse($meetingId, function () use ($meetingId, $topId, $direction): void {
             $this->agendaMutationService->changeItemDepth($meetingId, $topId, $direction);
         });
     }
 
+    #[NoAdminRequired]
     public function updateTopSubject(int $meetingId, int $topId, string $subject): DataResponse {
         return $this->agendaMutationResponse($meetingId, function () use ($meetingId, $topId, $subject): void {
             $this->agendaMutationService->updateItemSubject($meetingId, $topId, $subject);
         });
     }
 
+    #[NoAdminRequired]
     public function deleteTop(int $meetingId, int $topId): DataResponse {
         return $this->agendaMutationResponse(
             $meetingId,
@@ -226,6 +236,7 @@ class ApiController extends Controller {
         );
     }
 
+    #[NoAdminRequired]
     public function deleteMeeting(int $meetingId): DataResponse {
         return $this->responder->respond(
             function () use ($meetingId): array {
@@ -241,6 +252,7 @@ class ApiController extends Controller {
         );
     }
 
+    #[NoAdminRequired]
     public function addProtocolBlock(
         int $meetingId,
         int $topId,
@@ -264,6 +276,7 @@ class ApiController extends Controller {
         ]);
     }
 
+    #[NoAdminRequired]
     public function updateProtocolBlock(
         int $meetingId,
         int $topId,
@@ -284,10 +297,12 @@ class ApiController extends Controller {
         return new DataResponse(['ok' => true]);
     }
 
+    #[NoAdminRequired]
     public function seedDemo(): DataResponse {
         return new DataResponse(['ok' => true] + $this->demoDataService->seedForOwner($this->uid()));
     }
 
+    #[NoAdminRequired]
     public function generateInvitation(int $meetingId): DataResponse {
         $meeting = $this->assertMeetingOwner($meetingId);
 
@@ -304,6 +319,7 @@ class ApiController extends Controller {
         }
     }
 
+    #[NoAdminRequired]
     public function generateProtocol(int $meetingId): DataResponse {
         $meeting = $this->assertMeetingOwner($meetingId);
 
@@ -320,6 +336,7 @@ class ApiController extends Controller {
         }
     }
 
+    #[NoAdminRequired]
     public function generateResolutions(int $meetingId): DataResponse {
         $meeting = $this->assertMeetingOwner($meetingId);
 

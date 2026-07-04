@@ -53,6 +53,7 @@ foreach ($lintFiles as $file) {
 }
 
 $testFiles = array_merge(
+    collect_php_files($root, ['tests/Controller']),
     collect_php_files($root, ['tests/Model']),
     collect_php_files($root, ['tests/Service'])
 );

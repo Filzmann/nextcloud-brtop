@@ -6,6 +6,7 @@ namespace OCA\BrTop\Controller;
 
 use OCA\BrTop\AppInfo\Application;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
@@ -16,6 +17,7 @@ class PageController extends Controller {
     }
 
     #[NoCSRFRequired]
+    #[NoAdminRequired]
     public function index(): TemplateResponse {
         return new TemplateResponse(Application::APP_ID, 'index');
     }
