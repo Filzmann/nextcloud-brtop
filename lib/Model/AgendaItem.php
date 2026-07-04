@@ -170,13 +170,13 @@ class AgendaItem {
         ];
     }
 
-    public function toApiArray(): array {
+    public function toArray(): array {
         return array_merge($this->toRepositoryData(), [
             'requires_resolution' => $this->requiresResolution ? 1 : 0,
             'created_at' => $this->createdAt,
             'agenda_number' => $this->agendaNumber,
             'protocol_blocks' => array_map(
-                static fn(ProtocolBlock $block): array => $block->toApiArray(),
+                static fn(ProtocolBlock $block): array => $block->toArray(),
                 $this->protocolBlocks
             ),
         ]);

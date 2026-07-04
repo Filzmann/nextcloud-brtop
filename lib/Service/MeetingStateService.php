@@ -27,7 +27,7 @@ class MeetingStateService {
                 $this->attachProtocolBlocks($meetingId, $meeting->agendaItems())
             );
             $meeting->setDocuments($this->documentStore->forMeeting($meetingId));
-            $payload[] = $meeting->toApiArray();
+            $payload[] = $meeting->toArray();
         }
 
         return $payload;

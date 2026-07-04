@@ -75,10 +75,10 @@ $meeting = new Meeting([
     'documents' => [$document],
 ]);
 
-$mappedMeeting = Meeting::get($meeting->toApiArray());
-$mappedMeetings = Meeting::get_all([$meeting->toApiArray()]);
+$mappedMeeting = Meeting::get($meeting->toArray());
+$mappedMeetings = Meeting::get_all([$meeting->toArray()]);
 
-$payload = $meeting->toApiArray();
+$payload = $meeting->toArray();
 
 $checkSame(true, $mappedMeeting instanceof Meeting, 'Meeting::get should hydrate API data.');
 $checkSame(1, count($mappedMeetings), 'Meeting::get_all should hydrate API lists.');

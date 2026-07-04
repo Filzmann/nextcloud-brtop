@@ -41,7 +41,7 @@ trait ModelApiTrait {
     }
 
     public function toArray(): array {
-        return $this->toApiArray();
+        throw new \RuntimeException(static::class . ' muss toArray() implementieren.');
     }
 
     public function to_array(): array {

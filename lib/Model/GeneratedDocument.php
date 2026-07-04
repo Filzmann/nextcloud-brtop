@@ -50,7 +50,7 @@ class GeneratedDocument {
         ];
     }
 
-    public function toApiArray(): array {
+    public function toArray(): array {
         return $this->toRepositoryData();
     }
 }

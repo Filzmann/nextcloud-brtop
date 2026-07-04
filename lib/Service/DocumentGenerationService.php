@@ -183,7 +183,7 @@ class DocumentGenerationService {
 
         foreach ($tops as &$top) {
             $top['protocol_blocks'] = array_map(
-                static fn(ProtocolBlock $block): array => $block->toApiArray(),
+                static fn(ProtocolBlock $block): array => $block->toArray(),
                 $blocksByTop[(int)$top['id']] ?? []
             );
         }

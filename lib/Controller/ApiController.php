@@ -259,7 +259,7 @@ class ApiController extends Controller {
 
         return new DataResponse([
             'ok' => true,
-            'block' => $block->toApiArray(),
+            'block' => $block->toArray(),
         ]);
     }
 

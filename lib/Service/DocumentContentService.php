@@ -226,7 +226,7 @@ class DocumentContentService {
     }
 
     private function protocolBlockData(array|ProtocolBlock $block): array {
-        return $block instanceof ProtocolBlock ? $block->toApiArray() : $block;
+        return $block instanceof ProtocolBlock ? $block->toArray() : $block;
     }
 
 }

@@ -116,15 +116,15 @@ class Meeting {
         ];
     }
 
-    public function toApiArray(): array {
+    public function toArray(): array {
         return array_merge($this->toRepositoryData(), [
             'created_at' => $this->createdAt,
             'tops' => array_map(
-                static fn(AgendaItem $item): array => $item->toApiArray(),
+                static fn(AgendaItem $item): array => $item->toArray(),
                 $this->agendaItems()
             ),
             'documents' => array_map(
-                static fn(GeneratedDocument $document): array => $document->toApiArray(),
+                static fn(GeneratedDocument $document): array => $document->toArray(),
                 $this->documents()
             ),
         ]);

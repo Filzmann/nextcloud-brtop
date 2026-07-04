@@ -44,7 +44,7 @@ class ProtocolBlock {
         ];
     }
 
-    public function toApiArray(): array {
+    public function toArray(): array {
         return $this->toRepositoryData();
     }
 }
