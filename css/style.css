@@ -355,9 +355,29 @@
 }
 
 .brtop-notice {
-    padding: 10px;
-    border-left: 4px solid var(--color-warning);
+    max-width: 900px;
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border-left: 4px solid var(--color-primary-element);
+    border-radius: 4px;
     background: var(--color-background-hover);
+    white-space: pre-line;
+}
+
+.brtop-notice[hidden] {
+    display: none !important;
+}
+
+.brtop-notice-success {
+    border-left-color: var(--color-success);
+}
+
+.brtop-notice-error {
+    border-left-color: var(--color-error);
+}
+
+.brtop-notice-warning {
+    border-left-color: var(--color-warning);
 }
 
 .brtop-checkline {

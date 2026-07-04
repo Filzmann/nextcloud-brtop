@@ -25,6 +25,7 @@ style('brtop', 'style');
 
 <div id="brtop-app">
     <h1>BR TOP- und Sitzungsverwaltung</h1>
+    <div id="brtop-notice" class="brtop-notice" role="status" aria-live="polite" hidden></div>
 
     <section id="sessions-view" class="brtop-card brtop-view is-active" aria-hidden="false">
         <div class="brtop-section-head">

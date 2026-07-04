@@ -8,9 +8,10 @@
     const {
         byId,
         fmtMeeting,
-        documentResultText
+        showDocumentResult,
+        showError,
+        showNotice
     } = window.BRTop.ui;
-    const { errorMessage } = window.LocalBase.ui;
     const { MeetingRepository } = window.BRTop.repositories;
     const { sessionTableHtml } = window.BRTop.meetingList;
     const { createController: createMeetingDetailController } = window.BRTop.meetingDetail;
@@ -21,10 +22,6 @@
     const findMeeting = (id) => meetings.find(m => String(m.id) === String(id)) || null;
 
     const currentMeeting = () => selectedMeetingId ? findMeeting(selectedMeetingId) : null;
-
-    function alertError(title, error, fallback = 'Fehler') {
-        alert(`${title}:\n${errorMessage(error, fallback)}`);
-    }
 
     const viewRouter = window.BRTop.viewRouter.createController({
         byId,
@@ -113,6 +110,7 @@
         const result = await meetingRepository.createNextRegular();
         await loadState();
         openMeetingDetail(result.id);
+        showNotice('Sitzung angelegt.', 'success');
     }
 
     async function deleteMeeting(id) {
@@ -128,13 +126,14 @@
         }
         await loadState();
         viewRouter.show('sessions-view');
+        showNotice('Sitzung geloescht.', 'success');
     }
 
     async function generateInvitation() {
         const result = await meetingRepository.createInvitation(selectedMeetingId);
         await loadState();
         renderMeetingDetail();
-        alert(documentResultText(result) || 'Ladung erzeugt.');
+        showDocumentResult(result, 'Ladung erzeugt.');
     }
 
     async function generateProtocolDocument() {
@@ -143,14 +142,14 @@
         const result = await meetingRepository.createProtocol(selectedMeetingId);
         await loadState();
         renderProtocolEditor();
-        alert(documentResultText(result) || 'Protokolldokument erzeugt.');
+        showDocumentResult(result, 'Protokolldokument erzeugt.');
     }
 
     byId('new-meeting').addEventListener('click', async () => {
         try {
             await createNewMeeting();
         } catch (e) {
-            alertError('Fehler beim Anlegen der Sitzung', e, 'Sitzung konnte nicht angelegt werden.');
+            showError(e, 'Sitzung konnte nicht angelegt werden.');
         }
     });
 
@@ -170,7 +169,7 @@
                 await deleteMeeting(id);
             }
         } catch (e) {
-            alertError('Fehler', e);
+            showError(e, 'Aktion konnte nicht ausgefuehrt werden.');
         }
     });
 
@@ -182,7 +181,7 @@
         try {
             await generateInvitation();
         } catch (e) {
-            alertError('Fehler beim Erzeugen der Ladung', e, 'Ladung konnte nicht erzeugt werden.');
+            showError(e, 'Ladung konnte nicht erzeugt werden.');
         }
     });
 
@@ -196,7 +195,7 @@
             await loadState();
             openMeetingDetail(selectedMeetingId);
         } catch (e) {
-            alertError('Fehler beim Speichern des Protokolls', e, 'Protokoll konnte nicht gespeichert werden.');
+            showError(e, 'Protokoll konnte nicht gespeichert werden.');
         }
     });
 
@@ -204,12 +203,12 @@
         try {
             await generateProtocolDocument();
         } catch (e) {
-            alertError('Fehler beim Erzeugen des Protokolls', e, 'Protokoll konnte nicht erzeugt werden.');
+            showError(e, 'Protokoll konnte nicht erzeugt werden.');
         }
     });
 
     agendaEditor.init();
     protocolEditor.init();
     topForm.init();
-    loadState().catch(e => alertError('Fehler beim Laden der Sitzungen', e, 'Sitzungen konnten nicht geladen werden.'));
+    loadState().catch(e => showError(e, 'Sitzungen konnten nicht geladen werden.'));
 })();

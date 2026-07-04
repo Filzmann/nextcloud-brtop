@@ -1,9 +1,5 @@
 (function() {
-    const { errorMessage } = window.LocalBase.ui;
-
-    function alertError(title, error, fallback = 'Fehler') {
-        alert(`${title}:\n${errorMessage(error, fallback)}`);
-    }
+    const { showError, showNotice } = window.BRTop.ui;
 
     function createController({
         byId,
@@ -24,7 +20,7 @@
 
             const subject = input.value.trim();
             if (subject === '') {
-                alert('Der TOP-Betreff darf nicht leer sein.');
+                showNotice('Der TOP-Betreff darf nicht leer sein.', 'error');
                 input.focus();
                 return;
             }
@@ -81,7 +77,7 @@
                     await deleteTop(topId, button.getAttribute('data-label') || 'diesen TOP');
                 }
             } catch (e) {
-                alertError('Fehler beim Bearbeiten der TOP-Liste', e, 'TOP-Liste konnte nicht bearbeitet werden.');
+                showError(e, 'TOP-Liste konnte nicht bearbeitet werden.');
             }
         };
 
@@ -106,7 +102,7 @@
             try {
                 await saveTopSubject(input.getAttribute('data-top-id'));
             } catch (e) {
-                alertError('Fehler beim Speichern des TOP', e, 'TOP konnte nicht gespeichert werden.');
+                showError(e, 'TOP konnte nicht gespeichert werden.');
             }
         };
 
@@ -114,7 +110,7 @@
             try {
                 const meetingId = getMeetingId();
                 if (!meetingId) {
-                    alert('Bitte zuerst eine Sitzung öffnen.');
+                    showNotice('Bitte zuerst eine Sitzung oeffnen.', 'error');
                     return;
                 }
 
@@ -126,8 +122,9 @@
                 topForm.hide();
                 await loadState();
                 renderMeetingDetail();
+                showNotice('TOP gespeichert.', 'success');
             } catch (e) {
-                alertError('Fehler beim Speichern des TOP', e, 'TOP konnte nicht gespeichert werden.');
+                showError(e, 'TOP konnte nicht gespeichert werden.');
             }
         };
 

@@ -1,5 +1,9 @@
 (function() {
-    const { byId, esc } = window.LocalBase.ui;
+    const { Notice, byId, errorMessage, esc } = window.LocalBase.ui;
+    const noticeBox = new Notice('brtop-notice', {
+        baseClass: 'brtop-notice',
+        typeClassPrefix: 'brtop-notice-'
+    });
 
     const fmtDate = (date) => {
         const value = String(date || '');
@@ -118,6 +122,23 @@
         ].filter(Boolean).join('\n\n');
     };
 
+    const showNotice = (message, type = 'info') => {
+        noticeBox.show(message, type);
+    };
+
+    const showError = (error, fallback = 'Fehler') => {
+        showNotice(errorMessage(error, fallback), 'error');
+    };
+
+    const showDocumentResult = (result, fallback) => {
+        const text = documentResultText(result) || fallback;
+        const type = result && Array.isArray(result.warnings) && result.warnings.length > 0
+            ? 'warning'
+            : 'success';
+
+        showNotice(text, type);
+    };
+
     window.BRTop = window.BRTop || {};
     window.BRTop.ui = {
         byId,
@@ -129,6 +150,9 @@
         agendaNumber,
         iconButtonHtml,
         buttonPresetHtml,
-        documentResultText
+        documentResultText,
+        showDocumentResult,
+        showError,
+        showNotice
     };
 })();
