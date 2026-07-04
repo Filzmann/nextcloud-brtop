@@ -53,6 +53,7 @@ $top = new AgendaItem([
     'legal_basis' => '§ 99 BetrVG',
     'requires_resolution' => 1,
     'resolution_count' => 2,
+    'resolution_text' => "Der Betriebsrat stimmt der Einstellung zu.\nDer Betriebsrat verweigert die Zustimmung.",
     'agenda_number' => '2.1.1',
     'protocol_blocks' => [
         new ProtocolBlock(['content' => 'Der Betriebsrat berät den Vorgang.']),
@@ -70,6 +71,31 @@ $checkContains('2.1.1. Einstellung Test', $email, 'Invitation email should accep
 $checkContains('2 Beschlüsse vorgesehen', $email, 'Invitation email should show multiple resolutions.');
 $checkContains('## 2.1.1. Einstellung Test', $protocol, 'Protocol template should accept AgendaItem models.');
 $checkContains('Der Betriebsrat berät den Vorgang.', $protocol, 'Protocol template should use protocol blocks from AgendaItem models.');
+$checkContains('1. Der Betriebsrat stimmt der Einstellung zu.', $protocol, 'Protocol template should list the first custom resolution question.');
+$checkContains('2. Der Betriebsrat verweigert die Zustimmung.', $protocol, 'Protocol template should list the second custom resolution question.');
 $checkContains('**Beschluss:** 2 von 2', $resolution, 'Resolution document should accept Meeting and AgendaItem models.');
+$checkContains('Der Betriebsrat verweigert die Zustimmung.', $resolution, 'Resolution document should use the requested resolution question.');
+
+$missingQuestionsTop = new AgendaItem([
+    'id' => 8,
+    'meeting_id' => 3,
+    'position' => 2,
+    'type' => 'personnel_102',
+    'subject' => 'Anhörung Test',
+    'person_name' => 'Test Person',
+    'legal_basis' => '§ 102 BetrVG',
+    'requires_resolution' => 1,
+    'resolution_count' => 3,
+    'resolution_text' => 'Der Betriebsrat widerspricht der Kündigung.',
+    'agenda_number' => '2.1.2',
+]);
+$missingQuestionsProtocol = $contentService->protocolTemplate($meeting, [$missingQuestionsTop]);
+$missingQuestionsResolution = $contentService->resolutionDocument($meeting, $missingQuestionsTop, 3);
+
+$checkContains('1. Der Betriebsrat widerspricht der Kündigung.', $missingQuestionsProtocol, 'Protocol template should use provided resolution questions first.');
+$checkContains('2. Beschlussfrage 2 ergänzen.', $missingQuestionsProtocol, 'Protocol template should add placeholders for missing questions.');
+$checkContains('3. Beschlussfrage 3 ergänzen.', $missingQuestionsProtocol, 'Protocol template should add all missing placeholders.');
+$checkContains('**Beschluss:** 3 von 3', $missingQuestionsResolution, 'Resolution document should label the selected resolution index.');
+$checkContains('Beschlussfrage 3 ergänzen.', $missingQuestionsResolution, 'Resolution document should use placeholder questions when needed.');
 
 echo 'DocumentContentService smoke tests passed' . PHP_EOL;
