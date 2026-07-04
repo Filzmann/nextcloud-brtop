@@ -1,6 +1,7 @@
 <?php
 use OCA\BrTop\View\UiComponents;
 
+script('localbase', 'api/api-client');
 script('brtop', 'modules/api');
 script('brtop', 'modules/ui');
 script('brtop', 'modules/view-router');
