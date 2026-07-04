@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
 require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
 require __DIR__ . '/../../lib/Model/AgendaItem.php';
@@ -12,15 +13,7 @@ use OCA\BrTop\Model\AgendaItem;
 use OCA\BrTop\Model\GeneratedDocument;
 use OCA\BrTop\Model\Meeting;
 use OCA\BrTop\Model\ProtocolBlock;
-
-$checkSame = static function ($expected, $actual, string $message): void {
-    if ($expected !== $actual) {
-        fwrite(STDERR, $message . PHP_EOL);
-        fwrite(STDERR, 'Expected: ' . var_export($expected, true) . PHP_EOL);
-        fwrite(STDERR, 'Actual:   ' . var_export($actual, true) . PHP_EOL);
-        exit(1);
-    }
-};
+use function OCA\BrTop\Tests\assertSameValue;
 
 $protocolBlock = new ProtocolBlock([
     'id' => 12,
@@ -45,12 +38,12 @@ $top = new AgendaItem([
     'protocol_blocks' => [$protocolBlock],
 ]);
 
-$checkSame('2.1', $top->number(), 'AgendaItem should prefer explicit agenda numbers.');
-$checkSame('resolution', $top->kind(), 'Resolution TOPs should expose their kind.');
-$checkSame(true, $top->isResolutionItem(), 'Resolution TOPs should be resolution-relevant.');
-$checkSame(2, $top->resolutionCount(), 'Resolution count should be preserved.');
-$checkSame(true, $protocolBlock->isTextBlock(), 'ProtocolBlock should expose text block checks.');
-$checkSame(
+assertSameValue('2.1', $top->number(), 'AgendaItem should prefer explicit agenda numbers.');
+assertSameValue('resolution', $top->kind(), 'Resolution TOPs should expose their kind.');
+assertSameValue(true, $top->isResolutionItem(), 'Resolution TOPs should be resolution-relevant.');
+assertSameValue(2, $top->resolutionCount(), 'Resolution count should be preserved.');
+assertSameValue(true, $protocolBlock->isTextBlock(), 'ProtocolBlock should expose text block checks.');
+assertSameValue(
     'Wer verweigert die Zustimmung zu Einstellung Test und widerspricht ihr damit?',
     $top->defaultResolutionText(),
     'Personnel §99 TOPs should build the expected default resolution question.'
@@ -80,13 +73,13 @@ $mappedMeetings = Meeting::get_all([$meeting->toArray()]);
 
 $payload = $meeting->toArray();
 
-$checkSame(true, $mappedMeeting instanceof Meeting, 'Meeting::get should hydrate API data.');
-$checkSame(1, count($mappedMeetings), 'Meeting::get_all should hydrate API lists.');
-$checkSame(3, $mappedMeeting->toArray()['id'], 'Model toArray should keep the API payload shape.');
-$checkSame('ohne Titel', $meeting->displayTitle(), 'Meeting displayTitle should have a fallback.');
-$checkSame(true, $meeting->isRegularBrMeeting(), 'Meeting should expose regular BR sessions.');
-$checkSame('Ladung', $document->displayTitle(), 'GeneratedDocument should expose display titles.');
-$checkSame(7, $payload['tops'][0]['id'], 'Meeting API payload should include TOP objects as arrays.');
-$checkSame('invitation_markdown', $payload['documents'][0]['document_type'], 'Meeting API payload should include document objects as arrays.');
+assertSameValue(true, $mappedMeeting instanceof Meeting, 'Meeting::get should hydrate API data.');
+assertSameValue(1, count($mappedMeetings), 'Meeting::get_all should hydrate API lists.');
+assertSameValue(3, $mappedMeeting->toArray()['id'], 'Model toArray should keep the API payload shape.');
+assertSameValue('ohne Titel', $meeting->displayTitle(), 'Meeting displayTitle should have a fallback.');
+assertSameValue(true, $meeting->isRegularBrMeeting(), 'Meeting should expose regular BR sessions.');
+assertSameValue('Ladung', $document->displayTitle(), 'GeneratedDocument should expose display titles.');
+assertSameValue(7, $payload['tops'][0]['id'], 'Meeting API payload should include TOP objects as arrays.');
+assertSameValue('invitation_markdown', $payload['documents'][0]['document_type'], 'Meeting API payload should include document objects as arrays.');
 
 echo 'BRTop model smoke tests passed' . PHP_EOL;

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
 require __DIR__ . '/../../lib/Model/AgendaItem.php';
 require __DIR__ . '/../../lib/Model/Meeting.php';
@@ -20,14 +21,7 @@ use OCA\BrTop\Service\AgendaService;
 use OCA\BrTop\Service\DocumentContentService;
 use OCA\BrTop\Service\DocumentDateFormatter;
 use OCA\BrTop\Service\InvitationContentService;
-
-$checkContains = static function (string $needle, string $haystack, string $message): void {
-    if (!str_contains($haystack, $needle)) {
-        fwrite(STDERR, $message . PHP_EOL);
-        fwrite(STDERR, 'Missing: ' . $needle . PHP_EOL);
-        exit(1);
-    }
-};
+use function OCA\BrTop\Tests\assertContainsString;
 
 $agendaService = (new ReflectionClass(AgendaService::class))->newInstanceWithoutConstructor();
 $attachmentService = new AgendaAttachmentService();
@@ -66,15 +60,15 @@ $email = $contentService->invitationEmail($meeting, [$top], [
 $protocol = $contentService->protocolTemplate($meeting, [$top]);
 $resolution = $contentService->resolutionDocument($meeting, $top, 2);
 
-$checkContains('Sitzung: Ordentliche BR-Sitzung', $email, 'Invitation email should accept Meeting models.');
-$checkContains('2.1.1. Einstellung Test', $email, 'Invitation email should accept AgendaItem models.');
-$checkContains('2 Beschlüsse vorgesehen', $email, 'Invitation email should show multiple resolutions.');
-$checkContains('## 2.1.1. Einstellung Test', $protocol, 'Protocol template should accept AgendaItem models.');
-$checkContains('Der Betriebsrat berät den Vorgang.', $protocol, 'Protocol template should use protocol blocks from AgendaItem models.');
-$checkContains('1. Der Betriebsrat stimmt der Einstellung zu.', $protocol, 'Protocol template should list the first custom resolution question.');
-$checkContains('2. Der Betriebsrat verweigert die Zustimmung.', $protocol, 'Protocol template should list the second custom resolution question.');
-$checkContains('**Beschluss:** 2 von 2', $resolution, 'Resolution document should accept Meeting and AgendaItem models.');
-$checkContains('Der Betriebsrat verweigert die Zustimmung.', $resolution, 'Resolution document should use the requested resolution question.');
+assertContainsString('Sitzung: Ordentliche BR-Sitzung', $email, 'Invitation email should accept Meeting models.');
+assertContainsString('2.1.1. Einstellung Test', $email, 'Invitation email should accept AgendaItem models.');
+assertContainsString('2 Beschlüsse vorgesehen', $email, 'Invitation email should show multiple resolutions.');
+assertContainsString('## 2.1.1. Einstellung Test', $protocol, 'Protocol template should accept AgendaItem models.');
+assertContainsString('Der Betriebsrat berät den Vorgang.', $protocol, 'Protocol template should use protocol blocks from AgendaItem models.');
+assertContainsString('1. Der Betriebsrat stimmt der Einstellung zu.', $protocol, 'Protocol template should list the first custom resolution question.');
+assertContainsString('2. Der Betriebsrat verweigert die Zustimmung.', $protocol, 'Protocol template should list the second custom resolution question.');
+assertContainsString('**Beschluss:** 2 von 2', $resolution, 'Resolution document should accept Meeting and AgendaItem models.');
+assertContainsString('Der Betriebsrat verweigert die Zustimmung.', $resolution, 'Resolution document should use the requested resolution question.');
 
 $missingQuestionsTop = new AgendaItem([
     'id' => 8,
@@ -92,10 +86,10 @@ $missingQuestionsTop = new AgendaItem([
 $missingQuestionsProtocol = $contentService->protocolTemplate($meeting, [$missingQuestionsTop]);
 $missingQuestionsResolution = $contentService->resolutionDocument($meeting, $missingQuestionsTop, 3);
 
-$checkContains('1. Der Betriebsrat widerspricht der Kündigung.', $missingQuestionsProtocol, 'Protocol template should use provided resolution questions first.');
-$checkContains('2. Beschlussfrage 2 ergänzen.', $missingQuestionsProtocol, 'Protocol template should add placeholders for missing questions.');
-$checkContains('3. Beschlussfrage 3 ergänzen.', $missingQuestionsProtocol, 'Protocol template should add all missing placeholders.');
-$checkContains('**Beschluss:** 3 von 3', $missingQuestionsResolution, 'Resolution document should label the selected resolution index.');
-$checkContains('Beschlussfrage 3 ergänzen.', $missingQuestionsResolution, 'Resolution document should use placeholder questions when needed.');
+assertContainsString('1. Der Betriebsrat widerspricht der Kündigung.', $missingQuestionsProtocol, 'Protocol template should use provided resolution questions first.');
+assertContainsString('2. Beschlussfrage 2 ergänzen.', $missingQuestionsProtocol, 'Protocol template should add placeholders for missing questions.');
+assertContainsString('3. Beschlussfrage 3 ergänzen.', $missingQuestionsProtocol, 'Protocol template should add all missing placeholders.');
+assertContainsString('**Beschluss:** 3 von 3', $missingQuestionsResolution, 'Resolution document should label the selected resolution index.');
+assertContainsString('Beschlussfrage 3 ergänzen.', $missingQuestionsResolution, 'Resolution document should use placeholder questions when needed.');
 
 echo 'DocumentContentService smoke tests passed' . PHP_EOL;
