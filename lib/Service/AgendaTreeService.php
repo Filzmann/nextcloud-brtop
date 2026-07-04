@@ -180,7 +180,13 @@ class AgendaTreeService {
         }
 
         $ids = [];
-        $walk = function (int $id) use (&$walk, &$ids, $childrenByParent): void {
+        $visited = [];
+        $walk = function (int $id) use (&$walk, &$ids, &$visited, $childrenByParent): void {
+            if (isset($visited[$id])) {
+                return;
+            }
+
+            $visited[$id] = true;
             $ids[] = $id;
             foreach ($childrenByParent[$id] ?? [] as $childId) {
                 $walk($childId);
