@@ -49,6 +49,7 @@ for (const file of collectJsFiles('js')) {
 
 for (const file of [
     'tests/js/agenda-editor-smoke.js',
+    'tests/js/meeting-components-smoke.js',
     'tests/js/model-smoke.js',
     'tests/js/meeting-repository-smoke.js',
     'tests/js/protocol-editor-smoke.js',
