@@ -1,5 +1,7 @@
 (function() {
-    class ProtocolBlock {
+    const { Model } = window.BRTop.models;
+
+    class ProtocolBlock extends Model {
         constructor(data = {}) {
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id || data.meetingId || 0;
@@ -11,15 +13,11 @@
             this.updated_at = data.updated_at || data.updatedAt || '';
         }
 
-        static fromApi(data) {
-            return data instanceof ProtocolBlock ? data : new ProtocolBlock(data || {});
-        }
-
         isTextBlock() {
             return this.block_type === 'text';
         }
 
-        toApi() {
+        toArray() {
             return {
                 id: this.id,
                 meeting_id: this.meeting_id,

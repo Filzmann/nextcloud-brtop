@@ -7,6 +7,8 @@ namespace OCA\BrTop\Model;
 use OCA\BrTop\Store\AgendaItemStore;
 
 class AgendaItem {
+    use ModelApiTrait;
+
     private ?AgendaItemStore $store;
 
     public ?int $id;
@@ -51,10 +53,7 @@ class AgendaItem {
         $this->createdAt = (string)($data['created_at'] ?? $data['createdAt'] ?? '');
         $this->agendaNumber = (string)($data['agenda_number'] ?? $data['agendaNumber'] ?? '');
         $this->protocolBlocks = is_array($data['protocol_blocks'] ?? null)
-            ? array_values(array_map(
-                static fn($block): ProtocolBlock => $block instanceof ProtocolBlock ? $block : new ProtocolBlock((array)$block),
-                $data['protocol_blocks']
-            ))
+            ? ProtocolBlock::get_all($data['protocol_blocks'])
             : [];
     }
 

@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../../lib/Model/ModelApiTrait.php';
+require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
 require __DIR__ . '/../../lib/Model/AgendaItem.php';
 require __DIR__ . '/../../lib/Model/GeneratedDocument.php';
-require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
 require __DIR__ . '/../../lib/Model/Meeting.php';
 
 use OCA\BrTop\Model\AgendaItem;
@@ -74,8 +75,14 @@ $meeting = new Meeting([
     'documents' => [$document],
 ]);
 
+$mappedMeeting = Meeting::get($meeting->toApiArray());
+$mappedMeetings = Meeting::get_all([$meeting->toApiArray()]);
+
 $payload = $meeting->toApiArray();
 
+$checkSame(true, $mappedMeeting instanceof Meeting, 'Meeting::get should hydrate API data.');
+$checkSame(1, count($mappedMeetings), 'Meeting::get_all should hydrate API lists.');
+$checkSame(3, $mappedMeeting->toArray()['id'], 'Model toArray should keep the API payload shape.');
 $checkSame('ohne Titel', $meeting->displayTitle(), 'Meeting displayTitle should have a fallback.');
 $checkSame(true, $meeting->isRegularBrMeeting(), 'Meeting should expose regular BR sessions.');
 $checkSame('Ladung', $document->displayTitle(), 'GeneratedDocument should expose display titles.');

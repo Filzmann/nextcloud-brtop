@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace OCA\BrTop\Model;
 
 class GeneratedDocument {
+    use ModelApiTrait;
+
     public ?int $id;
     public int $meetingId;
     public string $documentType;

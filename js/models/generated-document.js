@@ -1,5 +1,7 @@
 (function() {
-    class GeneratedDocument {
+    const { Model } = window.BRTop.models;
+
+    class GeneratedDocument extends Model {
         constructor(data = {}) {
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id || data.meetingId || 0;
@@ -7,10 +9,6 @@
             this.title = data.title || '';
             this.file_path = data.file_path || data.filePath || '';
             this.created_at = data.created_at || data.createdAt || '';
-        }
-
-        static fromApi(data) {
-            return data instanceof GeneratedDocument ? data : new GeneratedDocument(data || {});
         }
 
         displayTitle() {
@@ -30,7 +28,7 @@
             return labels[this.document_type] || 'Dokument';
         }
 
-        toApi() {
+        toArray() {
             return {
                 id: this.id,
                 meeting_id: this.meeting_id,

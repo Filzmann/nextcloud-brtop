@@ -1,7 +1,7 @@
 (function() {
-    const { ProtocolBlock } = window.BRTop.models;
+    const { Model, ProtocolBlock } = window.BRTop.models;
 
-    class AgendaItem {
+    class AgendaItem extends Model {
         constructor(data = {}) {
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id ?? data.meetingId ?? null;
@@ -21,11 +21,7 @@
             this.resolution_count = Math.max(0, Number(data.resolution_count || data.resolutionCount || 0));
             this.created_at = data.created_at || data.createdAt || '';
             this.agenda_number = data.agenda_number || data.agendaNumber || '';
-            this.protocol_blocks = Array.isArray(data.protocol_blocks) ? data.protocol_blocks.map(ProtocolBlock.fromApi) : [];
-        }
-
-        static fromApi(data) {
-            return data instanceof AgendaItem ? data : new AgendaItem(data || {});
+            this.protocol_blocks = ProtocolBlock.get_all(data.protocol_blocks || []);
         }
 
         agendaNumberLabel() {
@@ -74,7 +70,7 @@
                 .filter(Boolean);
         }
 
-        toApi() {
+        toArray() {
             return {
                 id: this.id,
                 meeting_id: this.meeting_id,
@@ -94,7 +90,7 @@
                 resolution_count: this.resolution_count,
                 created_at: this.created_at,
                 agenda_number: this.agenda_number,
-                protocol_blocks: this.protocol_blocks.map(block => block.toApi())
+                protocol_blocks: this.protocol_blocks.map(block => block.toArray())
             };
         }
     }

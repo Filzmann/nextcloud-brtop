@@ -1,7 +1,7 @@
 (function() {
-    const { AgendaItem, GeneratedDocument } = window.BRTop.models;
+    const { Model, AgendaItem, GeneratedDocument } = window.BRTop.models;
 
-    class Meeting {
+    class Meeting extends Model {
         constructor(data = {}) {
             this.id = data.id ?? null;
             this.owner_uid = data.owner_uid || data.ownerUid || '';
@@ -15,12 +15,8 @@
             this.invitation_status = data.invitation_status || data.invitationStatus || 'not_created';
             this.status = data.status || 'draft';
             this.created_at = data.created_at || data.createdAt || '';
-            this.tops = Array.isArray(data.tops) ? data.tops.map(AgendaItem.fromApi) : [];
-            this.documents = Array.isArray(data.documents) ? data.documents.map(GeneratedDocument.fromApi) : [];
-        }
-
-        static fromApi(data) {
-            return data instanceof Meeting ? data : new Meeting(data || {});
+            this.tops = AgendaItem.get_all(data.tops || []);
+            this.documents = GeneratedDocument.get_all(data.documents || []);
         }
 
         displayTitle() {
@@ -31,7 +27,7 @@
             return this.meeting_type === 'regular_br';
         }
 
-        toApi() {
+        toArray() {
             return {
                 id: this.id,
                 owner_uid: this.owner_uid,
@@ -45,8 +41,8 @@
                 invitation_status: this.invitation_status,
                 status: this.status,
                 created_at: this.created_at,
-                tops: this.tops.map(top => top.toApi()),
-                documents: this.documents.map(document => document.toApi())
+                tops: this.tops.map(top => top.toArray()),
+                documents: this.documents.map(document => document.toArray())
             };
         }
     }

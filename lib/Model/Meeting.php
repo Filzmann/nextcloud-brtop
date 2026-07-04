@@ -7,6 +7,8 @@ namespace OCA\BrTop\Model;
 use OCA\BrTop\Store\MeetingStore;
 
 class Meeting {
+    use ModelApiTrait;
+
     private ?MeetingStore $store;
     private ?array $agendaItems = null;
     private array $documents = [];
@@ -41,10 +43,7 @@ class Meeting {
         $this->createdAt = (string)($data['created_at'] ?? $data['createdAt'] ?? '');
 
         if (is_array($data['tops'] ?? null)) {
-            $this->setAgendaItems(array_map(
-                static fn($item): AgendaItem => $item instanceof AgendaItem ? $item : new AgendaItem((array)$item),
-                $data['tops']
-            ));
+            $this->setAgendaItems(AgendaItem::get_all($data['tops']));
         }
 
         if (is_array($data['documents'] ?? null)) {
@@ -88,7 +87,7 @@ class Meeting {
 
     public function setDocuments(array $documents): void {
         $this->documents = array_values(array_map(
-            static fn($document): GeneratedDocument => $document instanceof GeneratedDocument ? $document : new GeneratedDocument((array)$document),
+            static fn($document): GeneratedDocument => GeneratedDocument::get($document),
             $documents
         ));
     }

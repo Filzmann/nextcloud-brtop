@@ -11,7 +11,7 @@
 
             return {
                 ...data,
-                meetings: (data.meetings || []).map(Meeting.fromApi),
+                meetings: Meeting.get_all(data.meetings || []),
                 settings: data.settings || {}
             };
         }
