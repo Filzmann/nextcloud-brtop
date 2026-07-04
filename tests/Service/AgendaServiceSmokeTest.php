@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
 require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
 require __DIR__ . '/../../lib/Model/AgendaItem.php';
@@ -19,26 +20,8 @@ use OCA\BrTop\Service\AgendaService;
 use OCA\BrTop\Service\AgendaTemplateService;
 use OCA\BrTop\Service\AgendaTreeService;
 use OCA\BrTop\Store\AgendaItemStore;
-
-$checkSame = static function ($expected, $actual, string $message): void {
-    if ($expected !== $actual) {
-        fwrite(STDERR, $message . PHP_EOL);
-        fwrite(STDERR, 'Expected: ' . var_export($expected, true) . PHP_EOL);
-        fwrite(STDERR, 'Actual:   ' . var_export($actual, true) . PHP_EOL);
-        exit(1);
-    }
-};
-
-$checkThrows = static function (callable $callback, string $message): void {
-    try {
-        $callback();
-    } catch (\InvalidArgumentException) {
-        return;
-    }
-
-    fwrite(STDERR, $message . PHP_EOL);
-    exit(1);
-};
+use function OCA\BrTop\Tests\assertSameValue;
+use function OCA\BrTop\Tests\assertThrows;
 
 $repository = new class extends AgendaItemRepository {
     public array $items = [
@@ -124,18 +107,20 @@ $id = $service->addItem(
     0
 );
 
-$checkSame(10, $id, 'Added agenda items should return their id.');
-$checkSame(1, $store->savedItem->parentId, 'New agenda items should keep a valid parent id.');
-$checkSame(2, $store->savedItem->level, 'New agenda items below a root parent should be level 2.');
-$checkSame('', $store->savedItem->attachmentPaths, 'Attachment paths should still be normalized.');
+assertSameValue(10, $id, 'Added agenda items should return their id.');
+assertSameValue(1, $store->savedItem->parentId, 'New agenda items should keep a valid parent id.');
+assertSameValue(2, $store->savedItem->level, 'New agenda items below a root parent should be level 2.');
+assertSameValue('', $store->savedItem->attachmentPaths, 'Attachment paths should still be normalized.');
 
-$checkThrows(
+assertThrows(
     static fn() => $service->addItem(3, 'other', 'Fehlt', '', '', '', false, 'discussion', 404, '', '', '', 0),
+    \InvalidArgumentException::class,
     'Missing parent agenda items should be rejected.'
 );
 
-$checkThrows(
+assertThrows(
     static fn() => $service->addItem(3, 'other', 'Zu tief', '', '', '', false, 'discussion', 3, '', '', '', 0),
+    \InvalidArgumentException::class,
     'Parent agenda items on level 3 should be rejected.'
 );
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../../lib/Service/MeetingService.php';
 require __DIR__ . '/../../lib/Service/AgendaMutationService.php';
 require __DIR__ . '/../../lib/Service/DemoDataService.php';
@@ -9,15 +10,7 @@ require __DIR__ . '/../../lib/Service/DemoDataService.php';
 use OCA\BrTop\Service\AgendaMutationService;
 use OCA\BrTop\Service\DemoDataService;
 use OCA\BrTop\Service\MeetingService;
-
-$checkSame = static function ($expected, $actual, string $message): void {
-    if ($expected !== $actual) {
-        fwrite(STDERR, $message . PHP_EOL);
-        fwrite(STDERR, 'Expected: ' . var_export($expected, true) . PHP_EOL);
-        fwrite(STDERR, 'Actual:   ' . var_export($actual, true) . PHP_EOL);
-        exit(1);
-    }
-};
+use function OCA\BrTop\Tests\assertSameValue;
 
 $meetingService = new class extends MeetingService {
     public array $created = [];
@@ -92,15 +85,15 @@ $agendaMutationService = new class extends AgendaMutationService {
 $service = new DemoDataService($meetingService, $agendaMutationService);
 $result = $service->seedForOwner('simon');
 
-$checkSame(['meetingId' => 23], $result, 'Demo seeding should return the created meeting id.');
-$checkSame('simon', $meetingService->created['uid'], 'Demo meeting should be created for the current user.');
-$checkSame('Ordentliche BR-Sitzung', $meetingService->created['title'], 'Demo meeting should keep the existing title.');
-$checkSame('10:00', $meetingService->created['meetingTime'], 'Demo meeting should keep the existing time.');
-$checkSame('custom', $meetingService->created['meetingType'], 'Demo meeting should keep the existing meeting type.');
-$checkSame(7, count($agendaMutationService->items), 'Demo seeding should create the existing seven agenda items.');
-$checkSame('protocol', $agendaMutationService->items[0]['type'], 'Demo seeding should start with the protocol TOP.');
-$checkSame('consultation_report', $agendaMutationService->items[6]['type'], 'Demo seeding should keep the consultation report TOP.');
-$checkSame(1, $agendaMutationService->items[1]['resolutionCount'], 'Resolution demo TOPs should create one resolution.');
-$checkSame(0, $agendaMutationService->items[6]['resolutionCount'], 'Non-resolution demo TOPs should not create resolutions.');
+assertSameValue(['meetingId' => 23], $result, 'Demo seeding should return the created meeting id.');
+assertSameValue('simon', $meetingService->created['uid'], 'Demo meeting should be created for the current user.');
+assertSameValue('Ordentliche BR-Sitzung', $meetingService->created['title'], 'Demo meeting should keep the existing title.');
+assertSameValue('10:00', $meetingService->created['meetingTime'], 'Demo meeting should keep the existing time.');
+assertSameValue('custom', $meetingService->created['meetingType'], 'Demo meeting should keep the existing meeting type.');
+assertSameValue(7, count($agendaMutationService->items), 'Demo seeding should create the existing seven agenda items.');
+assertSameValue('protocol', $agendaMutationService->items[0]['type'], 'Demo seeding should start with the protocol TOP.');
+assertSameValue('consultation_report', $agendaMutationService->items[6]['type'], 'Demo seeding should keep the consultation report TOP.');
+assertSameValue(1, $agendaMutationService->items[1]['resolutionCount'], 'Resolution demo TOPs should create one resolution.');
+assertSameValue(0, $agendaMutationService->items[6]['resolutionCount'], 'Non-resolution demo TOPs should not create resolutions.');
 
 echo 'DemoDataService smoke tests passed' . PHP_EOL;
