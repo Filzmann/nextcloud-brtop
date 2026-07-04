@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\BrTop\Service;
 
-use OCP\IGroupManager;
+use OCA\LocalBase\Service\GroupProvisioningService;
 
 class BrGroupsService {
     public const MEMBER_GROUP = 'Betriebsrat';
@@ -18,7 +18,7 @@ class BrGroupsService {
     ];
 
     public function __construct(
-        private IGroupManager $groupManager
+        private GroupProvisioningService $groups
     ) {
     }
 
@@ -27,23 +27,6 @@ class BrGroupsService {
     }
 
     public function ensureRequiredGroups(): array {
-        $created = [];
-
-        foreach (self::REQUIRED_GROUPS as $groupName) {
-            if ($this->groupManager->groupExists($groupName)) {
-                continue;
-            }
-
-            $group = $this->groupManager->createGroup($groupName);
-            if ($group === null && !$this->groupManager->groupExists($groupName)) {
-                throw new \RuntimeException('Nextcloud-Gruppe ' . $groupName . ' konnte nicht angelegt werden.');
-            }
-
-            if ($group !== null) {
-                $created[] = $groupName;
-            }
-        }
-
-        return $created;
+        return $this->groups->ensureGroups(self::REQUIRED_GROUPS);
     }
 }

@@ -7,9 +7,11 @@ namespace {
         eval('namespace OCP; interface IGroupManager { public function groupExists($gid); public function createGroup($gid); }');
     }
 
+    require __DIR__ . '/../../../localbase/lib/Service/GroupProvisioningService.php';
     require __DIR__ . '/../../lib/Service/BrGroupsService.php';
 
     use OCA\BrTop\Service\BrGroupsService;
+    use OCA\LocalBase\Service\GroupProvisioningService;
     use OCP\IGroupManager;
 
     $checkSame = static function ($expected, $actual, string $message): void {
@@ -41,7 +43,7 @@ namespace {
         }
     };
 
-    $service = new BrGroupsService($groupManager);
+    $service = new BrGroupsService(new GroupProvisioningService($groupManager));
 
     $checkSame(
         ['Betriebsrat-Vorsitzende', 'Betriebsrat-Stellvertreter'],
