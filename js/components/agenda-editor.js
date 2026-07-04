@@ -1,4 +1,10 @@
 (function() {
+    const { errorMessage } = window.LocalBase.ui;
+
+    function alertError(title, error, fallback = 'Fehler') {
+        alert(`${title}:\n${errorMessage(error, fallback)}`);
+    }
+
     function createController({
         byId,
         repository,
@@ -75,7 +81,7 @@
                     await deleteTop(topId, button.getAttribute('data-label') || 'diesen TOP');
                 }
             } catch (e) {
-                alert('Fehler beim Bearbeiten der TOP-Liste:\n' + e.message);
+                alertError('Fehler beim Bearbeiten der TOP-Liste', e, 'TOP-Liste konnte nicht bearbeitet werden.');
             }
         };
 
@@ -100,7 +106,7 @@
             try {
                 await saveTopSubject(input.getAttribute('data-top-id'));
             } catch (e) {
-                alert('Fehler beim Speichern des TOP:\n' + e.message);
+                alertError('Fehler beim Speichern des TOP', e, 'TOP konnte nicht gespeichert werden.');
             }
         };
 
@@ -121,7 +127,7 @@
                 await loadState();
                 renderMeetingDetail();
             } catch (e) {
-                alert('Fehler beim Speichern des TOP:\n' + e.message);
+                alertError('Fehler beim Speichern des TOP', e, 'TOP konnte nicht gespeichert werden.');
             }
         };
 

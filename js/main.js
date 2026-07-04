@@ -10,6 +10,7 @@
         fmtMeeting,
         documentResultText
     } = window.BRTop.ui;
+    const { errorMessage } = window.LocalBase.ui;
     const { MeetingRepository } = window.BRTop.repositories;
     const { sessionTableHtml } = window.BRTop.meetingList;
     const { createController: createMeetingDetailController } = window.BRTop.meetingDetail;
@@ -20,6 +21,10 @@
     const findMeeting = (id) => meetings.find(m => String(m.id) === String(id)) || null;
 
     const currentMeeting = () => selectedMeetingId ? findMeeting(selectedMeetingId) : null;
+
+    function alertError(title, error, fallback = 'Fehler') {
+        alert(`${title}:\n${errorMessage(error, fallback)}`);
+    }
 
     const viewRouter = window.BRTop.viewRouter.createController({
         byId,
@@ -145,7 +150,7 @@
         try {
             await createNewMeeting();
         } catch (e) {
-            alert('Fehler beim Anlegen der Sitzung:\n' + e.message);
+            alertError('Fehler beim Anlegen der Sitzung', e, 'Sitzung konnte nicht angelegt werden.');
         }
     });
 
@@ -165,7 +170,7 @@
                 await deleteMeeting(id);
             }
         } catch (e) {
-            alert('Fehler:\n' + e.message);
+            alertError('Fehler', e);
         }
     });
 
@@ -177,7 +182,7 @@
         try {
             await generateInvitation();
         } catch (e) {
-            alert('Fehler beim Erzeugen der Ladung:\n' + e.message);
+            alertError('Fehler beim Erzeugen der Ladung', e, 'Ladung konnte nicht erzeugt werden.');
         }
     });
 
@@ -191,7 +196,7 @@
             await loadState();
             openMeetingDetail(selectedMeetingId);
         } catch (e) {
-            alert('Fehler beim Speichern des Protokolls:\n' + e.message);
+            alertError('Fehler beim Speichern des Protokolls', e, 'Protokoll konnte nicht gespeichert werden.');
         }
     });
 
@@ -199,12 +204,12 @@
         try {
             await generateProtocolDocument();
         } catch (e) {
-            alert('Fehler beim Erzeugen des Protokolls:\n' + e.message);
+            alertError('Fehler beim Erzeugen des Protokolls', e, 'Protokoll konnte nicht erzeugt werden.');
         }
     });
 
     agendaEditor.init();
     protocolEditor.init();
     topForm.init();
-    loadState().catch(e => alert('Fehler beim Laden der Sitzungen:\n' + e.message));
+    loadState().catch(e => alertError('Fehler beim Laden der Sitzungen', e, 'Sitzungen konnten nicht geladen werden.'));
 })();

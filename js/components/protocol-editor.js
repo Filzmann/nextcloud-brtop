@@ -5,6 +5,11 @@
         agendaNumber,
         buttonPresetHtml
     } = window.BRTop.ui;
+    const { errorMessage } = window.LocalBase.ui;
+
+    function alertError(title, error, fallback = 'Fehler') {
+        alert(`${title}:\n${errorMessage(error, fallback)}`);
+    }
 
     function protocolBlockHtml(top, block) {
         const content = block && typeof block.content === 'string' ? block.content : '';
@@ -121,7 +126,7 @@
                     await saveDirty();
                     await addBlock(button.getAttribute('data-top-id'));
                 } catch (e) {
-                    alert('Fehler beim Hinzufügen des Protokollblocks:\n' + e.message);
+                    alertError('Fehler beim Hinzufügen des Protokollblocks', e, 'Protokollblock konnte nicht hinzugefuegt werden.');
                 }
             });
 
