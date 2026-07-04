@@ -116,6 +116,7 @@ In Codex-Sessions koennen DDEV-Befehle im normalen Sandbox-Kontext nicht zuverla
 - Wiederkehrende Logik wird nicht mehrfach in Controllern oder `main.js` dupliziert.
 - Persistente Kernobjekte bekommen Modelle/DTOs oder Value Objects.
 - Modelle/DTOs werden bei Neu- und Weiterentwicklungen in PHP und JavaScript einheitlich angefasst: `get(...)` fuer ein einzelnes Payload/Row/Objekt, `get_all([...])` fuer Listen, `toArray()` fuer Serialisierung und `save()` nur fuer wirklich persistierbare, store-gebundene Modelle. Nicht persistierbare DTOs duerfen `save()` bewusst mit klarer Fehlermeldung blockieren.
+- Modell-Hydration wird von aussen ueber `get(...)` und `get_all([...])` aufgerufen. Hilfsmethoden wie `fromArray` oder `fromRow` bleiben, falls noetig, interne/protected Implementierungsdetails und sind keine oeffentliche Modell-API.
 - Neue Modellarbeit fuehrt keine neuen `fromApi`-/`toApi`-Kompatibilitaetsaliase ein. Bestehende PHP-`toApiArray()`-Call-sites duerfen schrittweise auf `toArray()` migriert werden, wenn die betroffene Schicht ohnehin angefasst wird.
 - Datenzugriffe laufen ueber Repository-, Store- oder Service-Klassen.
 - Services arbeiten bevorzugt mit Modellen/DTOs statt rohen Arrays.
