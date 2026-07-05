@@ -6,10 +6,13 @@ namespace OCA\BrTop\Service;
 
 class AgendaTemplateService {
     private const ALLOWED_KINDS = ['section', 'report', 'discussion', 'resolution'];
+    private AgendaAttachmentService $attachmentService;
 
     public function __construct(
-        private BrtopSettingsService $settings
+        private BrtopSettingsService $settings,
+        ?AgendaAttachmentService $attachmentService = null
     ) {
+        $this->attachmentService = $attachmentService ?? new AgendaAttachmentService();
     }
 
     public function regularBrMeetingItems(): array {
@@ -228,6 +231,9 @@ class AgendaTemplateService {
                 'parent' => $parent,
                 'agendaItemKind' => $kind,
                 'protocolContent' => trim((string)($item['protocolContent'] ?? '')),
+                'invitationNote' => $this->attachmentService->normalizeInvitationNote((string)($item['invitationNote'] ?? '')),
+                'attachmentPaths' => $this->attachmentService->normalizeAttachmentPaths((string)($item['attachmentPaths'] ?? '')),
+                'resolutionCount' => $requiresResolution ? max(1, (int)($item['resolutionCount'] ?? 1)) : 0,
             ];
 
             if ($key !== '') {
