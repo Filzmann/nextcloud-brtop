@@ -53,6 +53,7 @@ for (const file of [
     'tests/js/model-smoke.js',
     'tests/js/meeting-repository-smoke.js',
     'tests/js/protocol-editor-smoke.js',
+    'tests/js/top-form-router-smoke.js',
     'tests/js/ui-smoke.js',
 ]) {
     run('node', [file]);
