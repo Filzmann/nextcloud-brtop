@@ -44,18 +44,15 @@ class MeetingService {
         $meetingType = $this->settings->normalizeMeetingType($meetingType);
         $committeeCode = $this->normalizeCommitteeCodeForMeeting($meetingType, $committeeCode);
 
-        $meeting = new Meeting([
-            'owner_uid' => $uid,
-            'title' => $title,
-            'meeting_date' => $meetingDate,
-            'meeting_time' => $meetingTime,
-            'location' => $location,
-            'meeting_type' => $meetingType,
-            'committee_code' => $committeeCode,
-            'invitation_date' => null,
-            'invitation_status' => 'not_created',
-            'status' => 'draft',
-        ], $this->meetingStore);
+        $meeting = $this->newMeeting(
+            $uid,
+            $title,
+            $meetingDate,
+            $meetingTime,
+            $location,
+            $meetingType,
+            $committeeCode
+        );
 
         return $meeting->save();
     }
@@ -65,18 +62,17 @@ class MeetingService {
         $items = $this->agendaTemplateService->regularBrMeetingItems();
 
         $id = $this->meetingRepository->transactional(function () use ($uid, $defaults, $items): int {
-            $meeting = new Meeting([
-                'owner_uid' => $uid,
-                'title' => $defaults['title'],
-                'meeting_date' => $defaults['meetingDate'],
-                'meeting_time' => $defaults['meetingTime'],
-                'location' => $defaults['location'],
-                'meeting_type' => 'regular_br',
-                'committee_code' => '',
-                'invitation_date' => $defaults['invitationDate'],
-                'invitation_status' => 'planned',
-                'status' => 'draft',
-            ], $this->meetingStore);
+            $meeting = $this->newMeeting(
+                $uid,
+                $defaults['title'],
+                $defaults['meetingDate'],
+                $defaults['meetingTime'],
+                $defaults['location'],
+                'regular_br',
+                '',
+                $defaults['invitationDate'],
+                'planned'
+            );
             $meetingId = $meeting->save();
 
             $this->agendaService->addTemplateItems($meetingId, $items);
@@ -112,5 +108,31 @@ class MeetingService {
         }
 
         return $this->settings->normalizeCommitteeCode($committeeCode);
+    }
+
+    private function newMeeting(
+        string $uid,
+        string $title,
+        string $meetingDate,
+        string $meetingTime,
+        string $location,
+        string $meetingType,
+        string $committeeCode,
+        ?string $invitationDate = null,
+        string $invitationStatus = 'not_created',
+        string $status = 'draft'
+    ): Meeting {
+        return new Meeting([
+            'owner_uid' => $uid,
+            'title' => $title,
+            'meeting_date' => $meetingDate,
+            'meeting_time' => $meetingTime,
+            'location' => $location,
+            'meeting_type' => $meetingType,
+            'committee_code' => $committeeCode,
+            'invitation_date' => $invitationDate,
+            'invitation_status' => $invitationStatus,
+            'status' => $status,
+        ], $this->meetingStore);
     }
 }
