@@ -1,48 +1,7 @@
 const assert = require('assert');
+const { createElementMap } = require('../../../localbase/tests/js/helpers/fake-dom.js');
 
-class FakeClassList {
-    constructor() {
-        this.values = new Set();
-    }
-
-    toggle(name, enabled) {
-        if (enabled) {
-            this.values.add(name);
-            return;
-        }
-
-        this.values.delete(name);
-    }
-
-    has(name) {
-        return this.values.has(name);
-    }
-}
-
-class FakeElement {
-    constructor(id = '') {
-        this.id = id;
-        this.value = '';
-        this.checked = false;
-        this.hidden = false;
-        this.scrollTop = 0;
-        this.dataset = {};
-        this.listeners = {};
-        this.attributes = {};
-        this.classList = new FakeClassList();
-    }
-
-    addEventListener(type, listener) {
-        this.listeners[type] = listener;
-    }
-
-    setAttribute(name, value) {
-        this.attributes[name] = value;
-    }
-}
-
-const elements = new Map();
-for (const id of [
+const elements = createElementMap([
     'content',
     'sessions-view',
     'meeting-detail-view',
@@ -65,9 +24,7 @@ for (const id of [
     'top-person-field',
     'top-legal-field',
     'top-resolution-options'
-]) {
-    elements.set(id, new FakeElement(id));
-}
+]);
 
 global.window = {};
 global.document = {
