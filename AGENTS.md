@@ -142,9 +142,11 @@ Diese Regeln gelten sinngemaess auch fuer andere eigene Nextcloud-Apps; die fach
 
 Vor groesseren Refactorings zuerst Charakterisierungstests fuer das bestehende gewuenschte Verhalten schreiben oder aktualisieren.
 
+- Tests sind Teil der Architekturarbeit und kein optionaler Nachtrag. Neue oder refaktorierte BRTop-Fachlogik bekommt passende Charakterisierungs-, Unit-, Contract- oder Smoke-Tests, bevor darauf weiter aufgebaut wird.
 - Schnelle PHP-Suite: `php tests/run.php`
 - Schnelle JavaScript-Suite: `node tests/run-js.mjs`
 - Nach LocalBase-Aenderungen mindestens die betroffenen BRTop-Smoke-/Contract-Tests laufen lassen.
+- Gemeinsame LocalBase-Test-Helper nutzen, wenn dadurch echte Setup-Duplizierung verschwindet, ohne die Lesbarkeit des einzelnen Tests zu verschlechtern.
 - Bei Controller-, DI-, Migrations- oder Nextcloud-Container-Aenderungen zusaetzlich gezielte DDEV-/`occ`-Checks ausfuehren.
 
 Wichtige lokale Pruefungen:
