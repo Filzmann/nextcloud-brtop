@@ -1,32 +1,12 @@
 const assert = require('assert');
+const {
+    FakeButton,
+    FakeElement,
+} = require('../../../localbase/tests/js/helpers/fake-dom.js');
 
 const uiState = {
     errors: []
 };
-
-class FakeElement {
-    constructor(attributes = {}) {
-        this.attributes = attributes;
-        this.listeners = {};
-        this.dataset = {};
-    }
-
-    addEventListener(type, listener) {
-        this.listeners[type] = listener;
-    }
-
-    closest(selector) {
-        if (selector === 'button[data-action="add-protocol-block"]' && this.attributes['data-action'] === 'add-protocol-block') {
-            return this;
-        }
-
-        return null;
-    }
-
-    getAttribute(name) {
-        return this.attributes[name] || null;
-    }
-}
 
 class FakeTextArea extends FakeElement {
     constructor(dataset, value, row) {
@@ -175,9 +155,9 @@ controller.init();
     assert.strictEqual(status.textContent, 'Gespeichert');
 
     await editor.listeners.click({
-        target: new FakeElement({
-            'data-action': 'add-protocol-block',
-            'data-top-id': '7'
+        target: new FakeButton({
+            action: 'add-protocol-block',
+            topId: '7'
         })
     });
     assert.strictEqual(loadCalls, 1);
@@ -195,9 +175,9 @@ controller.init();
         throw new Error('Kaputt');
     };
     await editor.listeners.click({
-        target: new FakeElement({
-            'data-action': 'add-protocol-block',
-            'data-top-id': '7'
+        target: new FakeButton({
+            action: 'add-protocol-block',
+            topId: '7'
         })
     });
     assert.deepStrictEqual(uiState.errors.pop(), {

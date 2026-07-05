@@ -1,37 +1,13 @@
 const assert = require('assert');
+const {
+    FakeButton,
+    FakeElement,
+} = require('../../../localbase/tests/js/helpers/fake-dom.js');
 
 const uiState = {
     notices: [],
     errors: []
 };
-
-class FakeElement {
-    constructor(attributes = {}) {
-        this.attributes = attributes;
-        this.listeners = {};
-        this.dataset = {};
-    }
-
-    addEventListener(type, listener) {
-        this.listeners[type] = listener;
-    }
-
-    closest(selector) {
-        if (selector === 'button[data-action]' && this.attributes['data-action']) {
-            return this;
-        }
-
-        return null;
-    }
-
-    getAttribute(name) {
-        return this.attributes[name] || null;
-    }
-
-    matches(selector) {
-        return selector === '[data-top-edit-input]' && this.attributes['data-top-edit-input'] !== undefined;
-    }
-}
 
 class FakeInput extends FakeElement {
     constructor(attributes = {}, value = '') {
@@ -174,18 +150,18 @@ controller.init();
     });
 
     await content.listeners.click({
-        target: new FakeElement({
-            'data-action': 'move-top',
-            'data-top-id': '9',
-            'data-direction': 'up'
+        target: new FakeButton({
+            action: 'move-top',
+            topId: '9',
+            direction: 'up'
         })
     });
     assert.deepStrictEqual(calls.pop(), ['moveTop', 5, '9', 'up']);
 
     await content.listeners.click({
-        target: new FakeElement({
-            'data-action': 'edit-top',
-            'data-top-id': '11'
+        target: new FakeButton({
+            action: 'edit-top',
+            topId: '11'
         })
     });
     assert.strictEqual(editingTopId, '11');
