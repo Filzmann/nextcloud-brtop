@@ -70,7 +70,6 @@ namespace {
         'deleteMeeting',
         'addProtocolBlock',
         'updateProtocolBlock',
-        'seedDemo',
         'generateInvitation',
         'generateProtocol',
         'generateResolutions',
@@ -84,6 +83,14 @@ namespace {
         if ($method->getAttributes(NoCSRFRequired::class) !== []) {
             throw new \RuntimeException($action . ' should keep the default CSRF protection.');
         }
+    }
+
+    $seedDemo = new \ReflectionMethod(ApiController::class, 'seedDemo');
+    if ($seedDemo->getAttributes(NoAdminRequired::class) !== []) {
+        throw new \RuntimeException('seedDemo must remain restricted to Nextcloud admins.');
+    }
+    if ($seedDemo->getAttributes(NoCSRFRequired::class) !== []) {
+        throw new \RuntimeException('seedDemo should keep the default CSRF protection.');
     }
 
     echo 'BRTop controller attribute smoke tests passed' . PHP_EOL;

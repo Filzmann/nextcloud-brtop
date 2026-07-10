@@ -297,7 +297,6 @@ class ApiController extends Controller {
         return new DataResponse(['ok' => true]);
     }
 
-    #[NoAdminRequired]
     public function seedDemo(): DataResponse {
         return new DataResponse(['ok' => true] + $this->demoDataService->seedForOwner($this->uid()));
     }
