@@ -59,7 +59,6 @@ namespace {
 
     $apiActions = [
         'state',
-        'updateSettings',
         'createMeeting',
         'planNextRegularMeeting',
         'addTop',
@@ -85,12 +84,14 @@ namespace {
         }
     }
 
-    $seedDemo = new \ReflectionMethod(ApiController::class, 'seedDemo');
-    if ($seedDemo->getAttributes(NoAdminRequired::class) !== []) {
-        throw new \RuntimeException('seedDemo must remain restricted to Nextcloud admins.');
-    }
-    if ($seedDemo->getAttributes(NoCSRFRequired::class) !== []) {
-        throw new \RuntimeException('seedDemo should keep the default CSRF protection.');
+    foreach (['updateSettings', 'seedDemo'] as $adminAction) {
+        $method = new \ReflectionMethod(ApiController::class, $adminAction);
+        if ($method->getAttributes(NoAdminRequired::class) !== []) {
+            throw new \RuntimeException($adminAction . ' must remain restricted to Nextcloud admins.');
+        }
+        if ($method->getAttributes(NoCSRFRequired::class) !== []) {
+            throw new \RuntimeException($adminAction . ' should keep the default CSRF protection.');
+        }
     }
 
     echo 'BRTop controller attribute smoke tests passed' . PHP_EOL;

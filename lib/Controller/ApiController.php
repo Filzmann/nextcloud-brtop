@@ -66,7 +66,6 @@ class ApiController extends Controller {
         return $settings;
     }
 
-    #[NoAdminRequired]
     public function updateSettings(
         string $defaultMeetingTitle,
         int $regularMeetingWeekday,
