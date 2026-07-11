@@ -9,11 +9,15 @@ use DateTimeImmutable;
 class DemoDataService {
     public function __construct(
         private MeetingService $meetingService,
-        private AgendaMutationService $agendaMutationService
+        private AgendaMutationService $agendaMutationService,
+        private BrRosterService $rosterService,
+        private BrDemoUserProvisioningService $demoUserProvisioningService
     ) {
     }
 
     public function seedForOwner(string $uid): array {
+        $demoUsers = $this->demoUserProvisioningService->ensureDemoUsers();
+
         $meetingId = $this->meetingService->create(
             $uid,
             'Ordentliche BR-Sitzung',
@@ -42,7 +46,11 @@ class DemoDataService {
             );
         }
 
-        return ['meetingId' => $meetingId];
+        return [
+            'meetingId' => $meetingId,
+            'demoUsers' => $demoUsers,
+            'demoCouncil' => $this->rosterService->demoCouncil(),
+        ];
     }
 
     private function demoAgendaItems(): array {

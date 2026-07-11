@@ -5,9 +5,13 @@ declare(strict_types=1);
 require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../../lib/Service/MeetingService.php';
 require __DIR__ . '/../../lib/Service/AgendaMutationService.php';
+require __DIR__ . '/../../lib/Service/BrRosterService.php';
+require __DIR__ . '/../../lib/Service/BrDemoUserProvisioningService.php';
 require __DIR__ . '/../../lib/Service/DemoDataService.php';
 
 use OCA\BrTop\Service\AgendaMutationService;
+use OCA\BrTop\Service\BrDemoUserProvisioningService;
+use OCA\BrTop\Service\BrRosterService;
 use OCA\BrTop\Service\DemoDataService;
 use OCA\BrTop\Service\MeetingService;
 use function OCA\BrTop\Tests\assertSameValue;
@@ -82,10 +86,27 @@ $agendaMutationService = new class extends AgendaMutationService {
     }
 };
 
-$service = new DemoDataService($meetingService, $agendaMutationService);
+$demoUserProvisioningService = new class extends BrDemoUserProvisioningService {
+    public function __construct() {
+    }
+
+    public function ensureDemoUsers(): array {
+        return [
+            'created' => ['brtop-lz-01'],
+            'addedToGroup' => ['admin', 'brtop-lz-01'],
+        ];
+    }
+};
+
+$service = new DemoDataService($meetingService, $agendaMutationService, new BrRosterService(), $demoUserProvisioningService);
 $result = $service->seedForOwner('simon');
 
-assertSameValue(['meetingId' => 23], $result, 'Demo seeding should return the created meeting id.');
+assertSameValue(23, $result['meetingId'], 'Demo seeding should return the created meeting id.');
+assertSameValue(['brtop-lz-01'], $result['demoUsers']['created'], 'Demo seeding should report provisioned users.');
+assertSameValue(['admin', 'brtop-lz-01'], $result['demoUsers']['addedToGroup'], 'Demo seeding should report BR group assignments.');
+assertSameValue(13, $result['demoCouncil']['councilSize'], 'Demo seeding should describe the 13-seat works council.');
+assertSameValue('female', $result['demoCouncil']['minorityGender'], 'Demo seeding should mark female as minority gender.');
+assertSameValue(29, count($result['demoCouncil']['members']), 'Demo seeding should expose regular members and replacements.');
 assertSameValue('simon', $meetingService->created['uid'], 'Demo meeting should be created for the current user.');
 assertSameValue('Ordentliche BR-Sitzung', $meetingService->created['title'], 'Demo meeting should keep the existing title.');
 assertSameValue('10:00', $meetingService->created['meetingTime'], 'Demo meeting should keep the existing time.');
