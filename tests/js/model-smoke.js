@@ -44,14 +44,18 @@ assert.strictEqual(document.typeLabel(), 'Protokollvorlage ODT');
 
 const meeting = Meeting.get({
     id: 5,
+    legislature_id: 3,
     title: 'BR-Sitzung',
     tops: [agendaItem.toArray()],
-    documents: [document.toArray()]
+    documents: [document.toArray()],
+    invitation_recipients: [{ user_uid: 'simon', display_name: 'Simon' }]
 });
 
 assert(meeting instanceof Meeting);
 assert.strictEqual(meeting.tops.length, 1);
 assert.strictEqual(meeting.documents.length, 1);
 assert.strictEqual(meeting.toArray().tops[0].subject, 'Personelle Angelegenheit');
+assert.strictEqual(meeting.toArray().invitation_recipients[0].user_uid, 'simon');
+assert.strictEqual(meeting.toArray().legislature_id, 3);
 
 console.log('BRTop model smoke test passed.');

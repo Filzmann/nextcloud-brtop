@@ -162,6 +162,48 @@
     overflow-x: auto;
 }
 
+.brtop-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.brtop-legislature-list {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.brtop-legislature-list legend {
+    padding: 0 .35rem;
+    font-weight: 700;
+}
+
+.brtop-legislature-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.brtop-legislature-list th,
+.brtop-legislature-list td {
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.brtop-legislature-list table .brtop-field {
+    min-width: 9rem;
+    margin: 0;
+}
+
+.brtop-legislature-list table input,
+.brtop-legislature-list table select {
+    width: 100%;
+    min-width: 8rem;
+}
+
 .brtop-session-table {
     width: 100%;
     border-collapse: collapse;
@@ -212,6 +254,42 @@
 .brtop-meta {
     color: var(--color-text-maxcontrast);
     margin-top: -4px;
+}
+
+.brtop-invitation-status {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    margin: 14px 0 18px;
+    padding: 14px;
+    background: var(--color-background-hover);
+}
+
+.brtop-invitation-status h3 {
+    margin-top: 0;
+}
+
+.brtop-invitation-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.brtop-invitation-row {
+    border-top: 1px solid var(--color-border);
+    padding-top: 10px;
+}
+
+.brtop-invitation-row:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.brtop-invitation-row p {
+    margin: 6px 0 0;
+}
+
+.brtop-empty {
+    color: var(--color-text-maxcontrast);
 }
 
 .brtop-agenda-list {
@@ -316,12 +394,84 @@
 }
 
 .brtop-documents {
+    list-style: none;
     margin-top: 4px;
     margin-bottom: 12px;
+    padding-left: 0;
+}
+
+.brtop-documents li {
+    margin: 5px 0;
+}
+
+.brtop-document-link {
+    color: var(--color-primary-element);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.brtop-document-link:hover,
+.brtop-document-link:focus-visible {
+    color: var(--color-primary-element-hover);
+    text-decoration-thickness: 2px;
 }
 
 .brtop-documents small {
+    display: block;
     color: var(--color-text-maxcontrast);
+}
+
+.brtop-document-overlay[hidden] {
+    display: none !important;
+}
+
+.brtop-document-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, .45);
+}
+
+.brtop-document-overlay-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(1100px, 100%);
+    min-height: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-main-background);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .28);
+}
+
+.brtop-document-overlay-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.brtop-document-overlay-head h2 {
+    margin: 0;
+}
+
+.brtop-document-overlay iframe {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 70vh;
+    border: 0;
+}
+
+@media (max-width: 760px) {
+    .brtop-document-overlay {
+        padding: 8px;
+    }
 }
 
 .brtop-protocol-top {

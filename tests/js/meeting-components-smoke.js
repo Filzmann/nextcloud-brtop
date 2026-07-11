@@ -25,6 +25,11 @@ const elements = new Map([
 ]);
 
 global.window = {};
+global.window.OC = {
+    generateUrl(path) {
+        return `/index.php${path}`;
+    }
+};
 global.document = {
     getElementById(id) {
         return elements.get(id) || null;
@@ -68,6 +73,7 @@ const content = {
         return [editInput];
     }
 };
+const documents = { innerHTML: '' };
 let meeting = {
     title: 'Sitzung <Detail>',
     meeting_date: '2026-07-07',
@@ -96,6 +102,41 @@ let meeting = {
             title: 'Dokument <A>',
             file_path: '/BRTop/<A>.odt'
         }
+    ],
+    invitation_recipients: [
+        {
+            user_uid: 'admin',
+            display_name: 'Admin',
+            member_role: 'regular',
+            invitation_type: 'initial',
+            list_name: 'Liste Dialog',
+            list_rank: 2
+        },
+        {
+            user_uid: 'clara',
+            display_name: 'Clara <N>',
+            member_role: 'regular',
+            invitation_type: 'absent',
+            list_name: 'Liste <Zukunft>',
+            list_rank: 3
+        },
+        {
+            user_uid: 'ivan',
+            display_name: 'Ivan',
+            member_role: 'regular',
+            invitation_type: 'initial',
+            list_name: 'Liste Zukunft',
+            list_rank: 9
+        },
+        {
+            user_uid: 'nora',
+            display_name: 'Nora',
+            member_role: 'replacement',
+            invitation_type: 'replacement',
+            list_name: 'Liste Zukunft',
+            list_rank: 11,
+            replacement_for_name: 'Clara <N>'
+        }
     ]
 };
 
@@ -106,6 +147,9 @@ const controller = meetingDetail.createController({
         }
         if (id === 'meeting-detail-content') {
             return content;
+        }
+        if (id === 'meeting-documents') {
+            return documents;
         }
 
         return null;
@@ -131,8 +175,19 @@ assert(content.innerHTML.includes('2 Beschl&uuml;sse') || content.innerHTML.incl
 assert(content.innerHTML.includes('Paragraf &lt;99&gt;'));
 assert(content.innerHTML.includes('Bitte &lt;lesen&gt;'));
 assert(content.innerHTML.includes('Anh\u00e4nge: a.pdf; b&lt;z&gt;.pdf') || content.innerHTML.includes('Anh&auml;nge: a.pdf; b&lt;z&gt;.pdf'));
-assert(content.innerHTML.includes('Dokument &lt;A&gt;'));
-assert(content.innerHTML.includes('/BRTop/&lt;A&gt;.odt'));
+assert(content.innerHTML.includes('Ladungsstatus'));
+assert(content.innerHTML.includes('Unveränderlicher Empfängersnapshot der Einladung'));
+assert(content.innerHTML.includes('Geladen: 3, davon Ersatzmitglieder: 1; bestätigte Verhinderungen: 1.'));
+assert(content.innerHTML.includes('Clara &lt;N&gt;'));
+assert(content.innerHTML.includes('Nicht geladen – Verhinderung bestätigt'));
+assert(content.innerHTML.includes('Liste &lt;Zukunft&gt;, Rang 3'));
+assert(content.innerHTML.includes('für Clara &lt;N&gt;'));
+assert(content.innerHTML.includes('scope="col"'));
+assert(!content.innerHTML.includes('Dokument &lt;A&gt;'));
+assert(documents.innerHTML.includes('Dokument &lt;A&gt;'));
+assert(documents.innerHTML.includes('/BRTop/&lt;A&gt;.odt'));
+assert(documents.innerHTML.includes('href="/index.php/apps/files/?dir=%2FBRTop&amp;scrollto=%3CA%3E.odt"'));
+assert(documents.innerHTML.includes('data-document-overlay="1"'));
 assert.strictEqual(editInput.focused, true);
 assert.strictEqual(editInput.selected, true);
 assert.strictEqual(controller.editingInput(11), editInput);
@@ -143,5 +198,6 @@ controller.render();
 
 assert.strictEqual(heading.textContent, 'Sitzung');
 assert(content.innerHTML.includes('Die Sitzung wurde nicht gefunden.'));
+assert.strictEqual(documents.innerHTML, '');
 
 console.log('BRTop meeting components smoke test passed.');

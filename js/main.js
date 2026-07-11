@@ -3,6 +3,8 @@
     let currentSettings = {};
     let selectedMeetingId = null;
     let editingTopId = null;
+    let capabilities = {};
+    let documentOverlayTrigger = null;
 
     const { request: api } = window.BRTop.api;
     const {
@@ -12,12 +14,13 @@
         showError,
         showNotice
     } = window.BRTop.ui;
-    const { MeetingRepository } = window.BRTop.repositories;
+    const { MeetingRepository, LegislatureRepository } = window.BRTop.repositories;
     const { sessionTableHtml } = window.BRTop.meetingList;
     const { createController: createMeetingDetailController } = window.BRTop.meetingDetail;
     const { protocolEditorHtml, createController: createProtocolEditorController } = window.BRTop.protocolEditor;
     const { createController: createAgendaEditorController } = window.BRTop.agendaEditor;
     const meetingRepository = new MeetingRepository(api);
+    const legislatureRepository = new LegislatureRepository(api);
 
     const findMeeting = (id) => meetings.find(m => String(m.id) === String(id)) || null;
 
@@ -25,7 +28,7 @@
 
     const viewRouter = window.BRTop.viewRouter.createController({
         byId,
-        viewIds: ['sessions-view', 'meeting-detail-view', 'protocol-view']
+        viewIds: ['sessions-view', 'meeting-detail-view', 'protocol-view', 'legislature-view', 'absence-view']
     });
     const topForm = window.BRTop.topForm.createController(byId);
     const meetingDetail = createMeetingDetailController({
@@ -56,6 +59,18 @@
         loadState,
         renderMeetingDetail
     });
+    const legislatureEditor = window.BRTop.legislatureEditor.createController({
+        byId,
+        repository: legislatureRepository,
+        showNotice,
+        showError
+    });
+    const absenceReview = window.BRTop.absenceReview.createController({
+        byId,
+        repository: legislatureRepository,
+        showNotice,
+        showError
+    });
 
     function renderSessionTable() {
         byId('state').innerHTML = sessionTableHtml(meetings);
@@ -65,6 +80,9 @@
         const data = await meetingRepository.state();
         meetings = data.meetings;
         currentSettings = data.settings || {};
+        capabilities = data.capabilities || {};
+        byId('manage-legislature').hidden = !capabilities.canManageLegislature;
+        byId('review-absences').hidden = !capabilities.canManageLegislature;
 
         if (selectedMeetingId && !findMeeting(selectedMeetingId)) {
             selectedMeetingId = null;
@@ -145,6 +163,40 @@
         showDocumentResult(result, 'Protokolldokument erzeugt.');
     }
 
+    function openDocumentOverlay(link) {
+        const overlay = byId('document-overlay');
+        const frame = byId('document-overlay-frame');
+        const title = byId('document-overlay-title');
+        if (!overlay || !frame || !title) {
+            window.location.href = link.href;
+            return;
+        }
+
+        title.textContent = link.getAttribute('data-document-title') || link.textContent || 'Dokument';
+        frame.src = link.href;
+        overlay.hidden = false;
+        documentOverlayTrigger = link;
+        const closeButton = byId('document-overlay-close');
+        if (closeButton) {
+            closeButton.focus();
+        }
+    }
+
+    function closeDocumentOverlay() {
+        const overlay = byId('document-overlay');
+        const frame = byId('document-overlay-frame');
+        if (frame) {
+            frame.src = 'about:blank';
+        }
+        if (overlay) {
+            overlay.hidden = true;
+        }
+        if (documentOverlayTrigger && typeof documentOverlayTrigger.focus === 'function') {
+            documentOverlayTrigger.focus();
+        }
+        documentOverlayTrigger = null;
+    }
+
     byId('new-meeting').addEventListener('click', async () => {
         try {
             await createNewMeeting();
@@ -177,6 +229,32 @@
         viewRouter.show('sessions-view');
     });
 
+    byId('manage-legislature').addEventListener('click', async () => {
+        try {
+            await legislatureEditor.load();
+            viewRouter.show('legislature-view');
+        } catch (e) {
+            showError(e, 'Legislatur konnte nicht geladen werden.');
+        }
+    });
+
+    byId('back-from-legislature').addEventListener('click', () => {
+        viewRouter.show('sessions-view');
+    });
+
+    byId('review-absences').addEventListener('click', async () => {
+        try {
+            await absenceReview.load(selectedMeetingId);
+            viewRouter.show('absence-view');
+        } catch (e) {
+            showError(e, 'Verhinderungen konnten nicht geladen werden.');
+        }
+    });
+
+    byId('back-from-absences').addEventListener('click', () => {
+        viewRouter.show('meeting-detail-view');
+    });
+
     byId('detail-create-invitation').addEventListener('click', async () => {
         try {
             await generateInvitation();
@@ -188,6 +266,55 @@
     byId('detail-edit-protocol').addEventListener('click', () => {
         openProtocolEditor();
     });
+
+    const documentsArea = byId('meeting-documents');
+    if (documentsArea) {
+        documentsArea.addEventListener('click', (event) => {
+            const link = event.target instanceof Element ? event.target.closest('a[data-document-overlay]') : null;
+            if (!link) {
+                return;
+            }
+
+            event.preventDefault();
+            openDocumentOverlay(link);
+        });
+    }
+
+    const documentOverlayClose = byId('document-overlay-close');
+    const documentOverlay = byId('document-overlay');
+    if (documentOverlayClose) {
+        documentOverlayClose.addEventListener('click', closeDocumentOverlay);
+    }
+    if (documentOverlay) {
+        documentOverlay.addEventListener('click', (event) => {
+            if (event.target === documentOverlay) {
+                closeDocumentOverlay();
+            }
+        });
+        documentOverlay.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeDocumentOverlay();
+                return;
+            }
+            if (event.key !== 'Tab') {
+                return;
+            }
+            const focusable = [byId('document-overlay-close'), byId('document-overlay-frame')].filter(Boolean);
+            if (focusable.length === 0) {
+                return;
+            }
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+    }
 
     byId('back-to-detail').addEventListener('click', async () => {
         try {
@@ -208,6 +335,8 @@
     });
 
     agendaEditor.init();
+    legislatureEditor.init();
+    absenceReview.init();
     protocolEditor.init();
     topForm.init();
     loadState().catch(e => showError(e, 'Sitzungen konnten nicht geladen werden.'));

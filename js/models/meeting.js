@@ -6,6 +6,7 @@
         constructor(data = {}) {
             super();
             this.id = data.id ?? null;
+            this.legislature_id = data.legislature_id ?? data.legislatureId ?? null;
             this.owner_uid = data.owner_uid || data.ownerUid || '';
             this.title = data.title || '';
             this.meeting_date = data.meeting_date || data.meetingDate || '';
@@ -19,6 +20,7 @@
             this.created_at = data.created_at || data.createdAt || '';
             this.tops = AgendaItem.get_all(data.tops || []);
             this.documents = GeneratedDocument.get_all(data.documents || []);
+            this.invitation_recipients = data.invitation_recipients || data.invitationRecipients || [];
         }
 
         displayTitle() {
@@ -32,6 +34,7 @@
         toArray() {
             return {
                 id: this.id,
+                legislature_id: this.legislature_id,
                 owner_uid: this.owner_uid,
                 title: this.title,
                 meeting_date: this.meeting_date,
@@ -44,7 +47,8 @@
                 status: this.status,
                 created_at: this.created_at,
                 tops: this.tops.map(top => top.toArray()),
-                documents: this.documents.map(document => document.toArray())
+                documents: this.documents.map(document => document.toArray()),
+                invitation_recipients: this.invitation_recipients
             };
         }
     }

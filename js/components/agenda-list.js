@@ -3,7 +3,8 @@
         esc,
         agendaKindLabel,
         agendaNumber,
-        buttonPresetHtml
+        buttonPresetHtml,
+        fileLinkHref
     } = window.BRTop.ui;
 
     function agendaListHtml(tops, editingTopId) {
@@ -69,7 +70,13 @@
             const title = typeof document.displayTitle === 'function'
                 ? document.displayTitle()
                 : (document.title || document.document_type || 'Dokument');
-            return `<li>${esc(title)} <small>${esc(document.file_path || '')}</small></li>`;
+            const filePath = document.file_path || '';
+            const href = filePath ? fileLinkHref(filePath) : '';
+            const titleHtml = href
+                ? `<a class="brtop-document-link" href="${esc(href)}" data-document-overlay="1" data-document-title="${esc(title)}">${esc(title)}</a>`
+                : esc(title);
+
+            return `<li>${titleHtml} <small>${esc(filePath)}</small></li>`;
         }).join('');
 
         return `<h3>Dokumente</h3><ul class="brtop-documents">${items}</ul>`;

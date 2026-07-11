@@ -15,12 +15,18 @@ require('../../../localbase/js/ui/ui.js');
 require('../../js/modules/ui.js');
 
 const {
+    fileLinkHref,
     documentResultText,
     showDocumentResult,
     showError,
     showNotice
 } = window.BRTop.ui;
 const notice = elements.get('brtop-notice');
+
+assert.strictEqual(
+    fileLinkHref('/BRTop/Sitzung/01_Ladung.md'),
+    '/apps/files/?dir=%2FBRTop%2FSitzung&scrollto=01_Ladung.md'
+);
 
 assert.strictEqual(
     documentResultText({

@@ -46,6 +46,32 @@
         return number === '' ? '' : number + '.';
     };
 
+    const filePathParts = (filePath) => {
+        const normalized = String(filePath || '').trim().replace(/\/+/g, '/');
+        if (normalized === '' || normalized === '/') {
+            return { dir: '/', file: '' };
+        }
+
+        const path = normalized.startsWith('/') ? normalized : '/' + normalized;
+        const lastSlash = path.lastIndexOf('/');
+
+        return {
+            dir: lastSlash <= 0 ? '/' : path.slice(0, lastSlash),
+            file: path.slice(lastSlash + 1)
+        };
+    };
+
+    const fileLinkHref = (filePath) => {
+        const { dir, file } = filePathParts(filePath);
+        const query = `dir=${encodeURIComponent(dir)}${file ? `&scrollto=${encodeURIComponent(file)}` : ''}`;
+
+        if (window.OC && typeof window.OC.generateUrl === 'function') {
+            return window.OC.generateUrl('/apps/files/') + '?' + query;
+        }
+
+        return '/apps/files/?' + query;
+    };
+
     const buttonIcons = Object.freeze({
         plus: '+',
         back: '&larr;',
@@ -150,6 +176,7 @@
         fmtMeeting,
         agendaKindLabel,
         agendaNumber,
+        fileLinkHref,
         iconButtonHtml,
         buttonPresetHtml,
         documentResultText,
