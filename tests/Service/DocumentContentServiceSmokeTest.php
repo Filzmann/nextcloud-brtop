@@ -55,12 +55,42 @@ $top = new AgendaItem([
 ]);
 
 $email = $contentService->invitationEmail($meeting, [$top], [
-    ['snapshot_position' => 1, 'user_uid' => 'simon', 'display_name' => 'Simon', 'email' => 'simon@example.invalid'],
+    [
+        'snapshot_position' => 1,
+        'user_uid' => 'simon',
+        'display_name' => 'Simon',
+        'email' => 'simon@example.invalid',
+        'member_role' => 'regular',
+        'invitation_type' => 'absent',
+        'list_name' => 'Liste Zukunft',
+        'list_seats' => 10,
+        'list_rank' => 1,
+        'gender' => 'male',
+        'minority_gender' => 'female',
+        'minority_minimum_seats' => 1,
+    ],
+    [
+        'snapshot_position' => 2,
+        'user_uid' => 'nora',
+        'display_name' => 'Nora',
+        'email' => 'nora@example.invalid',
+        'member_role' => 'replacement',
+        'invitation_type' => 'replacement',
+        'list_name' => 'Liste Zukunft',
+        'list_seats' => 10,
+        'list_rank' => 11,
+        'gender' => 'female',
+        'minority_gender' => 'female',
+        'minority_minimum_seats' => 1,
+        'replacement_for_name' => 'Clara Neumann',
+    ],
 ]);
 $protocol = $contentService->protocolTemplate($meeting, [$top]);
 $resolution = $contentService->resolutionDocument($meeting, $top, 2);
 
 assertContainsString('Sitzung: Ordentliche BR-Sitzung', $email, 'Invitation email should accept Meeting models.');
+assertContainsString('Geladene BR-Mitglieder: 0', $email, 'Invitation email should not count confirmed absent regular members as invited.');
+assertContainsString('Geladene Nachrücker*innen: 1', $email, 'Invitation email should count replacements separately.');
 assertContainsString('2.1.1. Einstellung Test', $email, 'Invitation email should accept AgendaItem models.');
 assertContainsString('2 Beschlüsse vorgesehen', $email, 'Invitation email should show multiple resolutions.');
 assertContainsString('## 2.1.1. Einstellung Test', $protocol, 'Protocol template should accept AgendaItem models.');

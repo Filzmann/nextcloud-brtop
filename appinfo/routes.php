@@ -6,6 +6,11 @@ return [
 
         ['name' => 'api#state', 'url' => '/api/state', 'verb' => 'GET'],
         ['name' => 'api#updateSettings', 'url' => '/api/settings', 'verb' => 'POST'],
+        ['name' => 'api#legislature', 'url' => '/api/legislature', 'verb' => 'GET'],
+        ['name' => 'api#saveLegislature', 'url' => '/api/legislature', 'verb' => 'POST'],
+        ['name' => 'api#activateLegislature', 'url' => '/api/legislature/{legislatureId}/activate', 'verb' => 'POST'],
+        ['name' => 'api#absenceSuggestions', 'url' => '/api/meetings/{meetingId}/absences', 'verb' => 'GET'],
+        ['name' => 'api#saveConfirmedAbsences', 'url' => '/api/meetings/{meetingId}/absences', 'verb' => 'POST'],
         ['name' => 'api#createMeeting', 'url' => '/api/meetings', 'verb' => 'POST'],
         ['name' => 'api#planNextRegularMeeting', 'url' => '/api/meetings/next-regular', 'verb' => 'POST'],
         ['name' => 'api#deleteMeeting', 'url' => '/api/meetings/{meetingId}/delete', 'verb' => 'POST'],

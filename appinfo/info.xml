@@ -4,8 +4,8 @@
     <id>brtop</id>
     <name>BR TOP- und Sitzungsverwaltung</name>
     <summary>Prototyp zur Erstellung von Ladungen, Protokollvorlagen und Beschlussdokumenten für Betriebsratsarbeit.</summary>
-    <description>Verwaltet Sitzungen, TOPs, Ladungen, Protokollvorlagen und Beschlussdokumente. Die Ersatzmitgliedslogik ist im Prototyp vorbereitet, aber noch nicht rechtssicher umgesetzt.</description>
-    <version>0.1.22</version>
+    <description>Verwaltet Sitzungen, TOPs, versiegelte Legislatur- und Ladungssnapshots, Protokollvorlagen und Beschlussdokumente.</description>
+    <version>0.1.30</version>
     <licence>agpl</licence>
     <author>Simon / ChatGPT-Prototyp</author>
     <namespace>BrTop</namespace>
@@ -13,6 +13,7 @@
     <bugs>https://example.invalid</bugs>
     <dependencies>
         <nextcloud min-version="29" max-version="35"/>
+        <app>calendar</app>
     </dependencies>
     <repair-steps>
         <post-migration>

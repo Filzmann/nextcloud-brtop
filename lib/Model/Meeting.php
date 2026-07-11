@@ -13,8 +13,10 @@ class Meeting {
     private ?MeetingStore $store;
     private ?array $agendaItems = null;
     private array $documents = [];
+    private array $invitationRecipients = [];
 
     public ?int $id;
+    public ?int $legislatureId;
     public string $ownerUid;
     public string $title;
     public string $meetingDate;
@@ -30,6 +32,9 @@ class Meeting {
     public function __construct(array $data = [], ?MeetingStore $store = null) {
         $this->store = $store;
         $this->id = isset($data['id']) ? (int)$data['id'] : null;
+        $this->legislatureId = isset($data['legislature_id']) && $data['legislature_id'] !== null
+            ? (int)$data['legislature_id']
+            : null;
         $this->ownerUid = (string)($data['owner_uid'] ?? $data['ownerUid'] ?? '');
         $this->title = (string)($data['title'] ?? '');
         $this->meetingDate = (string)($data['meeting_date'] ?? $data['meetingDate'] ?? '');
@@ -49,6 +54,10 @@ class Meeting {
 
         if (is_array($data['documents'] ?? null)) {
             $this->setDocuments($data['documents']);
+        }
+
+        if (is_array($data['invitation_recipients'] ?? $data['invitationRecipients'] ?? null)) {
+            $this->setInvitationRecipients($data['invitation_recipients'] ?? $data['invitationRecipients']);
         }
     }
 
@@ -93,6 +102,14 @@ class Meeting {
         ));
     }
 
+    public function invitationRecipients(): array {
+        return $this->invitationRecipients;
+    }
+
+    public function setInvitationRecipients(array $recipients): void {
+        $this->invitationRecipients = array_values($recipients);
+    }
+
     public function isRegularBrMeeting(): bool {
         return $this->meetingType === 'regular_br';
     }
@@ -104,6 +121,7 @@ class Meeting {
     public function toRepositoryData(): array {
         return [
             'id' => $this->id,
+            'legislature_id' => $this->legislatureId,
             'owner_uid' => $this->ownerUid,
             'title' => $this->title,
             'meeting_date' => $this->meetingDate,
@@ -128,6 +146,7 @@ class Meeting {
                 static fn(GeneratedDocument $document): array => $document->toArray(),
                 $this->documents()
             ),
+            'invitation_recipients' => $this->invitationRecipients(),
         ]);
     }
 }

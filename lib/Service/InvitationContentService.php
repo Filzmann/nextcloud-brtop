@@ -35,7 +35,17 @@ class InvitationContentService {
         $lines[] = 'Uhrzeit: ' . (($meetingData['meeting_time'] ?? '') ?: 'noch offen');
         $lines[] = 'Ort: ' . (($meetingData['location'] ?? '') ?: 'noch offen');
         $lines[] = '';
-        $lines[] = 'Geladene Mitglieder: ' . count($recipients);
+        $lines[] = 'Geladene BR-Mitglieder: ' . count(array_filter(
+            $recipients,
+            static fn(array $recipient): bool => ($recipient['invitation_type'] ?? 'initial') === 'initial'
+        ));
+        $replacementCount = count(array_filter(
+            $recipients,
+            static fn(array $recipient): bool => ($recipient['member_role'] ?? '') === 'replacement'
+        ));
+        if ($replacementCount > 0) {
+            $lines[] = 'Geladene Nachrücker*innen: ' . $replacementCount;
+        }
         $lines[] = '';
         $lines[] = 'Tagesordnung:';
         $lines[] = '';
@@ -61,6 +71,14 @@ class InvitationContentService {
             '',
         ];
 
+        $summary = $this->recipientSummary($recipients);
+        if (count($summary) > 0) {
+            foreach ($summary as $line) {
+                $lines[] = $line;
+            }
+            $lines[] = '';
+        }
+
         foreach ($recipients as $recipient) {
             $label = (string)($recipient['display_name'] ?? '');
             if ($label === '') {
@@ -68,13 +86,98 @@ class InvitationContentService {
             }
 
             $line = $recipient['snapshot_position'] . '. ' . $label . ' (' . $recipient['user_uid'] . ')';
-            if (!empty($recipient['email'])) {
+            if (($recipient['invitation_type'] ?? 'initial') !== 'absent' && !empty($recipient['email'])) {
                 $line .= ' <' . $recipient['email'] . '>';
             }
+
+            $details = $this->recipientDetails($recipient);
+            if ($details !== '') {
+                $line .= ' - ' . $details;
+            }
+
             $lines[] = $line;
         }
 
         return implode("\n", $lines) . "\n";
+    }
+
+    private function recipientSummary(array $recipients): array {
+        $regularCount = 0;
+        $replacementCount = 0;
+        $confirmedAbsentCount = 0;
+        $minorityGender = '';
+        $minorityMinimumSeats = 0;
+        $attendingMinority = 0;
+        $lists = [];
+
+        foreach ($recipients as $recipient) {
+            if (($recipient['member_role'] ?? 'regular') === 'replacement') {
+                $replacementCount++;
+            } else {
+                $regularCount++;
+            }
+
+            if (($recipient['invitation_type'] ?? '') === 'absent') {
+                $confirmedAbsentCount++;
+            }
+
+            $minorityGender = $minorityGender ?: (string)($recipient['minority_gender'] ?? '');
+            $minorityMinimumSeats = max($minorityMinimumSeats, (int)($recipient['minority_minimum_seats'] ?? 0));
+            if (($recipient['invitation_type'] ?? 'initial') !== 'absent'
+                && ($recipient['gender'] ?? '') === $minorityGender) {
+                $attendingMinority++;
+            }
+            $listName = (string)($recipient['list_name'] ?? '');
+            if ($listName !== '') {
+                $lists[$listName] = (int)($recipient['list_seats'] ?? 0);
+            }
+        }
+
+        $summary = [
+            'Feste BR-Mitglieder: ' . $regularCount,
+        ];
+        if (count($lists) > 0) {
+            $listParts = [];
+            foreach ($lists as $listName => $seats) {
+                $listParts[] = $listName . ($seats > 0 ? ' (' . $seats . ' Sitze)' : '');
+            }
+            $summary[] = 'Listen: ' . implode(', ', $listParts);
+        }
+        if ($minorityGender !== '') {
+            $summary[] = 'Minderheitenschutz: ' . $attendingMinority
+                . ' von mindestens ' . $minorityMinimumSeats . ' Sitzen sichergestellt';
+        }
+        if ($replacementCount > 0) {
+            $summary[] = 'Nachrücker*innen geladen: ' . $replacementCount;
+        }
+        if ($confirmedAbsentCount > 0) {
+            $summary[] = 'Administrativ bestaetigte Verhinderungen: ' . $confirmedAbsentCount;
+        }
+
+        return $summary;
+    }
+
+    private function recipientDetails(array $recipient): string {
+        $details = [];
+
+        if (!empty($recipient['list_name'])) {
+            $listDetail = (string)$recipient['list_name'];
+            if (!empty($recipient['list_rank'])) {
+                $listDetail .= ', Rang ' . (int)$recipient['list_rank'];
+            }
+            $details[] = $listDetail;
+        }
+
+        if (($recipient['member_role'] ?? '') === 'replacement') {
+            $details[] = 'Nachrücker*in'
+                . (!empty($recipient['replacement_for_name']) ? ' für ' . $recipient['replacement_for_name'] : '');
+        }
+
+        if (($recipient['invitation_type'] ?? '') === 'absent') {
+            $details[] = 'nicht geladen; Verhinderung administrativ bestaetigt';
+        }
+
+        return implode('; ', $details);
     }
 
     private function appendAgendaLines(array &$lines, array $tops): void {

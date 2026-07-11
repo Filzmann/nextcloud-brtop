@@ -84,7 +84,7 @@ namespace {
         }
     }
 
-    foreach (['updateSettings', 'seedDemo'] as $adminAction) {
+    foreach (['updateSettings', 'seedDemo', 'legislature', 'saveLegislature', 'activateLegislature', 'absenceSuggestions', 'saveConfirmedAbsences'] as $adminAction) {
         $method = new \ReflectionMethod(ApiController::class, $adminAction);
         if ($method->getAttributes(NoAdminRequired::class) !== []) {
             throw new \RuntimeException($adminAction . ' must remain restricted to Nextcloud admins.');

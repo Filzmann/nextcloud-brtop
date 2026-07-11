@@ -9,12 +9,15 @@ use OCA\BrTop\Exception\DocumentGenerationException;
 use OCA\BrTop\Model\Meeting;
 use OCA\BrTop\Service\AgendaMutationService;
 use OCA\BrTop\Service\AgendaTemplateService;
+use OCA\BrTop\Service\BrAccessService;
 use OCA\BrTop\Service\BrtopLogger;
 use OCA\BrTop\Service\BrtopSettingsService;
 use OCA\BrTop\Service\DemoDataService;
 use OCA\BrTop\Service\DocumentGenerationService;
 use OCA\BrTop\Service\MeetingService;
+use OCA\BrTop\Service\MeetingAbsenceService;
 use OCA\BrTop\Service\MeetingStateService;
+use OCA\BrTop\Service\LegislatureService;
 use OCA\BrTop\Service\ProtocolBlockService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
@@ -37,6 +40,9 @@ class ApiController extends Controller {
         private MeetingService $meetingService,
         private DemoDataService $demoDataService,
         private ProtocolBlockService $protocolBlockService,
+        private LegislatureService $legislatureService,
+        private MeetingAbsenceService $meetingAbsenceService,
+        private BrAccessService $accessService,
         private ApiResponder $responder
     ) {
         parent::__construct(Application::APP_ID, $request);
@@ -52,11 +58,80 @@ class ApiController extends Controller {
 
     #[NoAdminRequired]
     public function state(): DataResponse {
+        $uid = $this->uid();
         return new DataResponse([
-            'meetings' => $this->meetingStateService->meetingsForOwner($this->uid()),
+            'meetings' => $this->meetingStateService->meetingsForOwner($uid),
             'settings' => $this->settingsPayload(),
+            'capabilities' => [
+                'canManageLegislature' => $this->accessService->isAdmin($uid),
+            ],
             'notice' => 'Standardstruktur: 1 Protokolle, 2 Personelle Angelegenheiten (§99/§100/§102), 3 Arbeitsorganisatorisches, 4 Sprechstundenbericht. Einladung zusammengefasst, Protokoll und Beschlüsse getrennt.'
         ]);
+    }
+
+    public function legislature(): DataResponse {
+        return new DataResponse([
+            'ok' => true,
+            'legislature' => $this->legislatureService->latest(),
+        ]);
+    }
+
+    public function saveLegislature(string $configurationJson): DataResponse {
+        return $this->responder->respond(
+            function () use ($configurationJson): array {
+                $payload = json_decode($configurationJson, true, 512, JSON_THROW_ON_ERROR);
+                if (!is_array($payload)) {
+                    throw new \InvalidArgumentException('Die Legislaturdaten sind ungueltig.');
+                }
+                return [
+                    'ok' => true,
+                    'legislature' => $this->legislatureService->saveDraft($payload, $this->uid()),
+                ];
+            },
+            [$this->logger, 'error'],
+            'save_legislature',
+            [],
+            'Die Legislatur konnte nicht gespeichert werden.'
+        );
+    }
+
+    public function activateLegislature(int $legislatureId): DataResponse {
+        return $this->responder->respond(
+            fn(): array => [
+                'ok' => true,
+                'legislature' => $this->legislatureService->activate($legislatureId),
+            ],
+            [$this->logger, 'error'],
+            'activate_legislature',
+            ['legislature_id' => $legislatureId],
+            'Die Legislatur konnte nicht aktiviert werden.'
+        );
+    }
+
+    public function absenceSuggestions(int $meetingId): DataResponse {
+        return new DataResponse([
+            'ok' => true,
+            'absenceState' => $this->meetingAbsenceService->prepare($meetingId),
+        ]);
+    }
+
+    public function saveConfirmedAbsences(int $meetingId, string $memberIdsJson = '[]'): DataResponse {
+        return $this->responder->respond(
+            function () use ($meetingId, $memberIdsJson): array {
+                $memberIds = json_decode($memberIdsJson, true, 512, JSON_THROW_ON_ERROR);
+                if (!is_array($memberIds)) {
+                    throw new \InvalidArgumentException('Die Verhinderungsliste ist ungueltig.');
+                }
+                return [
+                    'ok' => true,
+                    'absenceState' => $this->meetingAbsenceService->saveConfirmed($meetingId, $memberIds, $this->uid()),
+                ];
+            },
+            [$this->logger, 'error'],
+            'save_confirmed_absences',
+            ['meeting_id' => $meetingId],
+            'Die bestaetigten Verhinderungen konnten nicht gespeichert werden.'
+        );
     }
 
     private function settingsPayload(): array {

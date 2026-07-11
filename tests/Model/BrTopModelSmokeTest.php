@@ -59,6 +59,7 @@ $document = new GeneratedDocument([
 
 $meeting = new Meeting([
     'id' => 3,
+    'legislature_id' => 2,
     'owner_uid' => 'simon',
     'title' => '',
     'meeting_date' => '2026-07-07',
@@ -66,6 +67,9 @@ $meeting = new Meeting([
     'meeting_type' => 'regular_br',
     'tops' => [$top],
     'documents' => [$document],
+    'invitation_recipients' => [
+        ['user_uid' => 'simon', 'display_name' => 'Simon'],
+    ],
 ]);
 
 $mappedMeeting = Meeting::get($meeting->toArray());
@@ -76,10 +80,12 @@ $payload = $meeting->toArray();
 assertSameValue(true, $mappedMeeting instanceof Meeting, 'Meeting::get should hydrate API data.');
 assertSameValue(1, count($mappedMeetings), 'Meeting::get_all should hydrate API lists.');
 assertSameValue(3, $mappedMeeting->toArray()['id'], 'Model toArray should keep the API payload shape.');
+assertSameValue(2, $mappedMeeting->toArray()['legislature_id'], 'Meeting should preserve its bound legislature.');
 assertSameValue('ohne Titel', $meeting->displayTitle(), 'Meeting displayTitle should have a fallback.');
 assertSameValue(true, $meeting->isRegularBrMeeting(), 'Meeting should expose regular BR sessions.');
 assertSameValue('Ladung', $document->displayTitle(), 'GeneratedDocument should expose display titles.');
 assertSameValue(7, $payload['tops'][0]['id'], 'Meeting API payload should include TOP objects as arrays.');
 assertSameValue('invitation_markdown', $payload['documents'][0]['document_type'], 'Meeting API payload should include document objects as arrays.');
+assertSameValue('simon', $payload['invitation_recipients'][0]['user_uid'], 'Meeting API payload should include invitation recipients.');
 
 echo 'BRTop model smoke tests passed' . PHP_EOL;

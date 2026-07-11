@@ -41,6 +41,33 @@ class MeetingRepository {
         return $meeting === false ? null : $meeting;
     }
 
+    public function findById(int $meetingId): ?array {
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')
+            ->from('brtop_meetings')
+            ->where($qb->expr()->eq('id', $qb->createNamedParameter($meetingId, IQueryBuilder::PARAM_INT)));
+        $meeting = $qb->executeQuery()->fetch();
+        return $meeting === false ? null : $meeting;
+    }
+
+    public function bindLegislature(int $meetingId, int $legislatureId): void {
+        $qb = $this->db->getQueryBuilder();
+        $qb->update('brtop_meetings')
+            ->set('legislature_id', $qb->createNamedParameter($legislatureId, IQueryBuilder::PARAM_INT))
+            ->where($qb->expr()->eq('id', $qb->createNamedParameter($meetingId, IQueryBuilder::PARAM_INT)))
+            ->andWhere($qb->expr()->isNull('legislature_id'));
+        $qb->executeStatement();
+    }
+
+    public function hasInvitationSnapshot(int $meetingId): bool {
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('id')
+            ->from('brtop_invitation_recipients')
+            ->where($qb->expr()->eq('meeting_id', $qb->createNamedParameter($meetingId, IQueryBuilder::PARAM_INT)))
+            ->setMaxResults(1);
+        return $qb->executeQuery()->fetchOne() !== false;
+    }
+
     public function insert(
         string $uid,
         string $title,
@@ -98,6 +125,10 @@ class MeetingRepository {
             ->set('invitation_date', $qb->createNamedParameter($data['invitation_date'] ?? null))
             ->set('invitation_status', $qb->createNamedParameter((string)($data['invitation_status'] ?? 'not_created')))
             ->set('status', $qb->createNamedParameter((string)($data['status'] ?? 'draft')))
+            ->set('legislature_id', $qb->createNamedParameter(
+                isset($data['legislature_id']) ? (int)$data['legislature_id'] : null,
+                IQueryBuilder::PARAM_INT
+            ))
             ->where($qb->expr()->eq('id', $qb->createNamedParameter($meetingId, IQueryBuilder::PARAM_INT)));
         $qb->executeStatement();
     }

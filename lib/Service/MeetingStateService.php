@@ -13,7 +13,8 @@ class MeetingStateService {
     public function __construct(
         private MeetingStore $meetingStore,
         private DocumentStore $documentStore,
-        private ProtocolBlockStore $protocolBlockStore
+        private ProtocolBlockStore $protocolBlockStore,
+        private InvitationSnapshotService $invitationSnapshotService
     ) {
     }
 
@@ -27,6 +28,7 @@ class MeetingStateService {
                 $this->attachProtocolBlocks($meetingId, $meeting->agendaItems())
             );
             $meeting->setDocuments($this->documentStore->forMeeting($meetingId));
+            $meeting->setInvitationRecipients($this->invitationSnapshotService->recipientsForMeeting($meetingId));
             $payload[] = $meeting->toArray();
         }
 

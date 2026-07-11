@@ -10,6 +10,7 @@ use OCA\BrTop\Repository\DocumentRepository;
 use OCA\BrTop\Repository\MeetingRepository;
 use OCA\BrTop\Model\ProtocolBlock;
 use OCA\BrTop\Store\ProtocolBlockStore;
+use OCP\Lock\LockedException;
 
 class DocumentGenerationService {
     public function __construct(
@@ -26,11 +27,12 @@ class DocumentGenerationService {
 
     public function generateInvitation(string $uid, Meeting $meeting): array {
         $created = [];
+        $warnings = [];
         $meetingId = $this->meetingId($meeting);
 
         try {
             $tops = $this->agendaService->itemsForMeeting($meetingId);
-            $recipients = $this->invitationSnapshotService->getOrCreateForMeeting($meetingId);
+            $recipients = $this->invitationSnapshotService->getOrCreateForMeeting($meetingId, (string)$meeting->meetingDate, $uid);
 
             $basePath = $this->fileExportService->meetingFolder($meeting);
             $this->fileExportService->ensureFolder($uid, $basePath);
@@ -40,21 +42,21 @@ class DocumentGenerationService {
             $markdown = $this->documentContentService->invitationMarkdown($subject, $email);
             $recipientList = $this->documentContentService->invitationRecipientList($recipients);
 
-            $this->writeDocument($uid, $meetingId, $basePath, '01_Einladung_Email.txt', $email, 'invitation_email', 'Einladung E-Mail');
-            $created[] = '01_Einladung_Email.txt';
-            $this->writeDocument($uid, $meetingId, $basePath, '01_Ladung.md', $markdown, 'invitation_markdown', 'Ladung');
-            $created[] = '01_Ladung.md';
-            $this->writeDocument($uid, $meetingId, $basePath, '01_Ladungsliste.txt', $recipientList, 'invitation_recipients', 'Ladungsliste');
-            $created[] = '01_Ladungsliste.txt';
-            $this->meetingRepository->markInvitationCreated($meetingId);
+            $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Einladung_Email.txt', $email, 'invitation_email', 'Einladung E-Mail', $created, $warnings);
+            $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Ladung.md', $markdown, 'invitation_markdown', 'Ladung', $created, $warnings);
+            $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Ladungsliste.txt', $recipientList, 'invitation_recipients', 'Ladungsliste', $created, $warnings);
+            if ($warnings === []) {
+                $this->meetingRepository->markInvitationCreated($meetingId);
+            }
 
             return [
-                'ok' => true,
+                'ok' => count($warnings) === 0,
                 'type' => 'invitation',
                 'folder' => $basePath,
                 'subject' => $subject,
                 'email' => $email,
                 'created' => $created,
+                'warnings' => $warnings,
                 'recipientCount' => count($recipients),
             ];
         } catch (\Throwable $e) {
@@ -166,7 +168,46 @@ class DocumentGenerationService {
     ): void {
         $path = $basePath . '/' . $filename;
         $this->fileExportService->putUserFile($uid, $path, $content);
-        $this->documentRepository->insert($meetingId, $documentType, $title, $path);
+        if ($documentType === 'resolution_markdown') {
+            $this->documentRepository->insert($meetingId, $documentType, $title, $path);
+            return;
+        }
+
+        $this->documentRepository->replaceForMeetingAndType($meetingId, $documentType, $title, $path);
+    }
+
+    private function writeDocumentSafely(
+        string $uid,
+        int $meetingId,
+        string $basePath,
+        string $filename,
+        string $content,
+        string $documentType,
+        string $title,
+        array &$created,
+        array &$warnings
+    ): void {
+        try {
+            $this->writeDocument($uid, $meetingId, $basePath, $filename, $content, $documentType, $title);
+            $created[] = $filename;
+        } catch (\Throwable $e) {
+            if (!$this->isLockException($e)) {
+                throw $e;
+            }
+
+            $warnings[] = $filename . ' konnte nicht überschrieben werden, weil die Datei gerade in Nextcloud geöffnet oder gesperrt ist.';
+        }
+    }
+
+    private function isLockException(\Throwable $e): bool {
+        do {
+            if ($e instanceof LockedException) {
+                return true;
+            }
+            $e = $e->getPrevious();
+        } while ($e instanceof \Throwable);
+
+        return false;
     }
 
     private function meetingId(Meeting $meeting): int {
