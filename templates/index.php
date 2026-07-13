@@ -4,6 +4,7 @@ use OCA\BrTop\View\UiComponents;
 script('localbase', 'api/api-client');
 script('brtop', 'modules/api');
 script('localbase', 'ui/ui');
+script('orgsuite', 'suite-navigation');
 script('brtop', 'modules/ui');
 script('brtop', 'modules/view-router');
 script('localbase', 'models/model');
@@ -24,9 +25,11 @@ script('brtop', 'components/legislature-editor');
 script('brtop', 'components/absence-review');
 script('brtop', 'main');
 style('brtop', 'style');
+style('orgsuite', 'suite-navigation');
 ?>
 
 <div id="brtop-app">
+    <div class="orgsuite-host" data-orgsuite data-suite="br" data-current-app="brtop"></div>
     <h1>BR TOP- und Sitzungsverwaltung</h1>
     <div id="brtop-notice" class="brtop-notice" role="status" aria-live="polite" hidden></div>
 

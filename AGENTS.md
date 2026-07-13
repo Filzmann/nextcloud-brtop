@@ -132,6 +132,12 @@ Diese Regeln gelten sinngemaess auch fuer andere eigene Nextcloud-Apps; die fach
 
 ## Learnings pflegen
 
+### Gemeinsame Suite-Navigation
+
+- BRTop besitzt keinen eigenen Nextcloud-Hauptnavigationseintrag. `orgsuite` stellt den gemeinsamen Einstieg `BR` bereit.
+- Das Template bindet das zentrale OrgSuite-Menue mit `data-suite="br"` und `data-current-app="brtop"` ein.
+- BR- und Sitzungsrechte bleiben ausschliesslich serverseitig im BRTop; Menuesichtbarkeit ist keine Berechtigung.
+
 - Wenn bei der Arbeit ein echtes, wiederverwendbares Projekt-Learning entsteht, soll Codex vorschlagen, es in dieser `AGENTS.md` zu ergaenzen.
 - Die Ergaenzung erfolgt erst nach ausdruecklicher Freigabe.
 - App-spezifische Learnings werden in diesem App-Repo gespeichert.
