@@ -12,6 +12,9 @@ Nextcloud-App-ID:
 
     brtop
 
+Zukünftige Ziele und noch ungeklärte Produktentscheidungen stehen
+ausschließlich in `ROADMAP.md`.
+
 ## Zielsetzung
 
 BRTop soll den wiederkehrenden Sitzungs- und Dokumentprozess des Betriebsrats abbilden, nicht nur einzelne Dateien erzeugen.
@@ -20,16 +23,14 @@ Kernprozess:
 
 - Es gibt einen Betriebsrat mit `n` Mitgliedern; die Mitgliederzahl ist eine Setup- bzw. Konfigurationsvariable.
 - Ein BR-Mitglied ist ein Nextcloud-User in der Gruppe `Betriebsrat`.
-- Listen, Ersatzmitglieder und Nachladungen bleiben zu Beginn bewusst aussen vor, muessen aber spaeter wieder aufgegriffen werden.
+- Listen, Ersatzmitglieder und Nachladungen sind nicht Bestandteil des
+  geltenden Fachvertrags; ihre spätere Ausgestaltung steht in `ROADMAP.md`.
 - Die regulaere BR-Sitzung findet in einem konfigurierbaren Rhythmus statt, zunaechst typischerweise woechentlich am Dienstag zu einer konfigurierbaren Uhrzeit.
 - Die Einladung erfolgt an einem konfigurierbaren Wochentag vor der Sitzung, zunaechst typischerweise am Freitag vorher.
 - Sitzungen werden nicht automatisch vorerzeugt, sondern ueber "naechste Sitzung planen" angelegt.
 - Beim Erzeugen einer Einladung wird die Ladungsliste als rechtssicherer Snapshot gespeichert; spaetere Gruppenaenderungen duerfen alte Einladungen nicht veraendern.
-- Standard-TOPs, Sitzungstypen und Ausschuesse sollen konfigurierbar werden.
 - TOPs und Sub-TOPs werden bis Ebene 3 mit Ueberschrift, Reihenfolge, fachlicher TOP-Art und spaeterem Protokollinhalt in der Datenbank gespeichert.
 - Aus denselben gespeicherten Sitzungs- und TOP-Daten werden TOP-Liste fuer Einladung, Mailtext, Protokollvorlage und Dokumente erzeugt.
-- Alte Einladungen, Protokolle und Beschlussdokumente sollen ueber eine eigene Dokumentuebersicht mit DB-Metadaten auffindbar sein, nicht nur ueber Dateipfade.
-- E-Mail-Versand soll mittelfristig direkt aus der App moeglich sein; die Absenderadresse muss konfigurierbar sein.
 
 Start-Sitzungstypen:
 
@@ -89,9 +90,10 @@ Beschluesse:
 
 ## DDEV
 
-Die gemeinsame lokale Nextcloud-DDEV-Umgebung liegt ausserhalb dieses Repos:
-
-    ~/projects/br-nextcloud-apps/nextcloud-dev
+Die gemeinsame Nextcloud-DDEV-Umgebung wird aus dem dokumentierten
+Parent-Unterverzeichnis `nextcloud-dev` gesteuert. Bei einem eigenständigen
+Checkout ist der lokale DDEV-Pfad zuerst anhand der realen Umgebung zu
+ermitteln.
 
 BRTop nutzt gemeinsame Basisbausteine aus der Hilfsapp `localbase`. In der lokalen Nextcloud muss `localbase` aktiviert sein, bevor BRTop vollstaendig lauffaehig ist.
 
@@ -104,34 +106,23 @@ Wichtige Pruefungen:
 
 ## Architekturregeln
 
-- Controller bleiben duenn.
-- Fachlogik, Datenzugriff, Darstellung, Dokumenterzeugung und Dateiablage werden getrennt.
-- Wiederkehrende Logik wird nicht mehrfach in Controllern oder `main.js` dupliziert.
-- Persistente Kernobjekte bekommen Modelle/DTOs oder Value Objects.
-- Modelle/DTOs werden bei Neu- und Weiterentwicklungen in PHP und JavaScript einheitlich angefasst: `get(...)` fuer ein einzelnes Payload/Row/Objekt, `get_all([...])` fuer Listen, `toArray()` fuer Serialisierung und `save()` nur fuer wirklich persistierbare, store-gebundene Modelle. Nicht persistierbare DTOs duerfen `save()` bewusst mit klarer Fehlermeldung blockieren.
-- Modell-Hydration wird von aussen ueber `get(...)` und `get_all([...])` aufgerufen. Hilfsmethoden wie `fromArray` oder `fromRow` bleiben, falls noetig, interne/protected Implementierungsdetails und sind keine oeffentliche Modell-API.
-- Neue Modellarbeit fuehrt keine neuen `fromApi`-/`toApi`-Kompatibilitaetsaliase ein. Bestehende PHP-`toApiArray()`-Call-sites duerfen schrittweise auf `toArray()` migriert werden, wenn die betroffene Schicht ohnehin angefasst wird.
-- Datenzugriffe laufen ueber Repository-, Store- oder Service-Klassen.
-- Services arbeiten bevorzugt mit Modellen/DTOs statt rohen Arrays.
-- Groessere HTML-Bloecke werden aus `templates/index.php` in Partials ausgelagert.
-- Wiederkehrende Frontend-Logik wird in `js/components/`, `js/modules/` oder `js/repositories/` ausgelagert.
-- JavaScript wird gut gekapselt, wiederverwendbar und weitgehend objektorientiert strukturiert. API-Zugriffe gehoeren in Repositories/API-Adapter, Daten in Modelle/ViewModels, Workflows in kleine Services/Controller und Rendering/Eventbindung in Komponenten.
-- DRY und KISS gelten gemeinsam: echte Duplizierung wird entfernt, aber einfache Lesbarkeit und klare BRTop-Fachgrenzen bleiben wichtiger als fruehe generische Abstraktionen.
-- Gemeinsame UI-Helfer oder Komponenten werden erst nach `localbase` verschoben, wenn sie in mindestens zwei Apps dieselbe Semantik, dieselben Zustaende, Events und Accessibility-Regeln haben.
-- Fehler werden zentral protokolliert; Nutzer*innen erhalten sichere, knappe Meldungen ohne interne Details.
-- Keine Architekturabstraktion wird vorsorglich gebaut. Auslagerung erfolgt, wenn sie konkrete Duplizierung, Testbarkeit oder Wartbarkeit verbessert.
+- Der lokale Skill `work-in-nextcloud-app` ist die kanonische Quelle für
+  gemeinsame Schichtungs-, Modell-, Sicherheits-, UI- und Testregeln.
+- Sitzungsprozess, Agenda, Ladungssnapshot, Protokollinhalt,
+  Beschlussdokumente, Dokumentmetadaten und Dateiablage bleiben getrennte
+  fachliche Verantwortungen.
+- Refactorings berücksichtigen zuerst Prozessmodell, Sitzungstypen,
+  Konfiguration, Agenda-Templates, Ladungssnapshots und Dokumentmetadaten.
+- App-spezifische Dokument- und BR-Fachlogik bleibt in BRTop; gemeinsame
+  Bausteine wandern erst bei mindestens zwei semantisch gleichen, testbaren
+  Nutzungen nach LocalBase.
 
-Diese Regeln gelten sinngemaess auch fuer andere eigene Nextcloud-Apps; die fachlichen Anwendungsfaelle bleiben aber getrennt.
-
-## Learnings pflegen
-
-### Gemeinsame Suite-Navigation
+## Verbindliche Suite-Navigation
 
 - BRTop besitzt keinen eigenen Nextcloud-Hauptnavigationseintrag. `orgsuite` stellt den gemeinsamen Einstieg `BR` bereit.
 - Das Template bindet das zentrale OrgSuite-Menue mit `data-suite="br"` und `data-current-app="brtop"` ein.
 - BR- und Sitzungsrechte bleiben ausschliesslich serverseitig im BRTop; Menuesichtbarkeit ist keine Berechtigung.
 
-- App-spezifische Kandidaten zielen auf diese Datei; app-uebergreifende Kandidaten werden dem Parent nur als unverbindlicher Vorschlag berichtet. Bewertung und Freigabe folgen dem lokalen Skill `work-in-nextcloud-app`.
 
 ## Tests
 
