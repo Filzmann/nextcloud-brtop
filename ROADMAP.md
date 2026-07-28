@@ -4,6 +4,55 @@ Diese Datei enthält ausschließlich zukünftige Ziele und offene
 Produktentscheidungen. Geltende Fach-, Rechte-, Sicherheits- und
 Architekturregeln stehen in `AGENTS.md`.
 
+## Freigegebene Umsetzungsaufgaben
+
+### BRT-BR-GROUPS – Gemeinsamen BR-Gruppenvertrag konsumieren
+
+Status: bereit nach `LB-BR-GROUPS` und Klärung der
+Mitgliedschaftsinvariante
+
+- Zugriff, Ladungssnapshot, Administration und Dokumentkontext auf die
+  semantischen Gruppen für Mitglieder, Vorsitz und Stellvertretung umstellen.
+- Die heute teilweise konfigurierbare Mitgliedergruppe charakterisieren und
+  additiv in den gemeinsamen Vertrag übernehmen; keine Gruppe oder
+  Mitgliedschaft automatisch umbenennen, löschen oder verändern.
+- App-spezifische serverseitige Rechteentscheidungen in BRTop behalten und
+  bei fehlendem oder widersprüchlichem Vertrag sicher verweigern.
+- Migration und Fresh Install sowie Mitglieder, Vorsitz, Stellvertretung,
+  Nichtmitglieder, Admins, direkte API-Denies und historische
+  Einladungssnapshots testen.
+
+### BRT-DOCUMENT-CONFIG – Stammdaten und Dokumentvorlagen versionieren
+
+Status: bereit nach fachlicher Trennung fester und editierbarer Inhalte
+
+- Gremienname, Anschrift, Ausstellungsort, Ausschusskataloge und
+  organisationsspezifische Texte in validierte App-Administration überführen.
+- Rechtlich beziehungsweise fachlich unveränderbare Semantik getrennt halten
+  und vor unbeabsichtigter Entfernung durch Vorlagen schützen.
+- ODT-, Markdown-, Einladungs-, Protokoll- und Beschlussvorlagen versionieren;
+  nur validierte, nicht ausführbare Platzhalter zulassen.
+- Vorschau, Freigabestatus und Rückfall auf die letzte freigegebene Version
+  anbieten. Erzeugte Dokumente speichern die verwendete Vorlagenversion und
+  werden später nicht umgedeutet.
+- Bestehende Werte als kompatible Defaults sowie Validierung,
+  Platzhalterescaping, historische Reproduktion, ungültige Vorlage und
+  Rückfall testen.
+
+### BRT-L10N – BRTop-Oberfläche und Dokumentausgabe lokalisieren
+
+Status: bereit nach Entscheidung über die organisationsweite Dokumentsprache
+
+- Oberfläche und nutzerbezogene Meldungen nach persönlicher
+  Nextcloud-Locale lokalisieren.
+- Für Einladungen, E-Mails und Dokumente vorab festlegen, ob persönliche oder
+  organisationsweit konfigurierte Dokumentsprache gilt; die verwendete
+  Locale mit der Vorlagenversion reproduzierbar halten.
+- Technische TOP-Arten, Status, Rechtsgrundlagen, IDs und gespeicherte
+  Freitexte unverändert lassen.
+- Deutsche Ausgabe, eine weitere Locale, Fallback, Pluralformen,
+  Platzhalter, Escaping und Dokumentreproduktion testen.
+
 ## Aktueller Fokus
 
 - Den bestehenden Sitzungs-, Agenda- und Dokumentprozess fachlich
