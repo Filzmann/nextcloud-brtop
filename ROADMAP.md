@@ -39,9 +39,12 @@ Status: bereit nach fachlicher Trennung fester und editierbarer Inhalte
   Platzhalterescaping, historische Reproduktion, ungültige Vorlage und
   Rückfall testen.
 
+## Zukunftsplanung – nicht freigegeben
+
 ### BRT-L10N – BRTop-Oberfläche und Dokumentausgabe lokalisieren
 
-Status: bereit nach Entscheidung über die organisationsweite Dokumentsprache
+Status: später, nicht freigegeben; Dokumentsprache, Pilot-App, Reihenfolge und
+Rohtext-Gate werden vor jeder Umsetzung appübergreifend separat freigegeben
 
 - Oberfläche und nutzerbezogene Meldungen nach persönlicher
   Nextcloud-Locale lokalisieren.
