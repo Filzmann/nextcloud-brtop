@@ -2,16 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
-require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
-require __DIR__ . '/../../lib/Model/AgendaItem.php';
-require __DIR__ . '/../../lib/Repository/AgendaItemRepository.php';
-require __DIR__ . '/../../lib/Store/AgendaItemStore.php';
-require __DIR__ . '/../../lib/Service/AgendaTreeService.php';
-require __DIR__ . '/../../lib/Service/AgendaAttachmentService.php';
-require __DIR__ . '/../../lib/Service/AgendaTemplateService.php';
-require __DIR__ . '/../../lib/Service/AgendaService.php';
 
 use OCA\BrTop\Model\AgendaItem;
 use OCA\BrTop\Repository\AgendaItemRepository;

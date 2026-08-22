@@ -2,12 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require __DIR__ . '/../../lib/Service/MeetingService.php';
-require __DIR__ . '/../../lib/Service/AgendaMutationService.php';
-require __DIR__ . '/../../lib/Service/BrRosterService.php';
-require __DIR__ . '/../../lib/Service/BrDemoUserProvisioningService.php';
-require __DIR__ . '/../../lib/Service/DemoDataService.php';
 
 use OCA\BrTop\Service\AgendaMutationService;
 use OCA\BrTop\Service\BrDemoUserProvisioningService;

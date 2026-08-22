@@ -37,6 +37,8 @@ Begründung verpflichtend.
 | A3 | Adminabgrenzung | Eine als admin-only ausgewiesene Funktion nacheinander mit BR-Mitglied und Nextcloud-Admin versuchen. | Nur der Admin kann die Funktion ausführen; ein abgewiesener Versuch verändert nichts. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A4 | BR-Suite-Navigation | Zwischen BRTop und den weiteren aktivierten BR-Apps wechseln. | Der gemeinsame BR-Einstieg markiert BRTop korrekt; die Fachansicht bleibt erreichbar und bedienbar. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A5 | Tastatur, Fokus und Scrollen | Sitzungsübersicht, Detailansicht, Formulare und Dokumentdialog nur mit Tastatur bedienen; kleines Browserfenster verwenden. | Alle Aktionen sind erreichbar, Fokus ist sichtbar, Dialoge erzeugen keine Tastaturfalle und Inhalte bleiben scrollbar. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A6 | BR-Rollenhierarchie | Je ein synthetisches Konto ausschließlich der Vorsitz- beziehungsweise Stellvertretungsgruppe zuordnen und danach zusätzlich in die konfigurierte BR-Mitgliedergruppe aufnehmen. | Der widersprüchliche Stand wird serverseitig abgewiesen; erst mit zusätzlicher BR-Mitgliedschaft ist der gemeinsame Gruppenvertrag gültig. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A7 | Konfigurierter Gruppenvertrag | Einen gültigen, vom Default abweichenden LocalBase-BR-Gruppenvertrag verwenden und BRTop mit Mitglied und Nichtmitglied öffnen. | BRTop nutzt die konfigurierte Mitgliedergruppe für Zugriff und neue Ladungssnapshots; der frühere BRTop-Gruppenwert ist nicht mehr editierbar. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
 ## B. Sitzung und Tagesordnung
 

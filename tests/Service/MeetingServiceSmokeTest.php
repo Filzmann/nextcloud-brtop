@@ -2,24 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
-require __DIR__ . '/../../lib/Model/GeneratedDocument.php';
-require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
-require __DIR__ . '/../../lib/Model/AgendaItem.php';
-require __DIR__ . '/../../lib/Model/Meeting.php';
-require __DIR__ . '/../../lib/Repository/DocumentRepository.php';
-require __DIR__ . '/../../lib/Repository/MeetingRepository.php';
-require __DIR__ . '/../../lib/Store/AgendaItemStore.php';
-require __DIR__ . '/../../lib/Store/MeetingStore.php';
-require __DIR__ . '/../../lib/Store/ProtocolBlockStore.php';
-require __DIR__ . '/../../lib/Service/BrtopSettingsService.php';
-require __DIR__ . '/../../lib/Service/MeetingScheduleService.php';
-require __DIR__ . '/../../lib/Service/AgendaAttachmentService.php';
-require __DIR__ . '/../../lib/Service/AgendaTreeService.php';
-require __DIR__ . '/../../lib/Service/AgendaTemplateService.php';
-require __DIR__ . '/../../lib/Service/AgendaService.php';
-require __DIR__ . '/../../lib/Service/MeetingService.php';
 
 use OCA\BrTop\Model\Meeting;
 use OCA\BrTop\Repository\DocumentRepository;

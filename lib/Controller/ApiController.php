@@ -147,7 +147,6 @@ class ApiController extends Controller {
         int $invitationWeekday,
         string $defaultMeetingTime,
         string $defaultLocation,
-        string $memberGroupName,
         string $regularAgendaTemplateJson = ''
     ): DataResponse {
         return $this->responder->respond(
@@ -157,7 +156,6 @@ class ApiController extends Controller {
                 $invitationWeekday,
                 $defaultMeetingTime,
                 $defaultLocation,
-                $memberGroupName,
                 $regularAgendaTemplateJson
             ): array {
                 $regularAgendaTemplateJson = $this->agendaTemplateService->normalizeJsonForStorage($regularAgendaTemplateJson);
@@ -168,7 +166,6 @@ class ApiController extends Controller {
                     $invitationWeekday,
                     $defaultMeetingTime,
                     $defaultLocation,
-                    $memberGroupName,
                     $regularAgendaTemplateJson
                 );
 

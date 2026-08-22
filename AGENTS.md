@@ -97,6 +97,14 @@ ermitteln.
 
 BRTop nutzt gemeinsame Basisbausteine aus der Hilfsapp `localbase`. In der lokalen Nextcloud muss `localbase` aktiviert sein, bevor BRTop vollstaendig lauffaehig ist.
 
+Der versionierte BR-Gruppenvertrag in LocalBase ist die einzige Laufzeitquelle
+für Mitglieder-, Vorsitz- und Stellvertretungsgruppe. Vorsitzende und
+Stellvertretungen müssen zugleich Mitglieder der konfigurierten
+Mitgliedergruppe sein; fehlende, beschädigte oder widersprüchliche Verträge
+werden serverseitig abgewiesen. Der frühere BRTop-Wert `member_group_name`
+wird nur einmalig migriert und danach nicht mehr als Einstellung angeboten.
+Neue lokale BRTop-Demokonten verwenden `Benutzername = Passwort`.
+
 Wichtige Pruefungen:
 
     ddev exec -d /var/www/html/html php occ app:list | grep -i localbase

@@ -2,11 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require_once __DIR__ . '/../../lib/Model/LegislatureConfiguration.php';
-require_once __DIR__ . '/../../lib/Repository/LegislatureRepository.php';
-require_once __DIR__ . '/../../lib/Service/LegislatureValidationService.php';
-require_once __DIR__ . '/../../lib/Service/LegislatureService.php';
 
 use OCA\BrTop\Repository\LegislatureRepository;
 use OCA\BrTop\Service\LegislatureService;

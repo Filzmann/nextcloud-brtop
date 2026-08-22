@@ -8,7 +8,10 @@ use OCA\BrTop\Exception\AccessDeniedException;
 use OCP\IGroupManager;
 
 class BrAccessService {
-    public function __construct(private IGroupManager $groupManager) {
+    public function __construct(
+        private IGroupManager $groupManager,
+        private BrGroupsService $groups,
+    ) {
     }
 
     public function isAdmin(string $uid): bool {
@@ -17,7 +20,7 @@ class BrAccessService {
 
     public function canUse(string $uid): bool {
         return $this->isAdmin($uid)
-            || ($uid !== '' && $this->groupManager->isInGroup($uid, BrGroupsService::MEMBER_GROUP));
+            || ($uid !== '' && $this->groupManager->isInGroup($uid, $this->groups->memberGroupName()));
     }
 
     public function assertCanUse(string $uid): void {

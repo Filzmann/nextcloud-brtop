@@ -9,23 +9,24 @@ namespace {
 }
 
 namespace OCA\BrTop\Tests {
-    require __DIR__ . '/../helpers.php';
-    require_once __DIR__ . '/../../lib/Exception/AccessDeniedException.php';
-    require_once __DIR__ . '/../../lib/Service/BrGroupsService.php';
-    require_once __DIR__ . '/../../lib/Service/BrAccessService.php';
 
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Service\BrAccessService;
+    use OCA\BrTop\Service\BrGroupsService;
     use OCP\IGroupManager;
 
     $groups = new class implements IGroupManager {
         public function isAdmin($userId): bool { return $userId === 'admin'; }
-        public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'Betriebsrat'; }
+        public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'BR Custom'; }
     };
-    $service = new BrAccessService($groups);
+    $groupNames = new class extends BrGroupsService {
+        public function __construct() {}
+        public function memberGroupName(): string { return 'BR Custom'; }
+    };
+    $service = new BrAccessService($groups, $groupNames);
 
     assertSameValue(true, $service->canUse('admin'), 'Nextcloud admins should be allowed to use BRTop.');
-    assertSameValue(true, $service->canUse('br-member'), 'Members of the Betriebsrat group should be allowed to use BRTop.');
+    assertSameValue(true, $service->canUse('br-member'), 'Members of the configured BR group should be allowed to use BRTop.');
     assertSameValue(false, $service->canUse('other-user'), 'Unrelated authenticated users must be denied.');
     assertThrows(
         static fn() => $service->assertCanUse('other-user'),
