@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require __DIR__ . '/../../lib/Service/ReplacementSelectionService.php';
 
 use OCA\BrTop\Service\ReplacementSelectionService;
 use function OCA\BrTop\Tests\assertSameValue;

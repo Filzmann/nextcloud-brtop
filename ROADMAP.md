@@ -6,22 +6,6 @@ Architekturregeln stehen in `AGENTS.md`.
 
 ## Freigegebene Umsetzungsaufgaben
 
-### BRT-BR-GROUPS – Gemeinsamen BR-Gruppenvertrag konsumieren
-
-Status: bereit nach `LB-BR-GROUPS` und Klärung der
-Mitgliedschaftsinvariante
-
-- Zugriff, Ladungssnapshot, Administration und Dokumentkontext auf die
-  semantischen Gruppen für Mitglieder, Vorsitz und Stellvertretung umstellen.
-- Die heute teilweise konfigurierbare Mitgliedergruppe charakterisieren und
-  additiv in den gemeinsamen Vertrag übernehmen; keine Gruppe oder
-  Mitgliedschaft automatisch umbenennen, löschen oder verändern.
-- App-spezifische serverseitige Rechteentscheidungen in BRTop behalten und
-  bei fehlendem oder widersprüchlichem Vertrag sicher verweigern.
-- Migration und Fresh Install sowie Mitglieder, Vorsitz, Stellvertretung,
-  Nichtmitglieder, Admins, direkte API-Denies und historische
-  Einladungssnapshots testen.
-
 ### BRT-DOCUMENT-CONFIG – Stammdaten und Dokumentvorlagen versionieren
 
 Status: bereit nach fachlicher Trennung fester und editierbarer Inhalte
@@ -39,9 +23,12 @@ Status: bereit nach fachlicher Trennung fester und editierbarer Inhalte
   Platzhalterescaping, historische Reproduktion, ungültige Vorlage und
   Rückfall testen.
 
+## Zukunftsplanung – nicht freigegeben
+
 ### BRT-L10N – BRTop-Oberfläche und Dokumentausgabe lokalisieren
 
-Status: bereit nach Entscheidung über die organisationsweite Dokumentsprache
+Status: später, nicht freigegeben; Dokumentsprache, Pilot-App, Reihenfolge und
+Rohtext-Gate werden vor jeder Umsetzung appübergreifend separat freigegeben
 
 - Oberfläche und nutzerbezogene Meldungen nach persönlicher
   Nextcloud-Locale lokalisieren.
@@ -55,6 +42,8 @@ Status: bereit nach Entscheidung über die organisationsweite Dokumentsprache
 
 ## Aktueller Fokus
 
+- Die manuellen Prüfungen werden im ausfüllbaren
+  [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
 - Den bestehenden Sitzungs-, Agenda- und Dokumentprozess fachlich
   charakterisieren und auf einem realitätsnahen Staging abnehmen.
 - Vor produktiver Nutzung ein vollständiges Rollen-, Rechte-, Datenschutz-

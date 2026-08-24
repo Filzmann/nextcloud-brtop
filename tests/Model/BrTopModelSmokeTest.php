@@ -2,12 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
-require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
-require __DIR__ . '/../../lib/Model/AgendaItem.php';
-require __DIR__ . '/../../lib/Model/GeneratedDocument.php';
-require __DIR__ . '/../../lib/Model/Meeting.php';
 
 use OCA\BrTop\Model\AgendaItem;
 use OCA\BrTop\Model\GeneratedDocument;

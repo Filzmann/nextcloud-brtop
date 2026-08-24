@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../localbase/tests/Support/PhpTestRunner.php';
+require_once __DIR__ . '/bootstrap.php';
 
 use OCA\LocalBase\Tests\Support\PhpTestRunner;
 
@@ -12,4 +12,5 @@ PhpTestRunner::run(
     testDirectories: ['tests/Controller', 'tests/Model', 'tests/Service', 'tests/Ui'],
     testSuffixes: ['Test.php'],
     successMessage: 'BRTop PHP tests passed',
+    prependBootstrap: true,
 );

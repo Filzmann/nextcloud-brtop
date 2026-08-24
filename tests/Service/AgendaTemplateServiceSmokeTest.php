@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require __DIR__ . '/../../lib/Service/BrtopSettingsService.php';
-require __DIR__ . '/../../lib/Service/AgendaAttachmentService.php';
-require __DIR__ . '/../../lib/Service/AgendaTemplateService.php';
 
 use OCA\BrTop\Service\AgendaTemplateService;
 use OCA\BrTop\Service\BrtopSettingsService;

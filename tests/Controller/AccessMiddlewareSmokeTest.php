@@ -21,24 +21,18 @@ namespace {
 }
 
 namespace OCA\BrTop\AppInfo {
-    if (!class_exists(Application::class)) {
+    if (!class_exists(Application::class, false)) {
         final class Application { public const APP_ID = 'brtop'; }
     }
 }
 
 namespace OCA\BrTop\Tests {
-    require __DIR__ . '/../helpers.php';
-    require_once __DIR__ . '/../../lib/Exception/AccessDeniedException.php';
-    require_once __DIR__ . '/../../lib/Service/BrGroupsService.php';
-    require_once __DIR__ . '/../../lib/Service/BrAccessService.php';
-    require_once __DIR__ . '/../../lib/Controller/PageController.php';
-    require_once __DIR__ . '/../../lib/Controller/ApiController.php';
-    require_once __DIR__ . '/../../lib/Middleware/BrAccessMiddleware.php';
 
     use OCA\BrTop\Controller\ApiController;
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Middleware\BrAccessMiddleware;
     use OCA\BrTop\Service\BrAccessService;
+    use OCA\BrTop\Service\BrGroupsService;
     use OCP\IGroupManager;
     use OCP\IUserSession;
 
@@ -52,7 +46,11 @@ namespace OCA\BrTop\Tests {
         public function isAdmin($userId): bool { return $userId === 'admin'; }
         public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'Betriebsrat'; }
     };
-    $middleware = new BrAccessMiddleware($session, new BrAccessService($groups));
+    $groupNames = new class extends BrGroupsService {
+        public function __construct() {}
+        public function memberGroupName(): string { return 'Betriebsrat'; }
+    };
+    $middleware = new BrAccessMiddleware($session, new BrAccessService($groups, $groupNames));
     $controller = (new \ReflectionClass(ApiController::class))->newInstanceWithoutConstructor();
 
     $denied = assertThrows(

@@ -7,9 +7,6 @@ namespace {
         eval('namespace OCP; interface IConfig {}');
     }
 
-    require __DIR__ . '/../helpers.php';
-    require __DIR__ . '/../../lib/Service/BrtopSettingsService.php';
-    require __DIR__ . '/../../lib/Service/MeetingScheduleService.php';
 
     use OCA\BrTop\Service\BrtopSettingsService;
     use OCA\BrTop\Service\MeetingScheduleService;

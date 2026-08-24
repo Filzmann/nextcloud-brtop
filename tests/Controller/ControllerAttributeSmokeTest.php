@@ -33,7 +33,7 @@ namespace {
 }
 
 namespace OCA\BrTop\AppInfo {
-    if (!class_exists(Application::class)) {
+    if (!class_exists(Application::class, false)) {
         final class Application {
             public const APP_ID = 'brtop';
         }
@@ -41,8 +41,6 @@ namespace OCA\BrTop\AppInfo {
 }
 
 namespace {
-    require __DIR__ . '/../../lib/Controller/PageController.php';
-    require __DIR__ . '/../../lib/Controller/ApiController.php';
 
     use OCA\BrTop\Controller\ApiController;
     use OCA\BrTop\Controller\PageController;

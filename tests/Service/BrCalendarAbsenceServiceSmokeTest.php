@@ -12,8 +12,6 @@ namespace {
 }
 
 namespace OCA\BrTop\Tests {
-    require __DIR__ . '/../helpers.php';
-    require __DIR__ . '/../../lib/Service/BrCalendarAbsenceService.php';
 
     use OCA\BrTop\Service\BrCalendarAbsenceService;
     use OCP\Calendar\ICalendar;

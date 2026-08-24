@@ -43,5 +43,14 @@ Dann in Nextcloud öffnen:
 2. Dokumente erzeugen.
 3. In den Dateien prüfen, ob unter `BR-Sitzungen/...` Markdown-Dateien erzeugt wurden.
 
+Neu angelegte lokale BRTop-Demokonten verwenden ihren Benutzernamen als
+Passwort. Diese Zugangsdaten sind ausschließlich für lokale Test- und
+Demoumgebungen bestimmt.
+
+Für die fachliche, visuelle und datenschutzbezogene Staging-Prüfung steht ein
+ausfüllbares [manuelles Abnahmeformular](docs/manual-acceptance.md) bereit.
+Es bezieht sich ausdrücklich auf den aktuellen Entwicklungsstand und erteilt
+keine Produktiv- oder Rechtssicherheitsfreigabe.
+
 Geplante Erweiterungen und offene Fachentscheidungen stehen in
 [`ROADMAP.md`](ROADMAP.md).
