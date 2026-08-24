@@ -6,7 +6,11 @@ namespace OCA\BrTop\AppInfo;
 
 use OCA\BrTop\Middleware\BrAccessMiddleware;
 use OCA\BrTop\Privacy\BrTopPrivacyProviderListener;
+use OCA\BrTop\Permission\BrTopPermissionProviderListener;
+use OCA\BrTop\Permission\BrTopPermissionSourceInterface;
+use OCA\BrTop\Permission\NextcloudBrTopPermissionSource;
 use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+use OCA\FilzmannPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
@@ -22,6 +26,8 @@ class Application extends App implements IBootstrap {
     public function register(IRegistrationContext $context): void {
         $context->registerMiddleware(BrAccessMiddleware::class);
         $context->registerEventListener(RegisterPersonalDataProvidersEvent::class, BrTopPrivacyProviderListener::class);
+        $context->registerEventListener(RegisterPermissionProvidersEvent::class, BrTopPermissionProviderListener::class);
+        $context->registerServiceAlias(BrTopPermissionSourceInterface::class, NextcloudBrTopPermissionSource::class);
     }
 
     public function boot(IBootContext $context): void {

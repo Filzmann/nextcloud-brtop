@@ -1,0 +1,13 @@
+<?php
+declare(strict_types=1);
+namespace OCA\FilzmannPermissionMatrix\PublicApi\V1 {
+ interface PermissionProvider{public function descriptor():PermissionProviderDescriptor;public function collect():PermissionProviderResult;} final class PermissionProviderDescriptor{public function __construct(...$a){}} final class PermissionCondition{private function __construct(public string $operator,public ?string $groupId=null){}public static function group(string $id):self{return new self('group',$id);}public static function nextcloudAdmin():self{return new self('nextcloud-admin');}} final class PermissionRule{public function __construct(public string $type,public string $name,public string $detail,public string $permission,public string $label,public string $effect,public string $scope,public PermissionCondition $condition,public string $source,public string $confidence){}} final class PermissionProviderResult{public function __construct(public array $rules,public bool $complete=true,public array $warnings=[]){}} final class RegisterPermissionProvidersEvent{public array $providers=[];public function register(PermissionProvider $p):void{$this->providers[]=$p;}}
+}
+namespace {
+ use OCA\BrTop\Permission\BrTopPermissionProvider;use OCA\BrTop\Permission\BrTopPermissionProviderListener;use OCA\BrTop\Permission\BrTopPermissionSourceInterface;use OCA\FilzmannPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
+ $source=new class implements BrTopPermissionSourceInterface{public function memberGroupId():string{return 'br-members';}};$provider=new BrTopPermissionProvider($source);$rules=$provider->collect()->rules;$member=[];$admin=[];foreach($rules as $rule){if($rule->condition->operator==='group')$member[$rule->permission]=$rule;if($rule->condition->operator==='nextcloud-admin')$admin[$rule->permission]=$rule;}
+ foreach(['brtop.session.manage','brtop.document.generate'] as $key)if(($member[$key]->condition->groupId??null)!=='br-members')throw new RuntimeException('Mitgliederrecht fehlt: '.$key);
+ foreach(['brtop.settings.manage','brtop.legislature.manage','brtop.absence.confirm'] as $key)if(!isset($admin[$key]))throw new RuntimeException('Adminrecht fehlt: '.$key);
+ if(!str_contains($member['brtop.document.generate']->detail,'nicht untersucht'))throw new RuntimeException('Der Ausschluss von Dateiinhalten muss sichtbar bleiben.');
+ $event=new RegisterPermissionProvidersEvent();(new BrTopPermissionProviderListener($provider))->handle($event);if(($event->providers[0]??null)!==$provider)throw new RuntimeException('Lazy-Registrierung fehlt.');echo "BRTop permission provider tests passed\n";
+}
