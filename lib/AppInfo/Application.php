@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace OCA\BrTop\AppInfo;
 
 use OCA\BrTop\Middleware\BrAccessMiddleware;
+use OCA\BrTop\Privacy\BrTopPrivacyProviderListener;
+use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
@@ -19,6 +21,7 @@ class Application extends App implements IBootstrap {
 
     public function register(IRegistrationContext $context): void {
         $context->registerMiddleware(BrAccessMiddleware::class);
+        $context->registerEventListener(RegisterPersonalDataProvidersEvent::class, BrTopPrivacyProviderListener::class);
     }
 
     public function boot(IBootContext $context): void {

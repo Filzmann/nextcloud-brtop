@@ -124,6 +124,11 @@ Wichtige Pruefungen:
 - App-spezifische Dokument- und BR-Fachlogik bleibt in BRTop; gemeinsame
   Bausteine wandern erst bei mindestens zwei semantisch gleichen, testbaren
   Nutzungen nach LocalBase.
+- Der öffentliche Privacy-V1-Provider projiziert nur explizit per
+  Nextcloud-UID zuordenbare Metadaten. Datei- und Anhangpfade, Dateiinhalte,
+  TOP-, Protokoll- und Beschlussinhalte sowie unsichere Freitexttreffer sind
+  vorerst ausgeschlossen und werden als Vollständigkeitseinschränkung
+  ausgewiesen. Eine spätere sichere Inhaltslösung bleibt möglich.
 
 ## Verbindliche Suite-Navigation
 
