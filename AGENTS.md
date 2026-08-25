@@ -135,6 +135,8 @@ Wichtige Pruefungen:
 - BRTop besitzt keinen eigenen Nextcloud-Hauptnavigationseintrag. `orgsuite` stellt den gemeinsamen Einstieg `BR` bereit.
 - Das Template bindet das zentrale OrgSuite-Menue mit `data-suite="br"` und `data-current-app="brtop"` ein.
 - BR- und Sitzungsrechte bleiben ausschliesslich serverseitig im BRTop; Menuesichtbarkeit ist keine Berechtigung.
+- Native Nextcloud-Administration erteilt keinen fachlichen BRTop-Vollzugriff. Er setzt pro Administrationskonto eine aktive, app-lokale Freigabe von höchstens 24 Stunden voraus; Beginn, geplantes Ende und Widerruf bleiben historisch protokolliert.
+- Änderungen an Freigabehistorie oder BRTop-Rechten werden gleichzeitig im PersonalDataProvider und PermissionProvider nachgeführt.
 
 
 ## Tests

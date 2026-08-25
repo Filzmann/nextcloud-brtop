@@ -27,5 +27,8 @@ return [
         ['name' => 'api#generateResolutions', 'url' => '/api/meetings/{meetingId}/resolutions', 'verb' => 'POST'],
 
         ['name' => 'api#seedDemo', 'url' => '/api/demo', 'verb' => 'POST'],
+        ['name' => 'temporary_admin_access#status', 'url' => '/api/admin/full-access', 'verb' => 'GET'],
+        ['name' => 'temporary_admin_access#activate', 'url' => '/api/admin/full-access', 'verb' => 'POST'],
+        ['name' => 'temporary_admin_access#revoke', 'url' => '/api/admin/full-access/{targetUid}', 'verb' => 'DELETE'],
     ],
 ];

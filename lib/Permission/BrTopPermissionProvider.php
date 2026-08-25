@@ -5,7 +5,7 @@ use OCA\FilzmannPermissionMatrix\PublicApi\V1\{PermissionCondition,PermissionPro
 final class BrTopPermissionProvider implements PermissionProvider{
  public function __construct(private BrTopPermissionSourceInterface $source){}
  public function descriptor():PermissionProviderDescriptor{return new PermissionProviderDescriptor('brtop','BRTop','1.0',['permissions']);}
- public function collect():PermissionProviderResult{$member=PermissionCondition::group($this->source->memberGroupId());$admin=PermissionCondition::nextcloudAdmin();return new PermissionProviderResult([
+ public function collect():PermissionProviderResult{$member=PermissionCondition::group($this->source->memberGroupId());$admin=PermissionCondition::all([PermissionCondition::nextcloudAdmin(),PermissionCondition::temporaryAppAdminGrant()]);return new PermissionProviderResult([
   $this->rule('Sitzungsprozess','Sitzungen, TOPs und Protokollmetadaten','Lesen und bearbeiten','brtop.session.manage','Sitzungsprozess verwalten','all-sessions',$member),
   $this->rule('Dokument','Ladungen, Protokolle und Beschlüsse','Dokumente aus freigegebenen Fachdaten erzeugen und abrufen; Dateiinhalte werden vom Provider nicht untersucht','brtop.document.generate','Dokumente erzeugen','generated-documents',$member),
   $this->rule('Sitzungsprozess','Alle Sitzungen','Adminzugriff entspricht zusätzlich dem allgemeinen Appzugriff','brtop.session.manage','Sitzungsprozess verwalten','all-sessions',$admin),

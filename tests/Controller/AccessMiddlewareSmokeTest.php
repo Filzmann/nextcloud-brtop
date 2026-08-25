@@ -33,6 +33,7 @@ namespace OCA\BrTop\Tests {
     use OCA\BrTop\Middleware\BrAccessMiddleware;
     use OCA\BrTop\Service\BrAccessService;
     use OCA\BrTop\Service\BrGroupsService;
+    use OCA\BrTop\Service\TemporaryAdminAccessChecker;
     use OCP\IGroupManager;
     use OCP\IUserSession;
 
@@ -50,7 +51,8 @@ namespace OCA\BrTop\Tests {
         public function __construct() {}
         public function memberGroupName(): string { return 'Betriebsrat'; }
     };
-    $middleware = new BrAccessMiddleware($session, new BrAccessService($groups, $groupNames));
+    $adminAccess = new class implements TemporaryAdminAccessChecker { public function hasActiveGrant(string $uid): bool { return $uid === 'admin'; } };
+    $middleware = new BrAccessMiddleware($session, new BrAccessService($groups, $groupNames, $adminAccess));
     $controller = (new \ReflectionClass(ApiController::class))->newInstanceWithoutConstructor();
 
     $denied = assertThrows(

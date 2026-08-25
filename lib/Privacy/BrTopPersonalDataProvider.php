@@ -10,6 +10,7 @@ use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataPage;
 use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataProvider;
 use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
 use OCA\FilzmannDataProtection\PublicApi\V1\ProviderDescriptor;
+use OCA\BrTop\Repository\TemporaryAdminAccessRepository;
 
 final class BrTopPersonalDataProvider implements PersonalDataProvider {
     private const CONTENT_RESTRICTIONS = [
@@ -18,7 +19,7 @@ final class BrTopPersonalDataProvider implements PersonalDataProvider {
         'Nicht strukturiert per Nextcloud-UID zuordenbare Freitexterwähnungen können nicht automatisch ermittelt werden.',
     ];
 
-    public function __construct(private BrTopPrivacyRepository $repository) {
+    public function __construct(private BrTopPrivacyRepository $repository, private TemporaryAdminAccessRepository $adminAccess) {
     }
 
     public function descriptor(): ProviderDescriptor {
@@ -29,11 +30,19 @@ final class BrTopPersonalDataProvider implements PersonalDataProvider {
         if ($request->subject()->subjectType() !== 'nextcloud-user') return new PersonalDataPage('not_applicable');
         if ($request->cursor() !== null) throw new InvalidArgumentException('BRTop does not support cursor paging.');
         $rows = $this->repository->forSubject($request->subject()->subjectId(), $request->pageLimit() + 1);
-        $limited = count($rows) > $request->pageLimit();
-        if ($limited) $rows = array_slice($rows, 0, $request->pageLimit());
+        $adminHistory = $this->adminAccess->historyForUid($request->subject()->subjectId(), $request->pageLimit() + 1);
+        $limited = count($rows) + count($adminHistory) > $request->pageLimit();
         $restrictions = self::CONTENT_RESTRICTIONS;
         if ($limited) $restrictions[] = 'Ausgabelimit erreicht; weitere BRTop-Metadaten können vorhanden sein.';
-        return new PersonalDataPage('partial', array_map(fn(array $row): PersonalDataEntry => $this->item($row), $rows), $restrictions);
+        $items = array_map(fn(array $row): PersonalDataEntry => $this->item($row), $rows);
+        foreach ($adminHistory as $grant) $items[] = $this->adminAccessItem($request->subject()->subjectId(), $grant);
+        if ($limited) $items = array_slice($items, 0, $request->pageLimit());
+        return new PersonalDataPage('partial', $items, $restrictions);
+    }
+
+    private function adminAccessItem(string $uid, array $grant): PersonalDataEntry {
+        $roles=[];if($grant['targetUid']===$uid)$roles[]='Ziel der Vollzugriffsfreigabe';if($grant['grantedBy']===$uid)$roles[]='Freigebende Administration';if($grant['revokedBy']===$uid)$roles[]='Widerrufende Administration';$actualEnd=$grant['revokedAt']??$grant['endsAt'];
+        return new PersonalDataEntry('admin-access','Zeitlich begrenzter Admin-Vollzugriff','admin-access:'.$grant['id'],'Admin-Vollzugriff vom '.self::dateTime($grant['startsAt']),'Nachweis einer zeitlich begrenzten administrativen BRTop-Freigabe','App-lokale Freigabe im Nextcloud-Adminbereich',['Berechtigte Nextcloud-Administrator*innen und prüfberechtigte Stellen'],'Keine feste Löschfrist festgelegt; die sicherheitsrelevante Freigabehistorie bleibt bis zu einer gesonderten Aufbewahrungsentscheidung erhalten.','Durch BRTop sind keine Drittlandübermittlungen vorgesehen.','Der Server beendet den Vollzugriff spätestens nach 24 Stunden automatisch.','Kennungen anderer beteiligter Administrator*innen werden nicht ausgegeben.',['Eigene Rolle im Vorgang'=>implode(', ',$roles),'Beginn'=>self::dateTime($grant['startsAt']),'Geplantes Ende'=>self::dateTime($grant['endsAt']),'Tatsächliches Ende'=>self::dateTime($actualEnd),'Status'=>$grant['revokedAt']===null?'planmäßig beendet oder noch aktiv':'widerrufen']);
     }
 
     /** @param array<string, mixed> $row */
@@ -100,4 +109,5 @@ final class BrTopPersonalDataProvider implements PersonalDataProvider {
         $timestamp = strtotime((string)$value);
         return $timestamp === false ? (string)$value : date('d.m.Y', $timestamp);
     }
+    private static function dateTime(mixed $value): string { if($value instanceof \DateTimeInterface)return $value->format('d.m.Y, H:i').' Uhr';return (new \DateTimeImmutable((string)$value))->format('d.m.Y, H:i').' Uhr'; }
 }
