@@ -4,6 +4,18 @@ Diese Datei enthält ausschließlich zukünftige Ziele und offene
 Produktentscheidungen. Geltende Fach-, Rechte-, Sicherheits- und
 Architekturregeln stehen in `AGENTS.md`.
 
+## Nextcloud-Kompatibilitätsgate
+
+### BRT-NC-COMPAT – deklarierten Bereich 29–35 und künftige Majors belegen
+
+`info.xml` umfasst Nextcloud 33 bereits. Vor dem nächsten Release werden die
+Kernabläufe auf einem gepinnten NC-33-Stand und auf jeder weiteren deklarierten
+Major lückenlos geprüft: Fresh Install/Upgrade, DI, Migrationen, Jobs,
+Sitzungs-/Dokumentpfad, Exportdateien, Assets und sichtbare Oberfläche. Die
+Obergrenze wird nur nach dem app-lokalen
+`verify-nextcloud-future-compatibility`-Nachweis erweitert; ein dynamisches
+„latest“ ersetzt keine einzeln grüne Major.
+
 ## Freigegebene Umsetzungsaufgaben
 
 ### BRT-DOCUMENT-CONFIG – Stammdaten und Dokumentvorlagen versionieren
@@ -23,22 +35,16 @@ Status: bereit nach fachlicher Trennung fester und editierbarer Inhalte
   Platzhalterescaping, historische Reproduktion, ungültige Vorlage und
   Rückfall testen.
 
-## Zukunftsplanung – nicht freigegeben
+## Systemweit gegatete app-lokale Aufgabe
 
-### BRT-L10N – BRTop-Oberfläche und Dokumentausgabe lokalisieren
+### BRT-L10N – Oberfläche und Dokumentausgabe lokalisieren
 
-Status: später, nicht freigegeben; Dokumentsprache, Pilot-App, Reihenfolge und
-Rohtext-Gate werden vor jeder Umsetzung appübergreifend separat freigegeben
-
-- Oberfläche und nutzerbezogene Meldungen nach persönlicher
-  Nextcloud-Locale lokalisieren.
-- Für Einladungen, E-Mails und Dokumente vorab festlegen, ob persönliche oder
-  organisationsweit konfigurierte Dokumentsprache gilt; die verwendete
-  Locale mit der Vorlagenversion reproduzierbar halten.
-- Technische TOP-Arten, Status, Rechtsgrundlagen, IDs und gespeicherte
-  Freitexte unverändert lassen.
-- Deutsche Ausgabe, eine weitere Locale, Fallback, Pluralformen,
-  Platzhalter, Escaping und Dokumentreproduktion testen.
+Aktivierung ausschließlich nach Freigabe des Root-Vorhabens `ZM-06`.
+Oberfläche und Meldungen folgen dann der persönlichen Nextcloud-Locale. Für
+Einladungen, E-Mails und Dokumente wird app-lokal eine reproduzierbare
+persönliche oder organisationsweite Dokumentsprache entschieden und mit der
+Vorlagenversion gespeichert; technische TOP-Arten, Status, Rechtsgrundlagen,
+IDs und Freitexte bleiben unverändert.
 
 ## Aktueller Fokus
 
