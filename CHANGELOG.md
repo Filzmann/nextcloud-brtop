@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- App-eigenen Processing-Metadata-Katalog für fünf BR-TOP-Verarbeitungen über
+  den öffentlichen Datenschutz-V1-Vertrag veröffentlicht.
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
 
 ## 0.1.34

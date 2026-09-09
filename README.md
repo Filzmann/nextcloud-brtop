@@ -41,6 +41,22 @@ Dann in Nextcloud öffnen:
 
 Der separate Adminabschnitt `BR TOP` enthält den Schalter für zeitlich begrenzten fachlichen Vollzugriff. Ein Nextcloud-Administrationskonto erhält nicht automatisch Sitzungs- oder Gremienrechte. Die Freigabe erfolgt pro Administrationskonto für 1, 4, 8 oder höchstens 24 Stunden, kann vorzeitig widerrufen werden und wird app-lokal mit Beginn und Ende protokolliert. Datenschutz- und Berechtigungsprovider weisen diese Freigaben aus.
 
+## Datenschutz
+
+Der app-eigene `PersonalDataProvider` projiziert ausschließlich explizit per
+Nextcloud-UID zuordenbare Mitgliedschafts-, Ladungs-, Sitzungs-, Dokument- und
+Bearbeitungsmetadaten. Datei- und Anhangpfade, Datei-, TOP-, Protokoll- und
+Beschlussinhalte sowie nicht sicher zuordenbare Freitextnennungen bleiben zum
+Schutz von Gremien- und Drittpersonendaten ausgeschlossen; die Ausgabe weist
+diese Grenze als `partial` aus.
+
+Der Processing-Metadata-Provider beschreibt ergänzend die fünf Verarbeitungen
+Legislatur/Besetzung, Sitzung/Agenda/Protokoll, Ladung/Abwesenheit,
+Dokumenterzeugung mit persönlicher Nextcloud-Dateiablage und temporären
+Admin-Vollzugriff aus `resources/privacy-processing.json`. Der Katalog enthält
+keine personenbezogenen Laufzeitdaten; offene fachliche und rechtliche
+Entscheidungen sind als `PRIVACY-DECISION-REQUIRED` sichtbar.
+
 1. Demo-Sitzung anlegen.
 2. Dokumente erzeugen.
 3. In den Dateien prüfen, ob unter `BR-Sitzungen/...` Markdown-Dateien erzeugt wurden.

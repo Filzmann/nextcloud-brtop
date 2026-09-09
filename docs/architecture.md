@@ -29,3 +29,28 @@ fachlichen Vollzugriff eine app-lokale, zeitlich begrenzte Freigabe.
 Datenschutz- und Berechtigungsprovider projizieren nur ausdrücklich
 zuordenbare app-eigene Informationen. Datei- und Dokumentinhalte werden ohne
 gesonderten sicheren Vertrag nicht als Volltext ausgewertet.
+
+## Processing-Metadaten
+
+`resources/privacy-processing.json` ist die einzige app-eigene Policyquelle
+für `council_legislature_and_roster_management`,
+`meeting_agenda_and_protocol_management`,
+`invitation_snapshot_and_absence_management`,
+`document_generation_and_file_storage` und `temporary_admin_full_access`.
+Der öffentliche V1-Provider von `filzmann_data_protection` lädt diesen Katalog
+lazy und veröffentlicht keine personenbezogenen Laufzeitdaten.
+
+Die Trennung folgt den vorhandenen Verantwortungsgrenzen: Legislatur und
+Besetzung liefern die personelle Basis; Sitzungs-, Agenda- und
+Protokolltabellen halten die kanonischen Gremieninhalte; Ladungssnapshots und
+Abwesenheitsprüfung dokumentieren den konkreten Empfängerkreis; abgeleitete
+Dokumente werden im persönlichen Nextcloud-Dateibereich gespeichert und sind
+keine zweite Fachwahrheit. Der bestehende temporäre Admin-Vollzugriff bleibt
+als eigene, höchstens 24 Stunden wirksame Verarbeitung sichtbar.
+
+Die bestehende Art.-15-Projektion bleibt bewusst `partial`: Unsichere
+Freitexttreffer, Datei- und Anhangpfade sowie Gremien- und Dateiinhalte werden
+nicht automatisch ausgegeben. Rechtsgrundlagen, Empfängerscopes, Retention,
+Backup/Restore, Kalenderinfrastruktur, Shares und konsistente Datei-/Metadaten-
+Löschung werden nicht technisch erfunden, sondern im Katalog mit
+`PRIVACY-DECISION-REQUIRED` ausgewiesen.

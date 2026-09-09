@@ -129,6 +129,14 @@ Wichtige Pruefungen:
   TOP-, Protokoll- und Beschlussinhalte sowie unsichere Freitexttreffer sind
   vorerst ausgeschlossen und werden als Vollständigkeitseinschränkung
   ausgewiesen. Eine spätere sichere Inhaltslösung bleibt möglich.
+- Der app-eigene Processing-Katalog unter
+  `resources/privacy-processing.json` ist die kanonische Metadatenquelle für
+  Legislatur/Besetzung, Sitzungen/Agenda/Protokoll, Ladung/Abwesenheit,
+  Dokumenterzeugung/Dateiablage und temporären Admin-Vollzugriff. Er enthält
+  keine personenbezogenen Laufzeitdaten und markiert ungeklärte Rechtsgrundlagen,
+  Empfänger-, Retention-, Backup-, Kalender- und Dateientscheidungen mit
+  `PRIVACY-DECISION-REQUIRED`. Der öffentliche V1-Provider liest ausschließlich
+  diesen Katalog; eine zweite Registry oder kopierte Policyquelle ist verboten.
 
 ## Verbindliche Suite-Navigation
 
