@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IDBConnection::class)) {
-        eval('namespace OCP; interface IDBConnection {}');
+namespace OCP {
+    if (!interface_exists(IDBConnection::class)) {
+        interface IDBConnection {}
     }
 }
 

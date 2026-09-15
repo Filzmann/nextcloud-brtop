@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IUserManager::class)) {
-        eval('namespace OCP; interface IUserManager { public function get($uid); public function createUser($uid, $password); }');
+namespace OCP {
+    if (!interface_exists(IUserManager::class)) {
+        interface IUserManager { public function get($uid); public function createUser($uid, $password); }
     }
-    if (!interface_exists(\OCP\IGroupManager::class)) {
-        eval('namespace OCP; interface IGroupManager { public function get($gid); public function createGroup($gid); }');
+    if (!interface_exists(IGroupManager::class)) {
+        interface IGroupManager { public function get($gid); public function createGroup($gid); }
     }
 }
 

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IGroupManager::class)) {
-        eval('namespace OCP; interface IGroupManager { public function groupExists($gid); public function createGroup($gid); public function get($gid); }');
+namespace OCP {
+    if (!interface_exists(IGroupManager::class)) {
+        interface IGroupManager { public function groupExists($gid); public function createGroup($gid); public function get($gid); }
     }
-    if (!interface_exists(\OCP\IAppConfig::class)) {
-        eval('namespace OCP; interface IAppConfig { public function getValueString(string $appId, string $key, string $default = ""): string; public function setValueString(string $appId, string $key, string $value): void; }');
+    if (!interface_exists(IAppConfig::class)) {
+        interface IAppConfig { public function getValueString(string $appId, string $key, string $default = ""): string; public function setValueString(string $appId, string $key, string $value): void; }
     }
-    if (!interface_exists(\OCP\IConfig::class)) {
-        eval('namespace OCP; interface IConfig { public function getAppValue($appName, $key, $default = ""); }');
+    if (!interface_exists(IConfig::class)) {
+        interface IConfig { public function getAppValue($appName, $key, $default = ""); }
     }
 }
 

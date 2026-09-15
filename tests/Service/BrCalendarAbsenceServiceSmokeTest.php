@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\Calendar\ICalendar::class)) {
-        eval('namespace OCP\Calendar; interface ICalendar { public function getUri(): string; public function search(string $pattern, array $searchProperties = [], array $options = [], ?int $limit = null, ?int $offset = null): array; }');
+namespace OCP\Calendar {
+    if (!interface_exists(ICalendar::class)) {
+        interface ICalendar { public function getUri(): string; public function search(string $pattern, array $searchProperties = [], array $options = [], ?int $limit = null, ?int $offset = null): array; }
     }
-    if (!interface_exists(\OCP\Calendar\IManager::class)) {
-        eval('namespace OCP\Calendar; interface IManager { public function getCalendarsForPrincipal(string $principalUri, array $calendarUris = []): array; }');
+    if (!interface_exists(IManager::class)) {
+        interface IManager { public function getCalendarsForPrincipal(string $principalUri, array $calendarUris = []): array; }
     }
 }
 

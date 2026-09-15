@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IConfig::class)) {
-        eval('namespace OCP; interface IConfig { public function getAppValue($appName, $key, $default = ""); public function setAppValue($appName, $key, $value); }');
+namespace OCP {
+    if (!interface_exists(IConfig::class)) {
+        interface IConfig { public function getAppValue($appName, $key, $default = ""); public function setAppValue($appName, $key, $value); }
     }
 }
 

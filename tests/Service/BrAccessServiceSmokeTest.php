@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IGroupManager::class)) {
-        eval('namespace OCP; interface IGroupManager { public function isAdmin($userId); public function isInGroup($userId, $group); }');
+namespace OCP {
+    if (!interface_exists(IGroupManager::class)) {
+        interface IGroupManager { public function isAdmin($userId); public function isInGroup($userId, $group); }
     }
 }
 
