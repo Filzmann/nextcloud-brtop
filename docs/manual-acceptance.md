@@ -71,6 +71,21 @@ Begründung verpflichtend.
 | D4 | Nicht vorhandene Produktfunktionen | README-Einschränkungen mit der sichtbaren Oberfläche vergleichen. | Nicht umgesetzte Ersatzmitglied-, E-Mail-, PDF-/DOCX- und Produktivrechte-Funktionen werden nicht fälschlich als abgenommen dokumentiert. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | D5 | Datensparsame Abnahmeunterlagen | Formular, Screenshots und erzeugte Testdokumente auf Inhalte prüfen. | Es wurden nur synthetische Daten dokumentiert; keine vertraulichen Inhalte, Zugangsdaten oder unnötigen Pfade sind enthalten. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
+## Automatisierter lokaler Nachweis vom 11.09.2026
+
+Im Rahmen der risikoarmen Luna-Prüfung wurden aus dem Repository-Root nur die
+lokalen, nicht mutierenden Prüfungen ausgeführt:
+
+| Prüfung | Ergebnis | Aussagegrenze |
+|---|---|---|
+| `php tests/run.php` | erfolgreich | PHP-Syntax sowie Zugriffs-, Sitzungs-, Agenda-, Dokument-, Privacy-, Permission- und Adminzugriffsverträge sind grün. |
+| `node tests/run-js.mjs` | erfolgreich | JavaScript-Syntax sowie Agenda-, Sitzung-, Modell-, Repository-, Protokoll- und UI-Smokes sind grün. |
+| `git diff --check` | erfolgreich | Keine Whitespace-Fehler im aktuellen Arbeitsbaum. |
+
+DDEV, `occ`, Installation, App-Aktivierung, Gremien- oder Dokumentdaten wurden
+nicht verändert. Dieser Nachweis ersetzt weder die offene manuelle Abnahme
+noch die fachliche und rechtliche Freigabe.
+
 ## Abschlussentscheidung
 
 | Feld | Eintrag |
