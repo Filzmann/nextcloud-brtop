@@ -25,6 +25,16 @@ Der LocalBase-BR-Gruppenvertrag ist die einzige Laufzeitquelle für Mitglieder,
 Vorsitz und Stellvertretung. Rechte werden serverseitig geprüft; Navigation
 erteilt keine Rechte. Native Nextcloud-Administration benötigt für
 fachlichen Vollzugriff eine app-lokale, zeitlich begrenzte Freigabe.
+Ausschließlich Mitglieder der nativen Gruppe `Datenschutzbeauftragte` dürfen
+die Freigabehistorie lesen und Freigaben für aktuelle native
+Administrationskonten in der BRTop-Fachoberfläche erteilen oder widerrufen.
+Die authentifizierten Endpunkte sind deshalb nicht an die native Adminroute
+gebunden; Schreibrequests bleiben CSRF-geschützt und prüfen Rolle, Zielkonto
+und Dauer serverseitig. Rollenverlust, ungültige Ziele, Persistenzfehler,
+Ablauf und Verlust des nativen Adminstatus verweigern ohne zusätzliche
+Fachrechte. Ein fehlender Vollzugriff wird ausschließlich dem betroffenen
+Administrationskonto angezeigt; der direkte Sprung zur Steuerung erscheint
+nur beim selben Konto mit zusätzlicher Datenschutzrolle.
 
 Datenschutz- und Berechtigungsprovider projizieren nur ausdrücklich
 zuordenbare app-eigene Informationen. Datei- und Dokumentinhalte werden ohne

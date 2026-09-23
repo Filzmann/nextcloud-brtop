@@ -39,7 +39,7 @@ Dann in Nextcloud öffnen:
 /apps/brtop
 ```
 
-Der separate Adminabschnitt `BR TOP` enthält den Schalter für zeitlich begrenzten fachlichen Vollzugriff. Ein Nextcloud-Administrationskonto erhält nicht automatisch Sitzungs- oder Gremienrechte. Die Freigabe erfolgt pro Administrationskonto für 1, 4, 8 oder höchstens 24 Stunden, kann vorzeitig widerrufen werden und wird app-lokal mit Beginn und Ende protokolliert. Datenschutz- und Berechtigungsprovider weisen diese Freigaben aus.
+Ein Nextcloud-Administrationskonto erhält nicht automatisch Sitzungs- oder Gremienrechte. Ausschließlich Mitglieder der nativen Nextcloud-Gruppe `Datenschutzbeauftragte` können in der BRTop-Fachoberfläche die Freigabehistorie lesen und aktuellen Administrationskonten für 1, 4, 8 oder höchstens 24 Stunden fachlichen Vollzugriff erteilen oder ihn vorzeitig widerrufen. Native Administration allein genügt nicht. Beginn, geplantes Ende, Freigabe und Widerruf werden app-lokal protokolliert und in Datenschutz- sowie Berechtigungsprovider einbezogen. Ein fehlender Vollzugriff wird dem betroffenen Administrationskonto sicher angezeigt; der Direktlink zur Steuerung erscheint nur, wenn dasselbe Konto zugleich Datenschutzbeauftragte*r ist. Technische Systemeinstellungen bleiben davon getrennt im Nextcloud-Adminbereich.
 
 ## Datenschutz
 

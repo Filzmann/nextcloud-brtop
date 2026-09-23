@@ -8,6 +8,7 @@ runJavaScriptSuite({
     root,
     testFiles: [
         'tests/js/agenda-editor-smoke.js',
+        'tests/js/admin-access-smoke.js',
         'tests/js/absence-review-smoke.js',
         'tests/js/meeting-components-smoke.js',
         'tests/js/model-smoke.js',

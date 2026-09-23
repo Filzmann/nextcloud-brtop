@@ -19,6 +19,30 @@
     margin-bottom: 18px;
 }
 
+.brtop-access-notice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    align-items: baseline;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 2px solid var(--color-warning, #f0b400);
+    border-radius: 8px;
+}
+
+.brtop-access-card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.brtop-access-card th,
+.brtop-access-card td {
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-border);
+}
+
 .brtop-view[hidden],
 .brtop-view:not(.is-active) {
     display: none !important;

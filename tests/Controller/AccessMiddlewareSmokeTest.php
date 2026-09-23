@@ -31,6 +31,7 @@ namespace OCA\BrTop\AppInfo {
 namespace OCA\BrTop\Tests {
 
     use OCA\BrTop\Controller\ApiController;
+    use OCA\BrTop\Controller\PageController;
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Middleware\BrAccessMiddleware;
     use OCA\BrTop\Service\BrAccessService;
@@ -56,6 +57,9 @@ namespace OCA\BrTop\Tests {
     $adminAccess = new class implements TemporaryAdminAccessChecker { public function hasActiveGrant(string $uid): bool { return $uid === 'admin'; } };
     $middleware = new BrAccessMiddleware($session, new BrAccessService($groups, $groupNames, $adminAccess));
     $controller = (new \ReflectionClass(ApiController::class))->newInstanceWithoutConstructor();
+    $pageController = (new \ReflectionClass(PageController::class))->newInstanceWithoutConstructor();
+
+    $middleware->beforeController($pageController, 'index');
 
     $denied = assertThrows(
         static fn() => $middleware->beforeController($controller, 'state'),

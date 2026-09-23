@@ -44,6 +44,10 @@ namespace {
     if (array_key_exists('personal_runtime_data', $catalog->toArray())) {
         throw new RuntimeException('Der Processing-Katalog enthält personenbezogene Laufzeitdaten.');
     }
+    $encodedCatalog = json_encode($catalog->toArray(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+    if (!str_contains($encodedCatalog, 'Freigabesteuerung in der BRTop-Fachoberfläche') || str_contains($encodedCatalog, 'Allow-, Deny- und Manipulationsprüfungen stehen aus')) {
+        throw new RuntimeException('Der Processing-Katalog bildet die durchgesetzte Datenschutzrollen-Grenze nicht ab.');
+    }
 
     $registration = new RegisterProcessingMetadataProvidersEvent();
     $listener = new BrTopProcessingMetadataProviderListener($provider);

@@ -34,7 +34,7 @@ namespace {
         ['kind'=>'activity','id'=>5,'activity'=>'invitation_snapshot','occurred_at'=>'2026-08-23'],
         ['kind'=>'activity','id'=>5,'activity'=>'legislature_created','occurred_at'=>'2026-08-22'],
     ];
-    $adminAccess=new TemporaryAdminAccessRepository();$adminAccess->items=[['id'=>8,'targetUid'=>'self','grantedBy'=>'other-admin','startsAt'=>new DateTimeImmutable('2026-08-25T08:00:00+00:00'),'endsAt'=>new DateTimeImmutable('2026-08-25T12:00:00+00:00'),'revokedAt'=>null,'revokedBy'=>null]];
+    $adminAccess=new TemporaryAdminAccessRepository();$adminAccess->items=[['id'=>8,'targetUid'=>'other-admin','grantedBy'=>'self','startsAt'=>new DateTimeImmutable('2026-08-25T08:00:00+00:00'),'endsAt'=>new DateTimeImmutable('2026-08-25T12:00:00+00:00'),'revokedAt'=>new DateTimeImmutable('2026-08-25T10:00:00+00:00'),'revokedBy'=>'self']];
     $provider = new BrTopPersonalDataProvider($repository,$adminAccess);
     $descriptor = $provider->descriptor();
     if ($descriptor->appId() !== 'brtop' || !$descriptor->supportsSubjectType('nextcloud-user') || $descriptor->contractVersion() !== '1.0') {
@@ -47,10 +47,10 @@ namespace {
         throw new RuntimeException('BRTop weist die bewusst ausgeschlossenen Inhaltsklassen nicht als Teilantwort aus.');
     }
     $json = json_encode(array_map(static fn($entry): array => [
-        'categoryId'=>$entry->categoryId(), 'reference'=>$entry->reference(), 'summary'=>$entry->summary(), 'attributes'=>$entry->attributes(),
+        'categoryId'=>$entry->categoryId(), 'reference'=>$entry->reference(), 'summary'=>$entry->summary(), 'source'=>$entry->source(), 'recipientCategories'=>$entry->recipientCategories(), 'attributes'=>$entry->attributes(),
         'thirdPartyContentNotice'=>$entry->thirdPartyContentNotice(),
     ], $page->entries()), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    foreach (['Test Mitglied','mitglied@example.invalid','25.08.2026','Reguläre BR-Sitzung','Protokolldokument','Abwesenheitsprüfung','Admin-Vollzugriff'] as $expected) {
+    foreach (['Test Mitglied','mitglied@example.invalid','25.08.2026','Reguläre BR-Sitzung','Protokolldokument','Abwesenheitsprüfung','Admin-Vollzugriff','Freigebendes Mitglied von Datenschutzbeauftragte','Widerrufendes Mitglied von Datenschutzbeauftragte','App-lokale Freigabesteuerung in BRTop'] as $expected) {
         if (!str_contains($json, $expected)) throw new RuntimeException("Erforderliche BRTop-Metadaten fehlen: {$expected}");
     }
     foreach (['other-person','other-admin','Vertraulicher Sitzungstitel','Personalfall Beispiel','Geheimer Raum','BR-Sitzungen/','Vertraulicher Dateiinhalt','Nicht ausgeben'] as $forbidden) {
