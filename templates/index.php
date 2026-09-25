@@ -33,15 +33,20 @@ style('orgsuite', 'suite-navigation');
 
 <div id="brtop-app">
     <div class="orgsuite-host" data-orgsuite data-suite="br" data-current-app="brtop"></div>
-    <h1>BR TOP- und Sitzungsverwaltung</h1>
+    <div class="brtop-title-row">
+        <h1>BR TOP- und Sitzungsverwaltung</h1>
+        <?php if ($_['showMissingAdminGrant'] ?? false): ?>
+            <details class="brtop-admin-access-warning">
+                <summary aria-label="Informationen zum fehlenden fachlichen Admin-Vollzugriff"><span aria-hidden="true">⚠</span></summary>
+                <div class="brtop-admin-access-warning__panel">
+                    <strong>Kein zeitlich begrenzter fachlicher Vollzugriff aktiv.</strong>
+                    <p>Native Nextcloud-Administration reicht nicht aus. Mitglieder der Gruppe Datenschutzbeauftragte können eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
+                    <?php if ($_['showAdminAccessLink'] ?? false): ?><a href="#brtop-full-access-heading" target="_blank" rel="noopener noreferrer">Freigabesteuerung in neuem Tab öffnen</a><?php endif; ?>
+                </div>
+            </details>
+        <?php endif; ?>
+    </div>
     <div id="brtop-notice" class="brtop-notice" role="status" aria-live="polite" hidden></div>
-
-    <?php if ($_['showMissingAdminGrant'] ?? false): ?>
-        <aside class="brtop-access-notice" role="status">
-            <strong>Für dieses Administrationskonto ist kein zeitlich begrenzter fachlicher Vollzugriff aktiv.</strong>
-            <?php if ($_['showAdminAccessLink'] ?? false): ?><a href="#brtop-full-access-heading">Freigabesteuerung öffnen</a><?php endif; ?>
-        </aside>
-    <?php endif; ?>
 
     <?php if ($_['canManageAdminAccess'] ?? false): ?>
         <section id="brtop-full-access" class="brtop-card brtop-access-card" aria-labelledby="brtop-full-access-heading">
