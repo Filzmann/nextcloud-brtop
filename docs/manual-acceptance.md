@@ -81,20 +81,6 @@ Begründung verpflichtend.
 | E4 | Manipulation | Als gewöhnliches Konto sowie mit leerem, fremdem oder nichtadministrativem Ziel und mit mehr als 24 Stunden direkte Requests senden. | Zugriff beziehungsweise Eingabe wird verweigert; es entsteht keine Freigabe und keine Auditmutation. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | E5 | CSRF und Wirksamkeitsende | Schreibrequests ohne gültigen Requesttoken senden, danach eine Freigabe widerrufen, ablaufen lassen sowie dem Ziel den nativen Adminstatus entziehen. | Requests ohne Token mutieren nichts; Widerruf, Ablauf und Adminverlust beenden den fachlichen Zugriff sofort. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
-## Automatisierter lokaler Nachweis vom 11.09.2026
-
-Im Rahmen der risikoarmen Luna-Prüfung wurden aus dem Repository-Root nur die
-lokalen, nicht mutierenden Prüfungen ausgeführt:
-
-| Prüfung | Ergebnis | Aussagegrenze |
-|---|---|---|
-| `php tests/run.php` | erfolgreich | PHP-Syntax sowie Zugriffs-, Sitzungs-, Agenda-, Dokument-, Privacy-, Permission- und Adminzugriffsverträge sind grün. |
-| `node tests/run-js.mjs` | erfolgreich | JavaScript-Syntax sowie Agenda-, Sitzung-, Modell-, Repository-, Protokoll- und UI-Smokes sind grün. |
-| `git diff --check` | erfolgreich | Keine Whitespace-Fehler im aktuellen Arbeitsbaum. |
-
-DDEV, `occ`, Installation, App-Aktivierung, Gremien- oder Dokumentdaten wurden
-nicht verändert. Dieser Nachweis ersetzt weder die offene manuelle Abnahme
-noch die fachliche und rechtliche Freigabe.
 
 ## Abschlussentscheidung
 
