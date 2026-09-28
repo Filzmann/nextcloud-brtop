@@ -6,6 +6,9 @@ BRTop ist die kanonische Quelle für Sitzungen, Tagesordnungspunkte,
 Ladungssnapshots, Protokollinhalte, Beschlüsse und die daraus erzeugten
 Dokumente. OrgSuite stellt nur die BR-Navigation bereit; LocalBase liefert
 gemeinsame, versionierte Basisverträge.
+Der Betriebsrat ist fachlicher Owner dieser Verarbeitungen;
+`Datenschutzbeauftragte` verantwortet davon getrennt Retention-Policies,
+zweckgebundene Sperren und die Adminfreigabehistorie.
 
 ## Schichten und Daten
 
@@ -60,7 +63,10 @@ als eigene, höchstens 24 Stunden wirksame Verarbeitung sichtbar.
 
 Die bestehende Art.-15-Projektion bleibt bewusst `partial`: Unsichere
 Freitexttreffer, Datei- und Anhangpfade sowie Gremien- und Dateiinhalte werden
-nicht automatisch ausgegeben. Rechtsgrundlagen, Empfängerscopes, Retention,
-Backup/Restore, Kalenderinfrastruktur, Shares und konsistente Datei-/Metadaten-
-Löschung werden nicht technisch erfunden, sondern im Katalog mit
-`PRIVACY-DECISION-REQUIRED` ausgewiesen.
+nicht automatisch ausgegeben. Der Katalog hält die beschlossenen Fristen für
+Protokolle, Beschlüsse, Anwesenheitsnachweise, Ladungen, Entwürfe und
+abgeleitete Dokumente sowie die sechsmonatige Adminhistorie. Ungeklärt
+bleiben insbesondere Rechtsgrundlagen, Empfängerscopes, Backup/Restore,
+Kalenderinfrastruktur, Shares, Spezialfristen sensibler Inhalte und der
+getestete konsistente Datei-/Metadaten-Löschweg; bis dahin erfolgt keine
+automatische Retention-Ausführung.
