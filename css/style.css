@@ -194,6 +194,26 @@
     overflow-x: auto;
 }
 
+.brtop-persistent-scroll-track {
+    box-sizing: border-box;
+    height: 18px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 6px 6px 0 0;
+    background: var(--color-main-background);
+    scrollbar-gutter: stable;
+}
+
+.brtop-persistent-scroll-track-active {
+    position: fixed;
+    z-index: 10;
+}
+
+.brtop-persistent-scroll-track [data-persistent-horizontal-scroll-spacer] {
+    height: 1px;
+}
+
 .brtop-form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

@@ -9,6 +9,7 @@ if ($_['hasBrTopAccess'] ?? false) {
     script('localbase', 'ui/ui');
     script('brtop', 'modules/ui');
     script('brtop', 'modules/view-router');
+    script('brtop', 'modules/persistent-horizontal-scroll');
     script('localbase', 'models/model');
     script('brtop', 'models/protocol-block');
     script('brtop', 'models/agenda-item');
@@ -54,7 +55,7 @@ style('orgsuite', 'suite-navigation');
             <p>Ausschließlich Mitglieder der Gruppe Datenschutzbeauftragte dürfen aktuellen Nextcloud-Administrationskonten fachlichen Vollzugriff erteilen. Maximal 24 Stunden sind zulässig.</p>
             <form id="brtop-full-access-form"><label>Admin-Benutzerkennung <input name="targetUid" required maxlength="64" autocomplete="off"></label><label>Dauer <select name="durationMinutes" required><option value="60">1 Stunde</option><option value="240">4 Stunden</option><option value="480">8 Stunden</option><option value="1440">24 Stunden</option></select></label><label><input id="brtop-full-access-enabled" name="enabled" type="checkbox" required> Vollzugriff für diesen Zeitraum aktivieren</label><button type="submit" class="primary">Freigabe aktivieren</button></form>
             <p id="brtop-full-access-status" role="status" aria-live="polite"></p>
-            <div class="brtop-table-wrap" tabindex="0" role="region" aria-label="Protokollierte Admin-Vollzugriffszeiträume"><table><caption>Protokollierte Admin-Vollzugriffszeiträume</caption><thead><tr><th>Ziel-Admin</th><th>Freigegeben von</th><th>Von</th><th>Geplant bis</th><th>Tatsächlich bis / Status</th><th>Aktion</th></tr></thead><tbody id="brtop-full-access-history"><tr><td colspan="6">Freigaben werden geladen.</td></tr></tbody></table></div>
+            <div class="brtop-table-wrap" data-persistent-horizontal-scroll tabindex="0" role="region" aria-label="Protokollierte Admin-Vollzugriffszeiträume"><table><caption>Protokollierte Admin-Vollzugriffszeiträume</caption><thead><tr><th>Ziel-Admin</th><th>Freigegeben von</th><th>Von</th><th>Geplant bis</th><th>Tatsächlich bis / Status</th><th>Aktion</th></tr></thead><tbody id="brtop-full-access-history"><tr><td colspan="6">Freigaben werden geladen.</td></tr></tbody></table></div>
         </section>
     <?php endif; ?>
 
@@ -117,6 +118,7 @@ style('orgsuite', 'suite-navigation');
 
     <?php endif; ?>
 
+    <div class="brtop-persistent-scroll-track" data-persistent-horizontal-scroll-track tabindex="0" role="region" aria-label="Tabelle horizontal scrollen" hidden><div data-persistent-horizontal-scroll-spacer></div></div>
 </div>
 
 <?php if ($_['hasBrTopAccess'] ?? false): ?>

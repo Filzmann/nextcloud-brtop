@@ -73,7 +73,7 @@
                     ${input(`leg-list-${listIndex}-seats`, 'Gewonnene Sitze', list.seat_count, 'number', `min="0" data-list-field="seat_count" ${locked ? 'disabled' : 'required'}`)}
                     ${input(`leg-list-${listIndex}-votes`, 'Gültige Listenstimmen', list.vote_count, 'number', `min="0" data-list-field="vote_count" ${locked ? 'disabled' : 'required'}`)}
                 </div>
-                <div class="brtop-table-wrap">
+                <div class="brtop-table-wrap" data-persistent-horizontal-scroll>
                     <table>
                         <caption>Mitglieder der ${esc(list.name || `Vorschlagsliste ${listIndex + 1}`)}</caption>
                         <thead><tr><th scope="col">UID</th><th scope="col">Name</th><th scope="col">E-Mail</th><th scope="col">Geschlecht</th><th scope="col">Rolle</th><th scope="col">Rang</th><th scope="col">Aktion</th></tr></thead>

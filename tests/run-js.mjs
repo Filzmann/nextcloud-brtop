@@ -16,6 +16,7 @@ runJavaScriptSuite({
         'tests/js/legislature-repository-smoke.js',
         'tests/js/legislature-editor-smoke.js',
         'tests/js/protocol-editor-smoke.js',
+        'tests/js/persistent-horizontal-scroll-smoke.js',
         'tests/js/top-form-router-smoke.js',
         'tests/js/ui-smoke.js',
     ],

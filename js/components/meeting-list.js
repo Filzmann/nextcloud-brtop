@@ -24,7 +24,7 @@
         `).join('');
 
         return `
-            <div class="brtop-table-wrap">
+            <div class="brtop-table-wrap" data-persistent-horizontal-scroll>
                 <table class="brtop-session-table">
                     <thead>
                         <tr>
