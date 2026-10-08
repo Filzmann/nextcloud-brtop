@@ -1,8 +1,4 @@
 const assert = require('assert');
-const fs = require('fs');
-const vm = require('vm');
-
-const source = fs.readFileSync('js/modules/persistent-horizontal-scroll.js', 'utf8');
 const listeners = new Map();
 const target = {
     scrollWidth: 1200,
@@ -30,18 +26,15 @@ const appRoot = {
     removeEventListener: (type) => listeners.delete(`root:${type}`),
 };
 const windowListeners = new Map();
-const context = {
-    window: {
-        innerHeight: 800,
-        addEventListener: (type, listener) => windowListeners.set(type, listener),
-        removeEventListener: (type) => windowListeners.delete(type),
-    },
+global.window = {
+    innerHeight: 800,
+    addEventListener: (type, listener) => windowListeners.set(type, listener),
+    removeEventListener: (type) => windowListeners.delete(type),
     MutationObserver: class { observe() {} disconnect() {} },
 };
-context.window.MutationObserver = context.MutationObserver;
-vm.runInNewContext(source, context);
+require('../../js/modules/persistent-horizontal-scroll.js');
 
-const cleanup = context.window.BRTop.persistentHorizontalScroll.bind(appRoot);
+const cleanup = global.window.BRTop.persistentHorizontalScroll.bind(appRoot);
 assert.strictEqual(track.hidden, false);
 assert.strictEqual(spacer.style.width, '1200px');
 target.scrollLeft = 240;
