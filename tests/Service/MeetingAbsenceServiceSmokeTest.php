@@ -2,14 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require_once __DIR__ . '/../../lib/Repository/MeetingRepository.php';
-require_once __DIR__ . '/../../lib/Repository/MeetingAbsenceRepository.php';
-require_once __DIR__ . '/../../lib/Repository/LegislatureRepository.php';
-require_once __DIR__ . '/../../lib/Service/LegislatureValidationService.php';
-require_once __DIR__ . '/../../lib/Service/LegislatureService.php';
-require_once __DIR__ . '/../../lib/Service/BrCalendarAbsenceService.php';
-require_once __DIR__ . '/../../lib/Service/MeetingAbsenceService.php';
 
 use OCA\BrTop\Repository\LegislatureRepository;
 use OCA\BrTop\Repository\MeetingAbsenceRepository;

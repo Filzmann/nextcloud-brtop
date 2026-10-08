@@ -65,7 +65,7 @@
                 <section class="brtop-invitation-status">
                     <h3>Ladungsstatus</h3>
                     <p class="brtop-meta">Geladen: ${loaded.length}, davon Ersatzmitglieder: ${replacements.length}; bestätigte Verhinderungen: ${absent.length}.</p>
-                    <div class="brtop-table-wrap"><table class="brtop-session-table">
+                    <div class="brtop-table-wrap" data-persistent-horizontal-scroll><table class="brtop-session-table">
                         <caption>Unveränderlicher Empfängersnapshot der Einladung</caption>
                         <thead><tr><th scope="col">Name</th><th scope="col">Status</th><th scope="col">Liste/Rang</th><th scope="col">Nachrückung</th></tr></thead>
                         <tbody>${recipients.map(snapshotRowHtml).join('')}</tbody>

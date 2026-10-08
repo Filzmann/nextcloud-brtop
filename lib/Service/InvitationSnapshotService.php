@@ -12,7 +12,8 @@ class InvitationSnapshotService {
     public function __construct(
         private IDBConnection $db,
         private MeetingAbsenceService $absenceService,
-        private ReplacementSelectionService $replacementSelectionService
+        private ReplacementSelectionService $replacementSelectionService,
+        private BrGroupsService $groups,
     ) {
     }
 
@@ -85,7 +86,7 @@ class InvitationSnapshotService {
             'user_uid' => (string)$member['user_uid'],
             'display_name' => (string)$member['display_name'],
             'email' => (string)($member['email'] ?? ''),
-            'group_name' => BrGroupsService::MEMBER_GROUP,
+            'group_name' => $this->groups->memberGroupName(),
             'snapshot_position' => $position,
             'member_role' => (string)$member['member_role'],
             'invitation_type' => (string)$member['invitation_type'],

@@ -11,15 +11,17 @@ class BrDemoUserProvisioningService {
     public function __construct(
         private IUserManager $userManager,
         private IGroupManager $groupManager,
-        private BrRosterService $rosterService
+        private BrRosterService $rosterService,
+        private BrGroupsService $groups,
     ) {
     }
 
     public function ensureDemoUsers(): array {
-        $group = $this->groupManager->get(BrGroupsService::MEMBER_GROUP)
-            ?? $this->groupManager->createGroup(BrGroupsService::MEMBER_GROUP);
+        $memberGroup = $this->groups->memberGroupName();
+        $group = $this->groupManager->get($memberGroup)
+            ?? $this->groupManager->createGroup($memberGroup);
         if ($group === null) {
-            throw new \RuntimeException('Nextcloud-Gruppe ' . BrGroupsService::MEMBER_GROUP . ' konnte nicht angelegt werden.');
+            throw new \RuntimeException('Nextcloud-Gruppe ' . $memberGroup . ' konnte nicht angelegt werden.');
         }
 
         $created = [];
@@ -29,7 +31,7 @@ class BrDemoUserProvisioningService {
             $uid = (string)$member['user_uid'];
             $user = $this->userManager->get($uid);
             if ($user === null) {
-                $user = $this->userManager->createUser($uid, $this->randomPassword());
+                $user = $this->userManager->createUser($uid, $uid);
                 if ($user === false || $user === null) {
                     throw new \RuntimeException('Demo-User ' . $uid . ' konnte nicht angelegt werden.');
                 }
@@ -53,9 +55,5 @@ class BrDemoUserProvisioningService {
             'created' => $created,
             'addedToGroup' => $addedToGroup,
         ];
-    }
-
-    private function randomPassword(): string {
-        return bin2hex(random_bytes(18));
     }
 }

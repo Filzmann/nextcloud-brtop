@@ -2,38 +2,26 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!class_exists(\OCP\AppFramework\Controller::class)) {
-        eval('namespace OCP\AppFramework; class Controller { public function __construct(string $appName, \OCP\IRequest $request) {} }');
-    }
-    if (!interface_exists(\OCP\IRequest::class)) {
-        eval('namespace OCP; interface IRequest {}');
-    }
-    if (!interface_exists(\OCP\IUserSession::class)) {
-        eval('namespace OCP; interface IUserSession {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http::class)) {
-        eval('namespace OCP\AppFramework; class Http { public const STATUS_BAD_REQUEST = 400; public const STATUS_NOT_FOUND = 404; public const STATUS_INTERNAL_SERVER_ERROR = 500; }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Response::class)) {
-        eval('namespace OCP\AppFramework\Http; class Response {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\DataResponse::class)) {
-        eval('namespace OCP\AppFramework\Http; class DataResponse extends Response { public function __construct(mixed $data = [], int $status = 200) {} }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\TemplateResponse::class)) {
-        eval('namespace OCP\AppFramework\Http; class TemplateResponse extends Response { public function __construct(string $appName, string $templateName) {} }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Attribute\NoAdminRequired::class)) {
-        eval('namespace OCP\AppFramework\Http\Attribute; #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Attribute\NoCSRFRequired::class)) {
-        eval('namespace OCP\AppFramework\Http\Attribute; #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {}');
-    }
+namespace OCP {
+    if (!interface_exists(IRequest::class)) { interface IRequest {} }
+    if (!interface_exists(IUserSession::class)) { interface IUserSession {} }
+}
+namespace OCP\AppFramework {
+    if (!class_exists(Controller::class)) { class Controller { public function __construct(string $appName, \OCP\IRequest $request) {} } }
+    if (!class_exists(Http::class)) { class Http { public const STATUS_BAD_REQUEST = 400; public const STATUS_NOT_FOUND = 404; public const STATUS_INTERNAL_SERVER_ERROR = 500; } }
+}
+namespace OCP\AppFramework\Http {
+    if (!class_exists(Response::class)) { class Response {} }
+    if (!class_exists(DataResponse::class)) { class DataResponse extends Response { public function __construct(mixed $data = [], int $status = 200) {} } }
+    if (!class_exists(TemplateResponse::class)) { class TemplateResponse extends Response { public function __construct(string $appName, string $templateName) {} } }
+}
+namespace OCP\AppFramework\Http\Attribute {
+    if (!class_exists(NoAdminRequired::class)) { #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {} }
+    if (!class_exists(NoCSRFRequired::class)) { #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {} }
 }
 
 namespace OCA\BrTop\AppInfo {
-    if (!class_exists(Application::class)) {
+    if (!class_exists(Application::class, false)) {
         final class Application {
             public const APP_ID = 'brtop';
         }
@@ -41,8 +29,6 @@ namespace OCA\BrTop\AppInfo {
 }
 
 namespace {
-    require __DIR__ . '/../../lib/Controller/PageController.php';
-    require __DIR__ . '/../../lib/Controller/ApiController.php';
 
     use OCA\BrTop\Controller\ApiController;
     use OCA\BrTop\Controller\PageController;

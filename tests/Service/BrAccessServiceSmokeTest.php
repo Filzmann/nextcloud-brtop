@@ -2,30 +2,35 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IGroupManager::class)) {
-        eval('namespace OCP; interface IGroupManager { public function isAdmin($userId); public function isInGroup($userId, $group); }');
+namespace OCP {
+    if (!interface_exists(IGroupManager::class)) {
+        interface IGroupManager { public function isAdmin($userId); public function isInGroup($userId, $group); }
     }
 }
 
 namespace OCA\BrTop\Tests {
-    require __DIR__ . '/../helpers.php';
-    require_once __DIR__ . '/../../lib/Exception/AccessDeniedException.php';
-    require_once __DIR__ . '/../../lib/Service/BrGroupsService.php';
-    require_once __DIR__ . '/../../lib/Service/BrAccessService.php';
 
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Service\BrAccessService;
+    use OCA\BrTop\Service\BrGroupsService;
+    use OCA\BrTop\Service\TemporaryAdminAccessChecker;
     use OCP\IGroupManager;
 
     $groups = new class implements IGroupManager {
         public function isAdmin($userId): bool { return $userId === 'admin'; }
-        public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'Betriebsrat'; }
+        public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'BR Custom'; }
     };
-    $service = new BrAccessService($groups);
+    $groupNames = new class extends BrGroupsService {
+        public function __construct() {}
+        public function memberGroupName(): string { return 'BR Custom'; }
+    };
+    $adminAccess = new class implements TemporaryAdminAccessChecker { public bool $active=false; public function hasActiveGrant(string $uid):bool{return $this->active;} };
+    $service = new BrAccessService($groups, $groupNames, $adminAccess);
 
-    assertSameValue(true, $service->canUse('admin'), 'Nextcloud admins should be allowed to use BRTop.');
-    assertSameValue(true, $service->canUse('br-member'), 'Members of the Betriebsrat group should be allowed to use BRTop.');
+    assertSameValue(false, $service->canUse('admin'), 'Native Nextcloud admins must not receive BRTop access without an app-local grant.');
+    $adminAccess->active=true;
+    assertSameValue(true, $service->canUse('admin'), 'An active app-local grant should enable BRTop admin access.');
+    assertSameValue(true, $service->canUse('br-member'), 'Members of the configured BR group should be allowed to use BRTop.');
     assertSameValue(false, $service->canUse('other-user'), 'Unrelated authenticated users must be denied.');
     assertThrows(
         static fn() => $service->assertCanUse('other-user'),

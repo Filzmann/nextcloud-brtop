@@ -3,36 +3,63 @@ use OCA\BrTop\View\UiComponents;
 
 script('localbase', 'api/api-client');
 script('brtop', 'modules/api');
-script('localbase', 'ui/ui');
 script('orgsuite', 'suite-navigation');
-script('brtop', 'modules/ui');
-script('brtop', 'modules/view-router');
-script('localbase', 'models/model');
-script('brtop', 'models/protocol-block');
-script('brtop', 'models/agenda-item');
-script('brtop', 'models/generated-document');
-script('brtop', 'models/meeting');
-script('localbase', 'repositories/repository');
-script('brtop', 'repositories/meeting-repository');
-script('brtop', 'repositories/legislature-repository');
-script('brtop', 'components/meeting-list');
-script('brtop', 'components/agenda-list');
-script('brtop', 'components/meeting-detail');
-script('brtop', 'components/protocol-editor');
-script('brtop', 'components/top-form');
-script('brtop', 'components/agenda-editor');
-script('brtop', 'components/legislature-editor');
-script('brtop', 'components/absence-review');
-script('brtop', 'main');
+script('brtop', 'admin-access');
+if ($_['hasBrTopAccess'] ?? false) {
+    script('localbase', 'ui/ui');
+    script('brtop', 'modules/ui');
+    script('brtop', 'modules/view-router');
+    script('brtop', 'modules/persistent-horizontal-scroll');
+    script('localbase', 'models/model');
+    script('brtop', 'models/protocol-block');
+    script('brtop', 'models/agenda-item');
+    script('brtop', 'models/generated-document');
+    script('brtop', 'models/meeting');
+    script('localbase', 'repositories/repository');
+    script('brtop', 'repositories/meeting-repository');
+    script('brtop', 'repositories/legislature-repository');
+    script('brtop', 'components/meeting-list');
+    script('brtop', 'components/agenda-list');
+    script('brtop', 'components/meeting-detail');
+    script('brtop', 'components/protocol-editor');
+    script('brtop', 'components/top-form');
+    script('brtop', 'components/agenda-editor');
+    script('brtop', 'components/legislature-editor');
+    script('brtop', 'components/absence-review');
+    script('brtop', 'main');
+}
 style('brtop', 'style');
 style('orgsuite', 'suite-navigation');
 ?>
 
 <div id="brtop-app">
     <div class="orgsuite-host" data-orgsuite data-suite="br" data-current-app="brtop"></div>
-    <h1>BR TOP- und Sitzungsverwaltung</h1>
+    <div class="brtop-title-row">
+        <h1>BR TOP- und Sitzungsverwaltung</h1>
+        <?php if ($_['showMissingAdminGrant'] ?? false): ?>
+            <details class="brtop-admin-access-warning">
+                <summary aria-label="Informationen zum fehlenden fachlichen Admin-Vollzugriff"><span aria-hidden="true">⚠</span></summary>
+                <div class="brtop-admin-access-warning__panel">
+                    <strong>Kein zeitlich begrenzter fachlicher Vollzugriff aktiv.</strong>
+                    <p>Native Nextcloud-Administration reicht nicht aus. Mitglieder der Gruppe Datenschutzbeauftragte können eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
+                    <?php if ($_['showAdminAccessLink'] ?? false): ?><a href="#brtop-full-access-heading" target="_blank" rel="noopener noreferrer">Freigabesteuerung in neuem Tab öffnen</a><?php endif; ?>
+                </div>
+            </details>
+        <?php endif; ?>
+    </div>
     <div id="brtop-notice" class="brtop-notice" role="status" aria-live="polite" hidden></div>
 
+    <?php if ($_['canManageAdminAccess'] ?? false): ?>
+        <section id="brtop-full-access" class="brtop-card brtop-access-card" aria-labelledby="brtop-full-access-heading">
+            <h2 id="brtop-full-access-heading" tabindex="-1">Zeitlich begrenzter Admin-Vollzugriff</h2>
+            <p>Ausschließlich Mitglieder der Gruppe Datenschutzbeauftragte dürfen aktuellen Nextcloud-Administrationskonten fachlichen Vollzugriff erteilen. Maximal 24 Stunden sind zulässig.</p>
+            <form id="brtop-full-access-form"><label>Admin-Benutzerkennung <input name="targetUid" required maxlength="64" autocomplete="off"></label><label>Dauer <select name="durationMinutes" required><option value="60">1 Stunde</option><option value="240">4 Stunden</option><option value="480">8 Stunden</option><option value="1440">24 Stunden</option></select></label><label><input id="brtop-full-access-enabled" name="enabled" type="checkbox" required> Vollzugriff für diesen Zeitraum aktivieren</label><button type="submit" class="primary">Freigabe aktivieren</button></form>
+            <p id="brtop-full-access-status" role="status" aria-live="polite"></p>
+            <div class="brtop-table-wrap" data-persistent-horizontal-scroll tabindex="0" role="region" aria-label="Protokollierte Admin-Vollzugriffszeiträume"><table><caption>Protokollierte Admin-Vollzugriffszeiträume</caption><thead><tr><th>Ziel-Admin</th><th>Freigegeben von</th><th>Von</th><th>Geplant bis</th><th>Tatsächlich bis / Status</th><th>Aktion</th></tr></thead><tbody id="brtop-full-access-history"><tr><td colspan="6">Freigaben werden geladen.</td></tr></tbody></table></div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($_['hasBrTopAccess'] ?? false): ?>
     <section id="sessions-view" class="brtop-card brtop-view is-active" aria-hidden="false">
         <div class="brtop-section-head">
             <h2>Sitzungen</h2>
@@ -89,8 +116,12 @@ style('orgsuite', 'suite-navigation');
         <div id="absence-review"></div>
     </section>
 
+    <?php endif; ?>
+
+    <div class="brtop-persistent-scroll-track" data-persistent-horizontal-scroll-track tabindex="0" role="region" aria-label="Tabelle horizontal scrollen" hidden><div data-persistent-horizontal-scroll-spacer></div></div>
 </div>
 
+<?php if ($_['hasBrTopAccess'] ?? false): ?>
 <div id="document-overlay" class="brtop-document-overlay" hidden>
     <div class="brtop-document-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="document-overlay-title">
         <div class="brtop-document-overlay-head">
@@ -100,3 +131,4 @@ style('orgsuite', 'suite-navigation');
         <iframe id="document-overlay-frame" title="Dokumentvorschau"></iframe>
     </div>
 </div>
+<?php endif; ?>

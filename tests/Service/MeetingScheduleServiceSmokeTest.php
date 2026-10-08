@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IConfig::class)) {
-        eval('namespace OCP; interface IConfig {}');
+namespace OCP {
+    if (!interface_exists(IConfig::class)) {
+        interface IConfig {}
     }
+}
 
-    require __DIR__ . '/../helpers.php';
-    require __DIR__ . '/../../lib/Service/BrtopSettingsService.php';
-    require __DIR__ . '/../../lib/Service/MeetingScheduleService.php';
+namespace {
 
     use OCA\BrTop\Service\BrtopSettingsService;
     use OCA\BrTop\Service\MeetingScheduleService;

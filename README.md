@@ -39,9 +39,44 @@ Dann in Nextcloud öffnen:
 /apps/brtop
 ```
 
+Ein Nextcloud-Administrationskonto erhält nicht automatisch Sitzungs- oder Gremienrechte. Ausschließlich Mitglieder der nativen Nextcloud-Gruppe `Datenschutzbeauftragte` können in der BRTop-Fachoberfläche die Freigabehistorie lesen und aktuellen Administrationskonten für 1, 4, 8 oder höchstens 24 Stunden fachlichen Vollzugriff erteilen oder ihn vorzeitig widerrufen. Native Administration allein genügt nicht. Beginn, geplantes Ende, Freigabe und Widerruf werden app-lokal protokolliert und in Datenschutz- sowie Berechtigungsprovider einbezogen. Ein fehlender Vollzugriff wird dem betroffenen Administrationskonto sicher angezeigt; der Direktlink zur Steuerung erscheint nur, wenn dasselbe Konto zugleich Datenschutzbeauftragte*r ist. Technische Systemeinstellungen bleiben davon getrennt im Nextcloud-Adminbereich.
+
+## Datenschutz
+
+Der app-eigene `PersonalDataProvider` projiziert ausschließlich explizit per
+Nextcloud-UID zuordenbare Mitgliedschafts-, Ladungs-, Sitzungs-, Dokument- und
+Bearbeitungsmetadaten. Datei- und Anhangpfade, Datei-, TOP-, Protokoll- und
+Beschlussinhalte sowie nicht sicher zuordenbare Freitextnennungen bleiben zum
+Schutz von Gremien- und Drittpersonendaten ausgeschlossen; die Ausgabe weist
+diese Grenze als `partial` aus.
+
+Der Processing-Metadata-Provider beschreibt ergänzend die fünf Verarbeitungen
+Legislatur/Besetzung, Sitzung/Agenda/Protokoll, Ladung/Abwesenheit,
+Dokumenterzeugung mit persönlicher Nextcloud-Dateiablage und temporären
+Admin-Vollzugriff aus `resources/privacy-processing.json`. Der Katalog enthält
+keine personenbezogenen Laufzeitdaten; offene fachliche und rechtliche
+Entscheidungen sind als `PRIVACY-DECISION-REQUIRED` sichtbar.
+
 1. Demo-Sitzung anlegen.
 2. Dokumente erzeugen.
 3. In den Dateien prüfen, ob unter `BR-Sitzungen/...` Markdown-Dateien erzeugt wurden.
 
+Neu angelegte lokale BRTop-Demokonten verwenden ihren Benutzernamen als
+Passwort. Diese Zugangsdaten sind ausschließlich für lokale Test- und
+Demoumgebungen bestimmt.
+
+Für die fachliche, visuelle und datenschutzbezogene Staging-Prüfung steht ein
+ausfüllbares [manuelles Abnahmeformular](docs/manual-acceptance.md) bereit.
+Es bezieht sich ausdrücklich auf den aktuellen Entwicklungsstand und erteilt
+keine Produktiv- oder Rechtssicherheitsfreigabe.
+
 Geplante Erweiterungen und offene Fachentscheidungen stehen in
 [`ROADMAP.md`](ROADMAP.md).
+
+## Dokumentation
+
+- [Architektur](docs/architecture.md)
+- [Manuelle Abnahme](docs/manual-acceptance.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
+- [Arbeitsregeln](AGENTS.md)

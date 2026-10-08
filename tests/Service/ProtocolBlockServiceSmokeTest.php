@@ -2,13 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../helpers.php';
-require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
-require __DIR__ . '/../../lib/Model/AgendaItem.php';
-require __DIR__ . '/../../lib/Model/ProtocolBlock.php';
-require __DIR__ . '/../../lib/Service/ProtocolBlockService.php';
-require __DIR__ . '/../../lib/Service/AgendaService.php';
-require __DIR__ . '/../../lib/Store/ProtocolBlockStore.php';
 
 use OCA\BrTop\Model\AgendaItem;
 use OCA\BrTop\Model\ProtocolBlock;

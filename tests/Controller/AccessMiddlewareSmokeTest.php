@@ -2,43 +2,41 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!class_exists(\OCP\AppFramework\Controller::class)) {
-        eval('namespace OCP\AppFramework; class Controller { public function __construct(string $appName = "", mixed $request = null) {} } abstract class Middleware {}');
-    }
-    if (!interface_exists(\OCP\IRequest::class)) {
-        eval('namespace OCP; interface IRequest {} interface IUserSession { public function getUser(); } interface IGroupManager { public function isAdmin($userId); public function isInGroup($userId, $group); }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http::class)) {
-        eval('namespace OCP\AppFramework; class Http { public const STATUS_FORBIDDEN = 403; public const STATUS_BAD_REQUEST = 400; public const STATUS_NOT_FOUND = 404; public const STATUS_INTERNAL_SERVER_ERROR = 500; }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Response::class)) {
-        eval('namespace OCP\AppFramework\Http; class Response { protected int $status = 200; public function setStatus(int $status): void { $this->status = $status; } public function getStatus(): int { return $this->status; } } class DataResponse extends Response { public function __construct(private mixed $data = [], int $status = 200) { $this->status = $status; } public function getData(): mixed { return $this->data; } } class TemplateResponse extends Response { public function __construct(...$args) {} }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Attribute\NoAdminRequired::class)) {
-        eval('namespace OCP\AppFramework\Http\Attribute; #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {} #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {}');
-    }
+namespace OCP {
+    if (!interface_exists(IRequest::class)) { interface IRequest {} }
+    if (!interface_exists(IUserSession::class)) { interface IUserSession { public function getUser(); } }
+    if (!interface_exists(IGroupManager::class)) { interface IGroupManager { public function isAdmin($userId); public function isInGroup($userId, $group); } }
+}
+namespace OCP\AppFramework {
+    if (!class_exists(Controller::class)) { class Controller { public function __construct(string $appName = "", mixed $request = null) {} } }
+    if (!class_exists(Middleware::class)) { abstract class Middleware {} }
+    if (!class_exists(Http::class)) { class Http { public const STATUS_FORBIDDEN = 403; public const STATUS_BAD_REQUEST = 400; public const STATUS_NOT_FOUND = 404; public const STATUS_INTERNAL_SERVER_ERROR = 500; } }
+}
+namespace OCP\AppFramework\Http {
+    if (!class_exists(Response::class)) { class Response { protected int $status = 200; public function setStatus(int $status): void { $this->status = $status; } public function getStatus(): int { return $this->status; } } }
+    if (!class_exists(DataResponse::class)) { class DataResponse extends Response { public function __construct(private mixed $data = [], int $status = 200) { $this->status = $status; } public function getData(): mixed { return $this->data; } } }
+    if (!class_exists(TemplateResponse::class)) { class TemplateResponse extends Response { public function __construct(...$args) {} } }
+}
+namespace OCP\AppFramework\Http\Attribute {
+    if (!class_exists(NoAdminRequired::class)) { #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {} }
+    if (!class_exists(NoCSRFRequired::class)) { #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {} }
 }
 
 namespace OCA\BrTop\AppInfo {
-    if (!class_exists(Application::class)) {
+    if (!class_exists(Application::class, false)) {
         final class Application { public const APP_ID = 'brtop'; }
     }
 }
 
 namespace OCA\BrTop\Tests {
-    require __DIR__ . '/../helpers.php';
-    require_once __DIR__ . '/../../lib/Exception/AccessDeniedException.php';
-    require_once __DIR__ . '/../../lib/Service/BrGroupsService.php';
-    require_once __DIR__ . '/../../lib/Service/BrAccessService.php';
-    require_once __DIR__ . '/../../lib/Controller/PageController.php';
-    require_once __DIR__ . '/../../lib/Controller/ApiController.php';
-    require_once __DIR__ . '/../../lib/Middleware/BrAccessMiddleware.php';
 
     use OCA\BrTop\Controller\ApiController;
+    use OCA\BrTop\Controller\PageController;
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Middleware\BrAccessMiddleware;
     use OCA\BrTop\Service\BrAccessService;
+    use OCA\BrTop\Service\BrGroupsService;
+    use OCA\BrTop\Service\TemporaryAdminAccessChecker;
     use OCP\IGroupManager;
     use OCP\IUserSession;
 
@@ -52,8 +50,16 @@ namespace OCA\BrTop\Tests {
         public function isAdmin($userId): bool { return $userId === 'admin'; }
         public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'Betriebsrat'; }
     };
-    $middleware = new BrAccessMiddleware($session, new BrAccessService($groups));
+    $groupNames = new class extends BrGroupsService {
+        public function __construct() {}
+        public function memberGroupName(): string { return 'Betriebsrat'; }
+    };
+    $adminAccess = new class implements TemporaryAdminAccessChecker { public function hasActiveGrant(string $uid): bool { return $uid === 'admin'; } };
+    $middleware = new BrAccessMiddleware($session, new BrAccessService($groups, $groupNames, $adminAccess));
     $controller = (new \ReflectionClass(ApiController::class))->newInstanceWithoutConstructor();
+    $pageController = (new \ReflectionClass(PageController::class))->newInstanceWithoutConstructor();
+
+    $middleware->beforeController($pageController, 'index');
 
     $denied = assertThrows(
         static fn() => $middleware->beforeController($controller, 'state'),

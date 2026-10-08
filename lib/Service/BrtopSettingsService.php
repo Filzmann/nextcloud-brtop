@@ -20,7 +20,6 @@ class BrtopSettingsService {
             'invitationWeekday' => $this->invitationWeekday(),
             'defaultMeetingTime' => $this->defaultMeetingTime(),
             'defaultLocation' => $this->defaultLocation(),
-            'memberGroupName' => $this->memberGroupName(),
             'meetingTypes' => $this->meetingTypes(),
             'committeeCodes' => $this->committeeCodes(),
         ];
@@ -32,7 +31,6 @@ class BrtopSettingsService {
         int $invitationWeekday,
         string $defaultMeetingTime,
         string $defaultLocation,
-        string $memberGroupName,
         string $regularAgendaTemplateJson
     ): array {
         $this->setStringValue('default_meeting_title', $defaultMeetingTitle, 'Ordentliche BR-Sitzung');
@@ -40,7 +38,6 @@ class BrtopSettingsService {
         $this->setWeekdayValue('invitation_weekday', $invitationWeekday);
         $this->setTimeValue('default_meeting_time', $defaultMeetingTime);
         $this->setStringValue('default_location', $defaultLocation, 'BR-Büro / Videokonferenz');
-        $this->setStringValue('member_group_name', $memberGroupName, 'Betriebsrat');
         $this->setTextValue('regular_agenda_template_json', $regularAgendaTemplateJson);
 
         return $this->values();
@@ -66,7 +63,8 @@ class BrtopSettingsService {
         return $this->stringValue('default_location', 'BR-Büro / Videokonferenz');
     }
 
-    public function memberGroupName(): string {
+    /** Legacy source used only by the one-time migration into LocalBase. */
+    public function legacyMemberGroupName(): string {
         return $this->stringValue('member_group_name', 'Betriebsrat');
     }
 

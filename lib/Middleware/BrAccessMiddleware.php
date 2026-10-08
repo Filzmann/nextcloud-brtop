@@ -33,7 +33,10 @@ class BrAccessMiddleware extends Middleware {
     }
 
     public function beforeController(Controller $controller, string $methodName): void {
-        if (!$controller instanceof ApiController && !$controller instanceof PageController) {
+        if ($controller instanceof PageController) {
+            return;
+        }
+        if (!$controller instanceof ApiController) {
             return;
         }
 

@@ -339,5 +339,6 @@
     absenceReview.init();
     protocolEditor.init();
     topForm.init();
+    window.BRTop.persistentHorizontalScroll.bind(byId('brtop-app'));
     loadState().catch(e => showError(e, 'Sitzungen konnten nicht geladen werden.'));
 })();

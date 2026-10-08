@@ -22,7 +22,7 @@
             <p><strong>Sitzungsdatum:</strong> ${esc(state.meeting_date)}</p>
             ${state.reviewed ? '<p>Die Verhinderungsliste wurde bereits administrativ bestätigt.</p>' : ''}
             ${locked ? '<p><strong>Versiegelt:</strong> Der Einladungssnapshot ist bereits vorhanden und kann nicht verändert werden.</p>' : ''}
-            <div class="brtop-table-wrap"><table class="brtop-session-table">
+            <div class="brtop-table-wrap" data-persistent-horizontal-scroll><table class="brtop-session-table">
                 <caption>Verhinderungen und nicht verfügbare Ersatzmitglieder</caption>
                 <thead><tr><th scope="col">Verhindert</th><th scope="col">Name</th><th scope="col">Liste</th><th scope="col">Rang</th><th scope="col">Rolle/Quelle</th></tr></thead>
                 <tbody>${rows || '<tr><td colspan="5">Keine Mitglieder in der Legislatur.</td></tr>'}</tbody>
