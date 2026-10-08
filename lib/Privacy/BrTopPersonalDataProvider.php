@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace OCA\BrTop\Privacy;
 
 use InvalidArgumentException;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataEntry;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataPage;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataProvider;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
-use OCA\FilzmannDataProtection\PublicApi\V1\ProviderDescriptor;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataEntry;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataPage;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataProvider;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
+use OCA\FlzDataProtection\PublicApi\V1\ProviderDescriptor;
 use OCA\BrTop\Repository\TemporaryAdminAccessRepository;
 
 final class BrTopPersonalDataProvider implements PersonalDataProvider {

@@ -50,7 +50,7 @@ für `council_legislature_and_roster_management`,
 `meeting_agenda_and_protocol_management`,
 `invitation_snapshot_and_absence_management`,
 `document_generation_and_file_storage` und `temporary_admin_full_access`.
-Der öffentliche V1-Provider von `filzmann_data_protection` lädt diesen Katalog
+Der öffentliche V1-Provider von `flz_data_protection` lädt diesen Katalog
 lazy und veröffentlicht keine personenbezogenen Laufzeitdaten.
 
 Die Trennung folgt den vorhandenen Verantwortungsgrenzen: Legislatur und

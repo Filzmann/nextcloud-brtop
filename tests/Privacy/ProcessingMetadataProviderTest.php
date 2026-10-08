@@ -20,7 +20,7 @@ namespace OCP\EventDispatcher {
 namespace {
     use OCA\BrTop\Privacy\BrTopProcessingMetadataProvider;
     use OCA\BrTop\Privacy\BrTopProcessingMetadataProviderListener;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
     use OCP\EventDispatcher\Event;
 
     $provider = new BrTopProcessingMetadataProvider();

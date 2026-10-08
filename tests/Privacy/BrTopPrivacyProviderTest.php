@@ -19,9 +19,9 @@ namespace {
     use OCA\BrTop\Privacy\BrTopPersonalDataProvider;
     use OCA\BrTop\Privacy\BrTopPrivacyProviderListener;
     use OCA\BrTop\Privacy\BrTopPrivacyRepository;
-    use OCA\FilzmannDataProtection\PublicApi\V1\DataSubjectRef;
-    use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+    use OCA\FlzDataProtection\PublicApi\V1\DataSubjectRef;
+    use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
     use OCA\BrTop\Repository\TemporaryAdminAccessRepository;
 
     $repository = new BrTopPrivacyRepository();

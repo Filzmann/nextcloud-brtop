@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace OCA\BrTop\Permission;
-use OCA\FilzmannPermissionMatrix\PublicApi\V1\{PermissionCondition,PermissionProvider,PermissionProviderDescriptor,PermissionProviderResult,PermissionRule};
+use OCA\FlzPermissionMatrix\PublicApi\V1\{PermissionCondition,PermissionProvider,PermissionProviderDescriptor,PermissionProviderResult,PermissionRule};
 final class BrTopPermissionProvider implements PermissionProvider{
  public function __construct(private BrTopPermissionSourceInterface $source){}
  public function descriptor():PermissionProviderDescriptor{return new PermissionProviderDescriptor('brtop','BRTop','1.0',['permissions']);}
