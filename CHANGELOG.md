@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
+  Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes bestätigt. Der
+  Permission-Provider-Listener erfüllt nun Nextclouds öffentlichen
+  `IEventListener`-Vertrag; die Berechtigungssemantik bleibt unverändert.
+  Die deklarierten Hauptversionen 29 bis 32 waren nicht Teil dieses Laufs.
 - Die app-lokale Admin-Vollzugriffssteuerung aus dem technischen Adminbereich
   in die rollenabhängige BRTop-Fachoberfläche verschoben. Nur
   `Datenschutzbeauftragte` können Historie lesen sowie Freigaben für aktuelle
