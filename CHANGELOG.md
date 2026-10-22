@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Dokumentkonfiguration ergänzt: Organisationsstammdaten und Ausschusskataloge
+  werden validiert gespeichert; Text- und Protokoll-ODT-Vorlagen können als
+  Entwurf versioniert, geprüft und ausdrücklich freigegeben werden. Neue
+  Dokumentmetadaten führen Vorlagentyp und Version; ungültige freigegebene
+  Versionen nutzen die eingebaute Vorlage als Rückfall. Die ODT-Archivprüfung
+  ist durch Tests belegt, eine vollständige Browser-/DDEV-/Nextcloud-
+  Runtime-Abnahme bleibt offen.
 - Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
   Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes bestätigt. Der
   Permission-Provider-Listener erfüllt nun Nextclouds öffentlichen

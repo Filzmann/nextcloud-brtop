@@ -15,6 +15,19 @@ Noch nicht enthalten:
 - PDF/DOCX-Export,
 - Rollen- und Rechtekonzept.
 
+Der aktuelle Entwicklungsstand enthält zusätzlich eine app-lokale
+Dokumentkonfiguration: Organisationsstammdaten und Ausschusskataloge können
+in der BRTop-Administration validiert gespeichert werden. Textvorlagen für
+Einladung, Protokoll und Beschluss sowie die Protokoll-ODT-Vorlage werden als
+Entwurf versioniert, geprüft und erst nach ausdrücklicher Freigabe für neue
+Dokumente verwendet. Erzeugte Dokumentmetadaten speichern Vorlagentyp und
+Version; bei ungültigen freigegebenen Vorlagen fällt die Erzeugung auf die
+eingebaute Vorlage zurück.
+
+Die ODT-Prüfung validiert die Archivstruktur und erlaubte Platzhalter. Eine
+vollständige Browser-, DDEV- oder echte Nextcloud-Runtime-Abnahme der
+Dokumentkonfiguration ist mit diesem Stand noch nicht durchgeführt.
+
 ## Installation
 
 Nextcloud-Root, Runtimebenutzer, `apps_paths` und CLI-PHP werden aus der realen

@@ -30,5 +30,11 @@ return [
         ['name' => 'temporary_admin_access#status', 'url' => '/api/admin/full-access', 'verb' => 'GET'],
         ['name' => 'temporary_admin_access#activate', 'url' => '/api/admin/full-access', 'verb' => 'POST'],
         ['name' => 'temporary_admin_access#revoke', 'url' => '/api/admin/full-access/{targetUid}', 'verb' => 'DELETE'],
+        ['name' => 'document_configuration#state', 'url' => '/api/admin/document-configuration', 'verb' => 'GET'],
+        ['name' => 'document_configuration#template', 'url' => '/api/admin/document-configuration/templates/{templateKey}/{version}', 'verb' => 'GET'],
+        ['name' => 'document_configuration#saveOrganization', 'url' => '/api/admin/document-configuration/organization', 'verb' => 'POST'],
+        ['name' => 'document_configuration#saveDraft', 'url' => '/api/admin/document-configuration/templates/{templateKey}/draft', 'verb' => 'POST'],
+        ['name' => 'document_configuration#preview', 'url' => '/api/admin/document-configuration/templates/{templateKey}/preview', 'verb' => 'POST'],
+        ['name' => 'document_configuration#approve', 'url' => '/api/admin/document-configuration/templates/{templateKey}/{version}/approve', 'verb' => 'POST'],
     ],
 ];

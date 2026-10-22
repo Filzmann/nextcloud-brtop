@@ -14,6 +14,8 @@ class GeneratedDocument {
     public string $documentType;
     public string $title;
     public string $filePath;
+    public ?string $templateKey;
+    public ?int $templateVersion;
     public string $createdAt;
 
     public function __construct(array $data = []) {
@@ -22,6 +24,10 @@ class GeneratedDocument {
         $this->documentType = (string)($data['document_type'] ?? $data['documentType'] ?? '');
         $this->title = (string)($data['title'] ?? '');
         $this->filePath = (string)($data['file_path'] ?? $data['filePath'] ?? '');
+        $templateKey = $data['template_key'] ?? $data['templateKey'] ?? null;
+        $this->templateKey = $templateKey === null || $templateKey === '' ? null : (string)$templateKey;
+        $templateVersion = $data['template_version'] ?? $data['templateVersion'] ?? null;
+        $this->templateVersion = $templateVersion === null || $templateVersion === '' ? null : (int)$templateVersion;
         $this->createdAt = (string)($data['created_at'] ?? $data['createdAt'] ?? '');
     }
 
@@ -48,6 +54,8 @@ class GeneratedDocument {
             'document_type' => $this->documentType,
             'title' => $this->title,
             'file_path' => $this->filePath,
+            'template_key' => $this->templateKey,
+            'template_version' => $this->templateVersion,
             'created_at' => $this->createdAt,
         ];
     }

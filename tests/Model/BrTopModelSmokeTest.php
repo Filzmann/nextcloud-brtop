@@ -49,6 +49,8 @@ $document = new GeneratedDocument([
     'document_type' => 'invitation_markdown',
     'title' => '',
     'file_path' => 'BR-Sitzungen/2026-07-07/01_Ladung.md',
+    'template_key' => 'invitation_markdown',
+    'template_version' => 4,
 ]);
 
 $meeting = new Meeting([
@@ -78,6 +80,8 @@ assertSameValue(2, $mappedMeeting->toArray()['legislature_id'], 'Meeting should 
 assertSameValue('ohne Titel', $meeting->displayTitle(), 'Meeting displayTitle should have a fallback.');
 assertSameValue(true, $meeting->isRegularBrMeeting(), 'Meeting should expose regular BR sessions.');
 assertSameValue('Ladung', $document->displayTitle(), 'GeneratedDocument should expose display titles.');
+assertSameValue('invitation_markdown', $document->toArray()['template_key'], 'Generated documents should preserve the template key used at creation.');
+assertSameValue(4, $document->toArray()['template_version'], 'Generated documents should preserve the immutable template version used at creation.');
 assertSameValue(7, $payload['tops'][0]['id'], 'Meeting API payload should include TOP objects as arrays.');
 assertSameValue('invitation_markdown', $payload['documents'][0]['document_type'], 'Meeting API payload should include document objects as arrays.');
 assertSameValue('simon', $payload['invitation_recipients'][0]['user_uid'], 'Meeting API payload should include invitation recipients.');

@@ -48,6 +48,11 @@ namespace {
     if (!str_contains($encodedCatalog, 'Freigabesteuerung in der BRTop-Fachoberfläche') || str_contains($encodedCatalog, 'Allow-, Deny- und Manipulationsprüfungen stehen aus')) {
         throw new RuntimeException('Der Processing-Katalog bildet die durchgesetzte Datenschutzrollen-Grenze nicht ab.');
     }
+    foreach (['Vorlagenversion', 'Organisationsstammdaten', 'Freitextinhalte der Vorlagen werden nicht automatisch Personen zugeordnet'] as $contract) {
+        if (!str_contains($encodedCatalog, $contract)) {
+            throw new RuntimeException('Der Processing-Katalog bildet die Dokumentkonfiguration nicht vollständig ab: ' . $contract);
+        }
+    }
 
     $registration = new RegisterProcessingMetadataProvidersEvent();
     $listener = new BrTopProcessingMetadataProviderListener($provider);

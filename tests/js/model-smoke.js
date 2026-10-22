@@ -36,11 +36,15 @@ assert.strictEqual(agendaItem.kindLabel(), 'Beschluss');
 
 const document = GeneratedDocument.get({
     id: 3,
-    document_type: 'protocol_odt'
+    document_type: 'protocol_odt',
+    template_key: 'protocol_odt',
+    template_version: 4
 });
 
 assert(document instanceof GeneratedDocument);
 assert.strictEqual(document.typeLabel(), 'Protokollvorlage ODT');
+assert.strictEqual(document.toArray().template_key, 'protocol_odt');
+assert.strictEqual(document.toArray().template_version, 4);
 
 const meeting = Meeting.get({
     id: 5,

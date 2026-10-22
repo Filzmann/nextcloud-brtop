@@ -12,8 +12,12 @@ use OCA\BrTop\Permission\BrTopPermissionSourceInterface;
 use OCA\BrTop\Permission\NextcloudBrTopPermissionSource;
 use OCA\BrTop\Repository\TemporaryAdminAccessRepository;
 use OCA\BrTop\Repository\TemporaryAdminAccessRepositoryInterface;
+use OCA\BrTop\Repository\DocumentTemplateRepository;
+use OCA\BrTop\Repository\DocumentTemplateRepositoryInterface;
 use OCA\BrTop\Service\TemporaryAdminAccessChecker;
 use OCA\BrTop\Service\TemporaryAdminAccessService;
+use OCA\BrTop\Service\DocumentTemplateProvider;
+use OCA\BrTop\Service\DocumentTemplateService;
 use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 use OCA\FlzDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
 use OCA\FlzPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
@@ -37,6 +41,8 @@ class Application extends App implements IBootstrap {
         $context->registerServiceAlias(BrTopPermissionSourceInterface::class, NextcloudBrTopPermissionSource::class);
         $context->registerServiceAlias(TemporaryAdminAccessChecker::class, TemporaryAdminAccessService::class);
         $context->registerServiceAlias(TemporaryAdminAccessRepositoryInterface::class, TemporaryAdminAccessRepository::class);
+        $context->registerServiceAlias(DocumentTemplateRepositoryInterface::class, DocumentTemplateRepository::class);
+        $context->registerServiceAlias(DocumentTemplateProvider::class, DocumentTemplateService::class);
     }
 
     public function boot(IBootContext $context): void {

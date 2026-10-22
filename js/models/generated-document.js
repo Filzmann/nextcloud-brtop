@@ -7,6 +7,8 @@
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id || data.meetingId || 0;
             this.document_type = data.document_type || data.documentType || '';
+            this.template_key = data.template_key || data.templateKey || '';
+            this.template_version = data.template_version ?? data.templateVersion ?? null;
             this.title = data.title || '';
             this.file_path = data.file_path || data.filePath || '';
             this.created_at = data.created_at || data.createdAt || '';
@@ -34,6 +36,8 @@
                 id: this.id,
                 meeting_id: this.meeting_id,
                 document_type: this.document_type,
+                template_key: this.template_key,
+                template_version: this.template_version,
                 title: this.title,
                 file_path: this.file_path,
                 created_at: this.created_at

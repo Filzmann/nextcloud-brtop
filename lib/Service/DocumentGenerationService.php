@@ -21,7 +21,10 @@ class DocumentGenerationService {
         private DocumentRepository $documentRepository,
         private MeetingRepository $meetingRepository,
         private ProtocolBlockStore $protocolBlockStore,
-        private BrtopLogger $logger
+        private BrtopLogger $logger,
+        private OdtTemplateRenderer $odtRenderer,
+        private DocumentTemplateProvider $templates,
+        private BrtopSettingsService $settings
     ) {
     }
 
@@ -38,12 +41,14 @@ class DocumentGenerationService {
             $this->fileExportService->ensureFolder($uid, $basePath);
 
             $subject = $this->documentContentService->invitationSubject($meeting);
-            $email = $this->documentContentService->invitationEmail($meeting, $tops, $recipients);
-            $markdown = $this->documentContentService->invitationMarkdown($subject, $email);
+            $emailDocument = $this->documentContentService->renderInvitationEmail($meeting, $tops, $recipients);
+            $email = $emailDocument['content'];
+            $markdownDocument = $this->documentContentService->renderInvitationMarkdown($subject, $email);
+            $markdown = $markdownDocument['content'];
             $recipientList = $this->documentContentService->invitationRecipientList($recipients);
 
-            $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Einladung_Email.txt', $email, 'invitation_email', 'Einladung E-Mail', $created, $warnings);
-            $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Ladung.md', $markdown, 'invitation_markdown', 'Ladung', $created, $warnings);
+            $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Einladung_Email.txt', $email, 'invitation_email', 'Einladung E-Mail', $created, $warnings, $emailDocument['templateKey'], $emailDocument['version']);
+            $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Ladung.md', $markdown, 'invitation_markdown', 'Ladung', $created, $warnings, $markdownDocument['templateKey'], $markdownDocument['version']);
             $this->writeDocumentSafely($uid, $meetingId, $basePath, '01_Ladungsliste.txt', $recipientList, 'invitation_recipients', 'Ladungsliste', $created, $warnings);
             if ($warnings === []) {
                 $this->meetingRepository->markInvitationCreated($meetingId);
@@ -76,18 +81,20 @@ class DocumentGenerationService {
             $basePath = $this->fileExportService->meetingFolder($meeting);
             $this->fileExportService->ensureFolder($uid, $basePath);
 
-            $protocol = $this->documentContentService->protocolTemplate($meeting, $tops);
-            $this->writeDocument($uid, $meetingId, $basePath, '02_Protokollvorlage.md', $protocol, 'protocol_markdown', 'Protokollvorlage');
+            $protocolDocument = $this->documentContentService->renderProtocol($meeting, $tops);
+            $this->writeDocument($uid, $meetingId, $basePath, '02_Protokollvorlage.md', $protocolDocument['content'], 'protocol_markdown', 'Protokollvorlage', $protocolDocument['templateKey'], $protocolDocument['version']);
             $created[] = '02_Protokollvorlage.md';
 
             try {
-                if (class_exists(OdtTemplateRenderer::class)) {
-                    $odt = (new OdtTemplateRenderer())->renderProtocol($meetingData, $tops);
-                    $this->writeDocument($uid, $meetingId, $basePath, '02_Protokollvorlage.odt', $odt, 'protocol_odt', 'Protokollvorlage ODT');
-                    $created[] = '02_Protokollvorlage.odt';
-                } else {
-                    $warnings[] = 'ODT-Renderer ist noch nicht vorhanden.';
-                }
+                $odtTemplate = $this->templates->active('protocol_odt');
+                $odt = $this->odtRenderer->renderProtocol(
+                    $meetingData,
+                    $tops,
+                    $odtTemplate['content'],
+                    $this->settings->documentOrganization()
+                );
+                $this->writeDocument($uid, $meetingId, $basePath, '02_Protokollvorlage.odt', $odt, 'protocol_odt', 'Protokollvorlage ODT', $odtTemplate['templateKey'], $odtTemplate['version']);
+                $created[] = '02_Protokollvorlage.odt';
             } catch (\Throwable $e) {
                 $this->logger->error('generate_protocol_odt', $e, [
                     'meeting_id' => $meetingId,
@@ -132,14 +139,17 @@ class DocumentGenerationService {
                     $number = $this->agendaService->numberForItem($top);
                     $suffix = $resolutionCount > 1 ? '_' . str_pad((string)$resolutionIndex, 2, '0', STR_PAD_LEFT) : '';
                     $filename = '03_Beschluss_' . $number . $suffix . '_' . $this->fileExportService->safeName((string)$top['subject']) . '.md';
+                    $resolutionDocument = $this->documentContentService->renderResolution($meeting, $top, $resolutionIndex);
                     $this->writeDocument(
                         $uid,
                         $meetingId,
                         $basePath,
                         $filename,
-                        $this->documentContentService->resolutionDocument($meeting, $top, $resolutionIndex),
+                        $resolutionDocument['content'],
                         'resolution_markdown',
-                        'Beschluss ' . $number . ($resolutionCount > 1 ? '.' . $resolutionIndex : '')
+                        'Beschluss ' . $number . ($resolutionCount > 1 ? '.' . $resolutionIndex : ''),
+                        $resolutionDocument['templateKey'],
+                        $resolutionDocument['version']
                     );
                     $created[] = $filename;
                 }
@@ -164,16 +174,18 @@ class DocumentGenerationService {
         string $filename,
         string $content,
         string $documentType,
-        string $title
+        string $title,
+        ?string $templateKey = null,
+        ?int $templateVersion = null
     ): void {
         $path = $basePath . '/' . $filename;
         $this->fileExportService->putUserFile($uid, $path, $content);
         if ($documentType === 'resolution_markdown') {
-            $this->documentRepository->insert($meetingId, $documentType, $title, $path);
+            $this->documentRepository->insert($meetingId, $documentType, $title, $path, $templateKey, $templateVersion);
             return;
         }
 
-        $this->documentRepository->replaceForMeetingAndType($meetingId, $documentType, $title, $path);
+        $this->documentRepository->replaceForMeetingAndType($meetingId, $documentType, $title, $path, $templateKey, $templateVersion);
     }
 
     private function writeDocumentSafely(
@@ -185,10 +197,12 @@ class DocumentGenerationService {
         string $documentType,
         string $title,
         array &$created,
-        array &$warnings
+        array &$warnings,
+        ?string $templateKey = null,
+        ?int $templateVersion = null
     ): void {
         try {
-            $this->writeDocument($uid, $meetingId, $basePath, $filename, $content, $documentType, $title);
+            $this->writeDocument($uid, $meetingId, $basePath, $filename, $content, $documentType, $title, $templateKey, $templateVersion);
             $created[] = $filename;
         } catch (\Throwable $e) {
             if (!$this->isLockException($e)) {

@@ -83,13 +83,66 @@ class BrtopSettingsService {
     }
 
     public function committeeCodes(): array {
-        return [
+        $defaults = [
             ['value' => 'ASA', 'label' => 'ASA'],
             ['value' => 'DPA', 'label' => 'DPA'],
             ['value' => 'IKT', 'label' => 'IKT'],
             ['value' => 'BA', 'label' => 'BA'],
             ['value' => 'IBF', 'label' => 'IBF'],
         ];
+        $json = trim($this->config->getAppValue(Application::APP_ID, 'document_committee_codes_json', ''));
+        if ($json === '') {
+            return $defaults;
+        }
+
+        try {
+            return $this->normalizeCommitteeCodes($json);
+        } catch (\InvalidArgumentException) {
+            return $defaults;
+        }
+    }
+
+    public function documentOrganization(): array {
+        return [
+            'councilName' => $this->stringValue('document_council_name', 'Betriebsrat ambulante dienste e.V.'),
+            'councilAddress' => $this->textValue('document_council_address', 'Wilhelm-Kabus-Str. 21-35, 10829 Berlin'),
+            'issuePlace' => $this->stringValue('document_issue_place', 'Berlin'),
+            'committeeCodes' => $this->committeeCodes(),
+            'invitationSalutation' => $this->textValue('document_invitation_salutation', 'Liebe Kolleg*innen,'),
+            'invitationIntroduction' => $this->textValue('document_invitation_introduction', 'hiermit lade ich euch zur Sitzung ein.'),
+            'invitationClosing' => $this->textValue('document_invitation_closing', 'Viele Grüße'),
+            'invitationSender' => $this->textValue('document_invitation_sender', '{{ABSENDER}}'),
+        ];
+    }
+
+    public function saveDocumentOrganization(
+        string $councilName,
+        string $councilAddress,
+        string $issuePlace,
+        string $committeeCodesJson,
+        string $invitationSalutation,
+        string $invitationIntroduction,
+        string $invitationClosing,
+        string $invitationSender
+    ): array {
+        $values = [
+            'document_council_name' => $this->requiredText($councilName, 'Gremienname', 255),
+            'document_council_address' => $this->requiredText($councilAddress, 'Anschrift', 2000),
+            'document_issue_place' => $this->requiredText($issuePlace, 'Ausstellungsort', 255),
+            'document_invitation_salutation' => $this->requiredText($invitationSalutation, 'Anrede', 500),
+            'document_invitation_introduction' => $this->requiredText($invitationIntroduction, 'Einladungstext', 4000),
+            'document_invitation_closing' => $this->requiredText($invitationClosing, 'Grußformel', 500),
+            'document_invitation_sender' => $this->requiredText($invitationSender, 'Absender', 500),
+        ];
+        $committeeCodes = $this->normalizeCommitteeCodes($committeeCodesJson);
+        $encodedCodes = json_encode($committeeCodes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+
+        foreach ($values as $key => $value) {
+            $this->config->setAppValue(Application::APP_ID, $key, $value);
+        }
+        $this->config->setAppValue(Application::APP_ID, 'document_committee_codes_json', $encodedCodes);
+
+        return $this->documentOrganization();
     }
 
     public function normalizeMeetingType(string $meetingType): string {
@@ -118,6 +171,59 @@ class BrtopSettingsService {
         $value = trim($this->config->getAppValue(Application::APP_ID, $key, $default));
 
         return $value !== '' ? $value : $default;
+    }
+
+    private function textValue(string $key, string $default): string {
+        $value = trim(str_replace(["\r\n", "\r"], "\n", $this->config->getAppValue(Application::APP_ID, $key, $default)));
+        return $value !== '' ? $value : $default;
+    }
+
+    private function requiredText(string $value, string $label, int $maxLength): string {
+        $value = trim(str_replace(["\r\n", "\r", "\0"], ["\n", "\n", ''], $value));
+        if ($value === '') {
+            throw new \InvalidArgumentException($label . ' darf nicht leer sein.');
+        }
+        if (strlen($value) > $maxLength) {
+            throw new \InvalidArgumentException($label . ' ist zu lang.');
+        }
+        if (preg_match('/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/u', $value) === 1) {
+            throw new \InvalidArgumentException($label . ' enthält ungültige Steuerzeichen.');
+        }
+        return $value;
+    }
+
+    private function normalizeCommitteeCodes(string $json): array {
+        try {
+            $items = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new \InvalidArgumentException('Der Ausschusskatalog ist kein gültiges JSON-Array.', 0, $e);
+        }
+        if (!is_array($items) || $items === [] || count($items) > 30) {
+            throw new \InvalidArgumentException('Der Ausschusskatalog muss zwischen 1 und 30 Einträge enthalten.');
+        }
+
+        $normalized = [];
+        $seen = [];
+        foreach ($items as $index => $item) {
+            if (!is_array($item)) {
+                throw new \InvalidArgumentException('Ausschusscode ' . ($index + 1) . ' ist kein Objekt.');
+            }
+            $value = strtoupper(trim((string)($item['value'] ?? '')));
+            $label = trim((string)($item['label'] ?? ''));
+            if (preg_match('/^[A-Z][A-Z0-9_-]{1,15}$/', $value) !== 1) {
+                throw new \InvalidArgumentException('Ausschusscode ' . ($index + 1) . ' ist ungültig.');
+            }
+            if ($label === '' || strlen($label) > 80) {
+                throw new \InvalidArgumentException('Bezeichnung für Ausschusscode ' . $value . ' ist ungültig.');
+            }
+            if (isset($seen[$value])) {
+                throw new \InvalidArgumentException('Ausschusscode ' . $value . ' ist doppelt vorhanden.');
+            }
+            $seen[$value] = true;
+            $normalized[] = ['value' => $value, 'label' => $label];
+        }
+
+        return $normalized;
     }
 
     private function weekdayValue(string $key, int $default): int {

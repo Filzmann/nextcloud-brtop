@@ -71,6 +71,17 @@ Begründung verpflichtend.
 | D4 | Nicht vorhandene Produktfunktionen | README-Einschränkungen mit der sichtbaren Oberfläche vergleichen. | Nicht umgesetzte Ersatzmitglied-, E-Mail-, PDF-/DOCX- und Produktivrechte-Funktionen werden nicht fälschlich als abgenommen dokumentiert. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | D5 | Datensparsame Abnahmeunterlagen | Formular, Screenshots und erzeugte Testdokumente auf Inhalte prüfen. | Es wurden nur synthetische Daten dokumentiert; keine vertraulichen Inhalte, Zugangsdaten oder unnötigen Pfade sind enthalten. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
+## F. Dokumentkonfiguration
+
+| ID | Was wird geprüft? | Auszuführende Schritte | Erwartetes Ergebnis | Ergebnis | Warum/Beleg/Abweichung |
+|---|---|---|---|---|---|
+| F1 | Organisationsstammdaten | In der BRTop-Administration synthetischen Gremiennamen, Anschrift, Ausstellungsort, Ausschusskatalog und Einladungstexte speichern; anschließend neu laden. | Werte werden validiert gespeichert und nach dem Neuladen unverändert angezeigt. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| F2 | Textvorlagen als Entwurf | Eine Einladung-, Protokoll- oder Beschlussvorlage mit ausschließlich erlaubten Platzhaltern prüfen und als Entwurf speichern. | Die Vorschau verwendet synthetische Beispielwerte; der Entwurf ist versioniert und noch nicht aktiv. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| F3 | Freigabe und Nutzung | Einen gültigen Entwurf freigeben und danach ein neues synthetisches Dokument erzeugen. | Nur die freigegebene Version wird für neue Dokumente verwendet; Metadaten enthalten Vorlagentyp und Version. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| F4 | Ungültige Vorlage und Fallback | Eine Vorlage mit unbekanntem Pflichtplatzhalter beziehungsweise eine ungültige freigegebene Version prüfen. | Die Validierung weist den Entwurf zurück; bei einer ungültigen freigegebenen Version bleibt die eingebaute Vorlage nutzbar und der Fehler wird diagnostizierbar protokolliert. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| F5 | ODT-Vorlage | Eine synthetische ODT-Datei mit gültiger Archivstruktur sowie eine manipulierte oder unzulässige Datei prüfen. | ZIP-/ODT-Struktur, MIME-Typ, Pfade, Platzhalter und aktive Inhalte werden serverseitig geprüft; unzulässige Dateien werden abgewiesen. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| F6 | Runtime-Abgrenzung | Dokumentkonfiguration und erzeugte Dateien im realen DDEV-/Nextcloud-/Browserkontext prüfen. | Dieser Nachweis ist mit dem vorliegenden Entwicklungsstand noch offen; Tests allein ersetzen keine echte ODT-ZIP-Runtime- oder sichtbare Browserabnahme. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+
 ## E. Zeitlich begrenzter Admin-Vollzugriff
 
 | ID | Was wird geprüft? | Auszuführende Schritte | Erwartetes Ergebnis | Ergebnis | Warum/Beleg/Abweichung |
