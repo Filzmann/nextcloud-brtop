@@ -70,13 +70,13 @@ namespace {
         }
     }
 
-    foreach (['updateSettings', 'seedDemo', 'legislature', 'saveLegislature', 'activateLegislature', 'absenceSuggestions', 'saveConfirmedAbsences'] as $adminAction) {
-        $method = new \ReflectionMethod(ApiController::class, $adminAction);
-        if ($method->getAttributes(NoAdminRequired::class) !== []) {
-            throw new \RuntimeException($adminAction . ' must remain restricted to Nextcloud admins.');
+    foreach (['updateSettings', 'seedDemo', 'legislature', 'saveLegislature', 'activateLegislature', 'absenceSuggestions', 'saveConfirmedAbsences'] as $permissionAction) {
+        $method = new \ReflectionMethod(ApiController::class, $permissionAction);
+        if ($method->getAttributes(NoAdminRequired::class) === []) {
+            throw new \RuntimeException($permissionAction . ' must be reachable for server-side fachlich authorized BR members without native admin status.');
         }
         if ($method->getAttributes(NoCSRFRequired::class) !== []) {
-            throw new \RuntimeException($adminAction . ' should keep the default CSRF protection.');
+            throw new \RuntimeException($permissionAction . ' should keep the default CSRF protection.');
         }
     }
 

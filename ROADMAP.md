@@ -49,8 +49,6 @@ Entwicklungsruntime ist davon getrennt und ersetzt keinen RC-Nachweis.
 
 - Zusammensetzung des Gremiums, Listen, Ersatzmitglieder und Reihenfolge der
   Nachladung.
-- Rechte für Vorsitz, Stellvertretung, Schriftführung, Ausschüsse und normale
-  BR-Mitglieder.
 - Rechtsverbindlichkeit, Versionierung, Korrektur und Aufbewahrung erzeugter
   Dokumente.
 - Ablageort, Dateirechte, Lösch- und Rückbauvertrag.

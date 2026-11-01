@@ -10,15 +10,17 @@ use OCA\BrTop\Service\BrAccessService;
 use OCA\BrTop\Service\BrtopLogger;
 use OCA\BrTop\Service\BrtopSettingsService;
 use OCA\BrTop\Service\DocumentTemplateService;
+use OCA\BrTop\Service\BrPermissionService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Throwable;
 
-/** Native admin route plus the stricter app-local temporary full-access gate. */
+/** Fachlich berechtigte BR-Konfiguration; native Administration allein erteilt kein Recht. */
 final class DocumentConfigurationController extends Controller {
     public function __construct(
         IRequest $request,
@@ -32,6 +34,7 @@ final class DocumentConfigurationController extends Controller {
     }
 
     #[NoCSRFRequired]
+    #[NoAdminRequired]
     public function state(): JSONResponse {
         return $this->respond(fn(): array => [
             'ok' => true,
@@ -41,6 +44,7 @@ final class DocumentConfigurationController extends Controller {
     }
 
     #[NoCSRFRequired]
+    #[NoAdminRequired]
     public function template(string $templateKey, int $version): JSONResponse {
         return $this->respond(fn(): array => [
             'ok' => true,
@@ -48,6 +52,7 @@ final class DocumentConfigurationController extends Controller {
         ], 'document_configuration_template', ['template_key' => $templateKey, 'template_version' => $version]);
     }
 
+    #[NoAdminRequired]
     public function saveOrganization(
         string $councilName,
         string $councilAddress,
@@ -73,6 +78,7 @@ final class DocumentConfigurationController extends Controller {
         ], 'save_document_organization');
     }
 
+    #[NoAdminRequired]
     public function saveDraft(string $templateKey, string $content, string $encoding = 'plain'): JSONResponse {
         return $this->respond(fn(): array => [
             'ok' => true,
@@ -82,6 +88,7 @@ final class DocumentConfigurationController extends Controller {
         ], 'save_document_template_draft', ['template_key' => $templateKey]);
     }
 
+    #[NoAdminRequired]
     public function preview(string $templateKey, string $content, string $encoding = 'plain'): JSONResponse {
         return $this->respond(function () use ($templateKey, $content, $encoding): array {
             $preview = $this->templates->preview($templateKey, $this->decodeContent($templateKey, $content, $encoding));
@@ -93,6 +100,7 @@ final class DocumentConfigurationController extends Controller {
         }, 'preview_document_template', ['template_key' => $templateKey]);
     }
 
+    #[NoAdminRequired]
     public function approve(string $templateKey, int $version): JSONResponse {
         return $this->respond(fn(): array => [
             'ok' => true,
@@ -128,7 +136,7 @@ final class DocumentConfigurationController extends Controller {
     private function respond(callable $callback, string $action, array $context = []): JSONResponse {
         try {
             $user = $this->userSession->getUser();
-            $this->access->assertAdmin($user?->getUID() ?? '');
+            $this->access->assertPermission($user?->getUID() ?? '', BrPermissionService::SETTINGS_MANAGE);
             return new JSONResponse($callback());
         } catch (AccessDeniedException $e) {
             return new JSONResponse(['ok' => false, 'message' => $e->getMessage()], Http::STATUS_FORBIDDEN);

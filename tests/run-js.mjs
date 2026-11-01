@@ -10,6 +10,7 @@ runJavaScriptSuite({
         'tests/js/agenda-editor-smoke.js',
         'tests/js/admin-access-smoke.js',
         'tests/js/admin-document-configuration-smoke.js',
+        'tests/js/br-dpo-settings-smoke.js',
         'tests/js/absence-review-smoke.js',
         'tests/js/meeting-components-smoke.js',
         'tests/js/model-smoke.js',

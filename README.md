@@ -13,7 +13,7 @@ Noch nicht enthalten:
 - Import von Urlaubs-/Krankmeldungen,
 - echte E-Mail-Versendung,
 - PDF/DOCX-Export,
-- Rollen- und Rechtekonzept.
+- produktionsreifes, frei konfigurierbares Rollen- und Rechtekonzept.
 
 Der aktuelle Entwicklungsstand enthält zusätzlich eine app-lokale
 Dokumentkonfiguration: Organisationsstammdaten und Ausschusskataloge können
@@ -52,7 +52,9 @@ Dann in Nextcloud öffnen:
 /apps/brtop
 ```
 
-Ein Nextcloud-Administrationskonto erhält nicht automatisch Sitzungs- oder Gremienrechte. Ausschließlich Mitglieder der nativen Nextcloud-Gruppe `Datenschutzbeauftragte` können in der BRTop-Fachoberfläche die Freigabehistorie lesen und aktuellen Administrationskonten für 1, 4, 8 oder höchstens 24 Stunden fachlichen Vollzugriff erteilen oder ihn vorzeitig widerrufen. Native Administration allein genügt nicht. Beginn, geplantes Ende, Freigabe und Widerruf werden app-lokal protokolliert und in Datenschutz- sowie Berechtigungsprovider einbezogen. Ein fehlender Vollzugriff wird dem betroffenen Administrationskonto sicher angezeigt; der Direktlink zur Steuerung erscheint nur, wenn dasselbe Konto zugleich Datenschutzbeauftragte*r ist. Technische Systemeinstellungen bleiben davon getrennt im Nextcloud-Adminbereich.
+Alle aktuellen Mitglieder des kanonischen LocalBase-BR-Vertrags erhalten standardmäßig die getrennten Fachrechte für Lesen aller Sitzungen, Bearbeiten des Sitzungsprozesses, Dokumenterzeugung, Einstellungen und Vorlagen, Legislaturverwaltung sowie Abwesenheitsbestätigung. Lese- und Bearbeitungsrecht bleiben technisch getrennt und gelten im gemeinsamen Scope aller BR-Sitzungen.
+
+Ein Nextcloud-Administrationskonto erhält nicht automatisch Sitzungs- oder Gremienrechte. Der aktuelle BR-Vorsitz sowie aktuelle BR-Mitglieder mit einer durch den Vorsitz explizit zugewiesenen persönlichen BR-Datenschutzberechtigung können in der BRTop-Fachoberfläche die Freigabehistorie lesen und aktuellen Administrationskonten für 1, 4, 8 oder höchstens 24 Stunden fachlichen Vollzugriff erteilen oder ihn vorzeitig widerrufen. Native Administration allein genügt nicht. Die persönliche Berechtigung gilt nur während aktueller BR-Mitgliedschaft und erlaubt keine Weiterdelegation. Beginn, geplantes Ende, Freigabe und Widerruf werden app-lokal protokolliert und in Datenschutz- sowie Berechtigungsprovider einbezogen. Technische Systemeinstellungen bleiben davon getrennt im Nextcloud-Adminbereich.
 
 ## Datenschutz
 
@@ -63,10 +65,11 @@ Beschlussinhalte sowie nicht sicher zuordenbare Freitextnennungen bleiben zum
 Schutz von Gremien- und Drittpersonendaten ausgeschlossen; die Ausgabe weist
 diese Grenze als `partial` aus.
 
-Der Processing-Metadata-Provider beschreibt ergänzend die fünf Verarbeitungen
+Der Processing-Metadata-Provider beschreibt ergänzend die sechs Verarbeitungen
 Legislatur/Besetzung, Sitzung/Agenda/Protokoll, Ladung/Abwesenheit,
 Dokumenterzeugung mit persönlicher Nextcloud-Dateiablage und temporären
-Admin-Vollzugriff aus `resources/privacy-processing.json`. Der Katalog enthält
+Admin-Vollzugriff sowie die persönliche BR-Datenschutzberechtigung aus
+`resources/privacy-processing.json`. Der Katalog enthält
 keine personenbezogenen Laufzeitdaten; offene fachliche und rechtliche
 Entscheidungen sind als `PRIVACY-DECISION-REQUIRED` sichtbar.
 

@@ -38,6 +38,7 @@ namespace {
         'invitation_snapshot_and_absence_management',
         'document_generation_and_file_storage',
         'temporary_admin_full_access',
+        'br_dpo_permission_assignment',
     ]) {
         throw new RuntimeException('Der app-lokale Processing-Katalog ist unvollständig.');
     }
@@ -51,6 +52,11 @@ namespace {
     foreach (['Vorlagenversion', 'Organisationsstammdaten', 'Freitextinhalte der Vorlagen werden nicht automatisch Personen zugeordnet'] as $contract) {
         if (!str_contains($encodedCatalog, $contract)) {
             throw new RuntimeException('Der Processing-Katalog bildet die Dokumentkonfiguration nicht vollständig ab: ' . $contract);
+        }
+    }
+    foreach (['AppConfig-Zuweisung der BR-Datenschutzberechtigung', 'ausschließlich aktuellen BR-Mitgliedern', 'BR-Vorsitz'] as $contract) {
+        if (!str_contains($encodedCatalog, $contract)) {
+            throw new RuntimeException('Der Processing-Katalog bildet die persönliche BR-Datenschutzberechtigung nicht vollständig ab: ' . $contract);
         }
     }
 

@@ -8,6 +8,7 @@ use OCA\BrTop\Controller\ApiController;
 use OCA\BrTop\Controller\PageController;
 use OCA\BrTop\Exception\AccessDeniedException;
 use OCA\BrTop\Service\BrAccessService;
+use OCA\BrTop\Service\BrPermissionService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -16,14 +17,28 @@ use OCP\AppFramework\Middleware;
 use OCP\IUserSession;
 
 class BrAccessMiddleware extends Middleware {
-    private const ADMIN_ACTIONS = [
-        'updateSettings',
-        'seedDemo',
-        'legislature',
-        'saveLegislature',
-        'activateLegislature',
-        'absenceSuggestions',
-        'saveConfirmedAbsences',
+    private const ACTION_PERMISSIONS = [
+        'state' => BrPermissionService::SESSION_READ,
+        'createMeeting' => BrPermissionService::SESSION_MANAGE,
+        'planNextRegularMeeting' => BrPermissionService::SESSION_MANAGE,
+        'deleteMeeting' => BrPermissionService::SESSION_MANAGE,
+        'addTop' => BrPermissionService::SESSION_MANAGE,
+        'moveTop' => BrPermissionService::SESSION_MANAGE,
+        'changeTopDepth' => BrPermissionService::SESSION_MANAGE,
+        'updateTopSubject' => BrPermissionService::SESSION_MANAGE,
+        'deleteTop' => BrPermissionService::SESSION_MANAGE,
+        'addProtocolBlock' => BrPermissionService::SESSION_MANAGE,
+        'updateProtocolBlock' => BrPermissionService::SESSION_MANAGE,
+        'generateInvitation' => BrPermissionService::DOCUMENT_GENERATE,
+        'generateProtocol' => BrPermissionService::DOCUMENT_GENERATE,
+        'generateResolutions' => BrPermissionService::DOCUMENT_GENERATE,
+        'updateSettings' => BrPermissionService::SETTINGS_MANAGE,
+        'seedDemo' => BrPermissionService::SETTINGS_MANAGE,
+        'legislature' => BrPermissionService::LEGISLATURE_MANAGE,
+        'saveLegislature' => BrPermissionService::LEGISLATURE_MANAGE,
+        'activateLegislature' => BrPermissionService::LEGISLATURE_MANAGE,
+        'absenceSuggestions' => BrPermissionService::ABSENCE_CONFIRM,
+        'saveConfirmedAbsences' => BrPermissionService::ABSENCE_CONFIRM,
     ];
 
     public function __construct(
@@ -42,12 +57,8 @@ class BrAccessMiddleware extends Middleware {
 
         $user = $this->userSession->getUser();
         $uid = $user?->getUID() ?? '';
-        if ($controller instanceof ApiController && in_array($methodName, self::ADMIN_ACTIONS, true)) {
-            $this->accessService->assertAdmin($uid);
-            return;
-        }
-
-        $this->accessService->assertCanUse($uid);
+        $permission = self::ACTION_PERMISSIONS[$methodName] ?? '';
+        $this->accessService->assertPermission($uid, $permission);
     }
 
     public function afterException(Controller $controller, string $methodName, \Exception $exception) {

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Getrennte BRTop-Fachrechte für Sitzungslesen, Sitzungsbearbeitung,
+  Dokumenterzeugung, Einstellungen, Legislatur und Abwesenheitsbestätigung
+  eingeführt. Alle aktuellen BR-Mitglieder erhalten diese Rechte als Default
+  im gemeinsamen Scope aller Sitzungen; native Administration benötigt
+  weiterhin eine aktive app-lokale Freigabe. Der BR-Vorsitz kann die
+  Freigabesteuerung einzelnen aktuellen BR-Mitgliedern als persönliche
+  BR-Datenschutzberechtigung über ein Auswahlmenü übertragen. Provider,
+  Art.-15-Projektion und Verarbeitungskatalog bilden die neue Grenze ab.
 - Dokumentkonfiguration ergänzt: Organisationsstammdaten und Ausschusskataloge
   werden validiert gespeichert; Text- und Protokoll-ODT-Vorlagen können als
   Entwurf versioniert, geprüft und ausdrücklich freigegeben werden. Neue
@@ -15,13 +23,11 @@
   `IEventListener`-Vertrag; die Berechtigungssemantik bleibt unverändert.
   Die deklarierten Hauptversionen 29 bis 32 waren nicht Teil dieses Laufs.
 - Die app-lokale Admin-Vollzugriffssteuerung aus dem technischen Adminbereich
-  in die rollenabhängige BRTop-Fachoberfläche verschoben. Nur
-  `Datenschutzbeauftragte` können Historie lesen sowie Freigaben für aktuelle
-  native Administrationskonten erteilen oder widerrufen; native Administration
+  in die rollenabhängige BRTop-Fachoberfläche verschoben; native Administration
   allein, gewöhnliche Konten und manipulierte Ziele bleiben mutationsfrei
   abgewiesen. Sichere Hinweis- und Direktlinkregeln sowie Datenschutz- und
   Berechtigungsprojektionen wurden daran angeglichen.
-- App-eigenen Processing-Metadata-Katalog für fünf BR-TOP-Verarbeitungen über
+- App-eigenen Processing-Metadata-Katalog für sechs BR-TOP-Verarbeitungen über
   den öffentlichen Datenschutz-V1-Vertrag veröffentlicht.
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
 

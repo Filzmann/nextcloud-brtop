@@ -6,9 +6,10 @@ BRTop ist die kanonische Quelle für Sitzungen, Tagesordnungspunkte,
 Ladungssnapshots, Protokollinhalte, Beschlüsse und die daraus erzeugten
 Dokumente. OrgSuite stellt nur die BR-Navigation bereit; LocalBase liefert
 gemeinsame, versionierte Basisverträge.
-Der Betriebsrat ist fachlicher Owner dieser Verarbeitungen;
-`Datenschutzbeauftragte` verantwortet davon getrennt Retention-Policies,
-zweckgebundene Sperren und die Adminfreigabehistorie.
+Der Betriebsrat ist fachlicher Owner dieser Verarbeitungen. Die fachliche
+Adminfreigabehistorie verwalten BR-Vorsitz und persönlich berechtigte aktuelle
+BR-Mitglieder; allgemeine Datenschutzbeauftragte verantworten davon getrennt
+Retention-Policies und zweckgebundene Sperren.
 
 ## Schichten und Daten
 
@@ -25,19 +26,25 @@ zweckgebundene Sperren und die Adminfreigabehistorie.
 ## Rechte und Integrationen
 
 Der LocalBase-BR-Gruppenvertrag ist die einzige Laufzeitquelle für Mitglieder,
-Vorsitz und Stellvertretung. Rechte werden serverseitig geprüft; Navigation
-erteilt keine Rechte. Native Nextcloud-Administration benötigt für
-fachlichen Vollzugriff eine app-lokale, zeitlich begrenzte Freigabe.
-Ausschließlich Mitglieder der nativen Gruppe `Datenschutzbeauftragte` dürfen
-die Freigabehistorie lesen und Freigaben für aktuelle native
-Administrationskonten in der BRTop-Fachoberfläche erteilen oder widerrufen.
+Vorsitz und Stellvertretung. Alle aktuellen Mitglieder erhalten standardmäßig
+die getrennten Rechte `brtop.session.read`, `brtop.session.manage`,
+`brtop.document.generate`, `brtop.settings.manage`,
+`brtop.legislature.manage` und `brtop.absence.confirm`. Lesen und Bearbeiten
+gelten im gemeinsamen Scope aller BR-Sitzungen und bleiben serverseitig
+getrennt geprüft; Navigation erteilt keine Rechte. Native
+Nextcloud-Administration benötigt für fachlichen Vollzugriff eine app-lokale,
+zeitlich begrenzte Freigabe. Der aktuelle BR-Vorsitz darf die
+Freigabehistorie lesen, Freigaben für aktuelle native Administrationskonten
+erteilen oder widerrufen und die persönliche BR-Datenschutzberechtigung
+ausschließlich aktuellen BR-Mitgliedern zuweisen. Persönlich Berechtigte
+dürfen Freigaben verwalten, aber die Berechtigung nicht weiterdelegieren.
 Die authentifizierten Endpunkte sind deshalb nicht an die native Adminroute
 gebunden; Schreibrequests bleiben CSRF-geschützt und prüfen Rolle, Zielkonto
 und Dauer serverseitig. Rollenverlust, ungültige Ziele, Persistenzfehler,
 Ablauf und Verlust des nativen Adminstatus verweigern ohne zusätzliche
 Fachrechte. Ein fehlender Vollzugriff wird ausschließlich dem betroffenen
 Administrationskonto angezeigt; der direkte Sprung zur Steuerung erscheint
-nur beim selben Konto mit zusätzlicher Datenschutzrolle.
+nur beim selben Konto mit fachlichem Freigabeverwaltungsrecht.
 
 Datenschutz- und Berechtigungsprovider projizieren nur ausdrücklich
 zuordenbare app-eigene Informationen. Datei- und Dokumentinhalte werden ohne
@@ -49,7 +56,8 @@ gesonderten sicheren Vertrag nicht als Volltext ausgewertet.
 für `council_legislature_and_roster_management`,
 `meeting_agenda_and_protocol_management`,
 `invitation_snapshot_and_absence_management`,
-`document_generation_and_file_storage` und `temporary_admin_full_access`.
+`document_generation_and_file_storage`, `temporary_admin_full_access` und
+`br_dpo_permission_assignment`.
 Der öffentliche V1-Provider von `flz_data_protection` lädt diesen Katalog
 lazy und veröffentlicht keine personenbezogenen Laufzeitdaten.
 
@@ -58,8 +66,9 @@ Besetzung liefern die personelle Basis; Sitzungs-, Agenda- und
 Protokolltabellen halten die kanonischen Gremieninhalte; Ladungssnapshots und
 Abwesenheitsprüfung dokumentieren den konkreten Empfängerkreis; abgeleitete
 Dokumente werden im persönlichen Nextcloud-Dateibereich gespeichert und sind
-keine zweite Fachwahrheit. Der bestehende temporäre Admin-Vollzugriff bleibt
-als eigene, höchstens 24 Stunden wirksame Verarbeitung sichtbar.
+keine zweite Fachwahrheit. Der bestehende temporäre Admin-Vollzugriff und die
+persönliche BR-Datenschutzberechtigung bleiben als getrennte Verarbeitungen
+sichtbar.
 
 Die bestehende Art.-15-Projektion bleibt bewusst `partial`: Unsichere
 Freitexttreffer, Datei- und Anhangpfade sowie Gremien- und Dateiinhalte werden

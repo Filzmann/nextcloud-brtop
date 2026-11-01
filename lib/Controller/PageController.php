@@ -7,6 +7,7 @@ namespace OCA\BrTop\Controller;
 use OCA\BrTop\AppInfo\Application;
 use OCA\BrTop\Service\BrAccessService;
 use OCA\BrTop\Service\TemporaryAdminAccessService;
+use OCA\BrTop\Service\BrPermissionService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -32,6 +33,9 @@ class PageController extends Controller {
         $canManageAdminAccess = $this->temporaryAdminAccess->canManage();
         $showMissingAdminGrant = $this->temporaryAdminAccess->currentAdminNeedsGrant();
         $hasBrTopAccess = $this->access->canUse($uid);
+        $canManageSettings = $this->access->can($uid, BrPermissionService::SETTINGS_MANAGE);
+        $canAssignBrDpo = $this->access->can($uid, BrPermissionService::BR_DPO_ASSIGN);
+        $canAccessSettings = $canManageSettings || $canAssignBrDpo || $canManageAdminAccess;
         if (!$hasBrTopAccess && !$canManageAdminAccess && !$showMissingAdminGrant) {
             return new TemplateResponse('core', '403', [], 'guest', Http::STATUS_FORBIDDEN);
         }
@@ -40,6 +44,9 @@ class PageController extends Controller {
             'showMissingAdminGrant' => $showMissingAdminGrant,
             'showAdminAccessLink' => $canManageAdminAccess && $showMissingAdminGrant,
             'hasBrTopAccess' => $hasBrTopAccess,
+            'canManageSettings' => $canManageSettings,
+            'canAssignBrDpo' => $canAssignBrDpo,
+            'canAccessSettings' => $canAccessSettings,
         ]);
     }
 }

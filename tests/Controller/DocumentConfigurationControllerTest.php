@@ -45,6 +45,7 @@ namespace OCA\BrTop\Tests {
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Repository\DocumentTemplateRepositoryInterface;
     use OCA\BrTop\Service\BrAccessService;
+    use OCA\BrTop\Service\BrPermissionService;
     use OCA\BrTop\Service\BrtopLogger;
     use OCA\BrTop\Service\BrtopSettingsService;
     use OCA\BrTop\Service\DocumentTemplateEngine;
@@ -70,7 +71,7 @@ namespace OCA\BrTop\Tests {
     $access = new class extends BrAccessService {
         public bool $allowed=true;
         public function __construct() {}
-        public function assertAdmin(string $uid):void{if(!$this->allowed)throw new AccessDeniedException('Keine Berechtigung.');}
+        public function assertPermission(string $uid,string $permission):void{if($permission!==BrPermissionService::SETTINGS_MANAGE||!$this->allowed)throw new AccessDeniedException('Keine Berechtigung.');}
     };
     $session = new class implements \OCP\IUserSession {
         public function getUser(){return new class {public function getUID():string{return 'admin-user';}};}
@@ -80,13 +81,13 @@ namespace OCA\BrTop\Tests {
 
     foreach(['saveOrganization','saveDraft','approve'] as $method){
         if((new \ReflectionMethod(DocumentConfigurationController::class,$method))->getAttributes(\OCP\AppFramework\Http\Attribute\NoCSRFRequired::class)!==[])throw new \RuntimeException("{$method} darf CSRF-Schutz nicht abschalten.");
-        if((new \ReflectionMethod(DocumentConfigurationController::class,$method))->getAttributes(\OCP\AppFramework\Http\Attribute\NoAdminRequired::class)!==[])throw new \RuntimeException("{$method} muss zusätzlich Nextcloud-Adminrechte verlangen.");
+        if((new \ReflectionMethod(DocumentConfigurationController::class,$method))->getAttributes(\OCP\AppFramework\Http\Attribute\NoAdminRequired::class)===[])throw new \RuntimeException("{$method} muss für fachlich berechtigte BR-Mitglieder ohne native Adminrolle erreichbar sein.");
     }
 
     $access->allowed=false;
-    if($controller->state()->getStatus()!==Http::STATUS_FORBIDDEN)throw new \RuntimeException('Admin-Konfiguration darf ohne aktive app-lokale Freigabe nicht gelesen werden.');
+    if($controller->state()->getStatus()!==Http::STATUS_FORBIDDEN)throw new \RuntimeException('Dokumentkonfiguration darf ohne BT3 nicht gelesen werden.');
     $access->allowed=true;
-    if($controller->state()->getStatus()!==200)throw new \RuntimeException('Freigegebene Administration kann den Konfigurationsstand nicht lesen.');
+    if($controller->state()->getStatus()!==200)throw new \RuntimeException('BR-Mitglied mit BT3 kann den Konfigurationsstand nicht lesen.');
 
     $before=count($repository->rows);
     $invalid=$controller->saveDraft('protocol_markdown','{{UNKNOWN}}');

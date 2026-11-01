@@ -5,6 +5,10 @@ script('localbase', 'api/api-client');
 script('brtop', 'modules/api');
 script('orgsuite', 'suite-navigation');
 script('brtop', 'admin-access');
+script('brtop', 'settings-tabs');
+if ($_['canAssignBrDpo'] ?? false) {
+    script('brtop', 'br-dpo-settings');
+}
 if ($_['hasBrTopAccess'] ?? false) {
     script('localbase', 'ui/ui');
     script('brtop', 'modules/ui');
@@ -41,7 +45,7 @@ style('orgsuite', 'suite-navigation');
                 <summary aria-label="Informationen zum fehlenden fachlichen Admin-Vollzugriff"><span aria-hidden="true">⚠</span></summary>
                 <div class="brtop-admin-access-warning__panel">
                     <strong>Kein zeitlich begrenzter fachlicher Vollzugriff aktiv.</strong>
-                    <p>Native Nextcloud-Administration reicht nicht aus. Mitglieder der Gruppe Datenschutzbeauftragte können eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
+                    <p>Native Nextcloud-Administration reicht nicht aus. Der BR-Vorsitz oder ein aktuell persönlich berechtigtes BR-Mitglied kann eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
                     <?php if ($_['showAdminAccessLink'] ?? false): ?><a href="#brtop-full-access-heading" target="_blank" rel="noopener noreferrer">Freigabesteuerung in neuem Tab öffnen</a><?php endif; ?>
                 </div>
             </details>
@@ -49,14 +53,41 @@ style('orgsuite', 'suite-navigation');
     </div>
     <div id="brtop-notice" class="brtop-notice" role="status" aria-live="polite" hidden></div>
 
+    <?php if ($_['hasBrTopAccess'] ?? false): ?>
+        <nav class="brtop-tabs" role="tablist" aria-label="BRTop-Bereiche">
+            <button id="brtop-sessions-tab" type="button" role="tab" aria-selected="true" aria-controls="brtop-sessions-panel" data-brtop-tab>Sitzungen</button>
+            <?php if ($_['canAccessSettings'] ?? false): ?><button id="brtop-settings-tab" type="button" role="tab" aria-selected="false" aria-controls="brtop-settings-panel" data-brtop-tab tabindex="-1">Einstellungen</button><?php endif; ?>
+        </nav>
+        <?php if ($_['canAccessSettings'] ?? false): ?>
+        <section id="brtop-settings-panel" class="brtop-settings-panel" role="tabpanel" aria-labelledby="brtop-settings-tab" hidden>
+            <?php if ($_['canManageSettings'] ?? false): ?><?php require __DIR__ . '/admin.php'; ?><?php endif; ?>
+            <?php if ($_['canAssignBrDpo'] ?? false): ?>
+                <section class="brtop-card" aria-labelledby="brtop-br-dpo-heading">
+                    <h2 id="brtop-br-dpo-heading">BR-Datenschutzberechtigung</h2>
+                    <p>Der BR-Vorsitz kann diese einzelne Berechtigung ausschließlich aktuellen Betriebsratsmitgliedern übertragen. Sie erlaubt die Steuerung zeitlich begrenzter Adminfreigaben, aber keine Weiterdelegation.</p>
+                    <form id="brtop-br-dpo-form">
+                        <label for="brtop-br-dpo-member-select">Berechtigte BR-Mitglieder</label>
+                        <select id="brtop-br-dpo-member-select" name="memberUids" multiple size="6" aria-describedby="brtop-br-dpo-help"></select>
+                        <small id="brtop-br-dpo-help">Mehrere Personen können mit Strg beziehungsweise Cmd ausgewählt werden.</small>
+                        <button type="submit" class="primary">Berechtigung speichern</button>
+                    </form>
+                    <p id="brtop-br-dpo-status" role="status" aria-live="polite"></p>
+                </section>
+            <?php endif; ?>
+
     <?php if ($_['canManageAdminAccess'] ?? false): ?>
         <section id="brtop-full-access" class="brtop-card brtop-access-card" aria-labelledby="brtop-full-access-heading">
             <h2 id="brtop-full-access-heading" tabindex="-1">Zeitlich begrenzter Admin-Vollzugriff</h2>
-            <p>Ausschließlich Mitglieder der Gruppe Datenschutzbeauftragte dürfen aktuellen Nextcloud-Administrationskonten fachlichen Vollzugriff erteilen. Maximal 24 Stunden sind zulässig.</p>
+            <p>Der BR-Vorsitz oder ein aktuell persönlich berechtigtes BR-Mitglied darf aktuellen Nextcloud-Administrationskonten fachlichen Vollzugriff erteilen. Maximal 24 Stunden sind zulässig.</p>
             <form id="brtop-full-access-form"><label>Admin-Benutzerkennung <input name="targetUid" required maxlength="64" autocomplete="off"></label><label>Dauer <select name="durationMinutes" required><option value="60">1 Stunde</option><option value="240">4 Stunden</option><option value="480">8 Stunden</option><option value="1440">24 Stunden</option></select></label><label><input id="brtop-full-access-enabled" name="enabled" type="checkbox" required> Vollzugriff für diesen Zeitraum aktivieren</label><button type="submit" class="primary">Freigabe aktivieren</button></form>
             <p id="brtop-full-access-status" role="status" aria-live="polite"></p>
             <div class="brtop-table-wrap" data-persistent-horizontal-scroll tabindex="0" role="region" aria-label="Protokollierte Admin-Vollzugriffszeiträume"><table><caption>Protokollierte Admin-Vollzugriffszeiträume</caption><thead><tr><th>Ziel-Admin</th><th>Freigegeben von</th><th>Von</th><th>Geplant bis</th><th>Tatsächlich bis / Status</th><th>Aktion</th></tr></thead><tbody id="brtop-full-access-history"><tr><td colspan="6">Freigaben werden geladen.</td></tr></tbody></table></div>
         </section>
+    <?php endif; ?>
+
+        </section>
+        <?php endif; ?>
+        <section id="brtop-sessions-panel" role="tabpanel" aria-labelledby="brtop-sessions-tab">
     <?php endif; ?>
 
     <?php if ($_['hasBrTopAccess'] ?? false): ?>
@@ -117,6 +148,8 @@ style('orgsuite', 'suite-navigation');
     </section>
 
     <?php endif; ?>
+
+    <?php if ($_['hasBrTopAccess'] ?? false): ?></section><?php endif; ?>
 
     <div class="brtop-persistent-scroll-track" data-persistent-horizontal-scroll-track tabindex="0" role="region" aria-label="Tabelle horizontal scrollen" hidden><div data-persistent-horizontal-scroll-spacer></div></div>
 </div>
