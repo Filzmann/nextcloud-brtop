@@ -23,8 +23,6 @@ Entwicklungsruntime ist davon getrennt und ersetzt keinen RC-Nachweis.
 
 ## Aktueller Fokus
 
-- Die manuellen Prüfungen werden im ausfüllbaren
-  [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
 - Den bestehenden Sitzungs-, Agenda- und Dokumentprozess fachlich
   charakterisieren und auf einem realitätsnahen Staging abnehmen.
 - Vor produktiver Nutzung ein vollständiges Rollen-, Rechte-, Datenschutz-
