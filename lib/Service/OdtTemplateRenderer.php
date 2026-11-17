@@ -8,37 +8,39 @@ use RuntimeException;
 use ZipArchive;
 
 class OdtTemplateRenderer {
-    public function renderProtocol(array $meeting, array $tops): string {
-        $templatePath = __DIR__ . '/../../templates/odt/protokoll-template.odt';
-
-        if (!is_file($templatePath)) {
-            throw new RuntimeException('ODT-Template nicht gefunden.');
+    public function renderProtocol(array $meeting, array $tops, string $templateContent, array $organization): string {
+        if ($templateContent === '') {
+            throw new RuntimeException('ODT-Template ist leer.');
         }
 
-        $settings = [
-            'GREMIENNAME' => 'Betriebsrat ambulante dienste e.V.',
-            'GREMIUM_ADRESSE' => 'Wilhelm-Kabus-Str. 21-35, 10829 Berlin',
+        $replacements = [
+            '{{GREMIENNAME}}' => (string)($organization['councilName'] ?? ''),
+            '{{GREMIUM_ADRESSE}}' => (string)($organization['councilAddress'] ?? ''),
+            '{{AUSSTELLUNGSORT}}' => (string)($organization['issuePlace'] ?? ''),
         ];
 
-        $replacements = [
-            '{{GREMIENNAME}}' => $settings['GREMIENNAME'],
-            '{{GREMIUM_ADRESSE}}' => $settings['GREMIUM_ADRESSE'],
-        ];
+        $templatePath = tempnam(sys_get_temp_dir(), 'brtop-odt-source-');
+        if ($templatePath === false || file_put_contents($templatePath, $templateContent) === false) {
+            throw new RuntimeException('Temporäre ODT-Vorlage konnte nicht erzeugt werden.');
+        }
 
         $zip = new ZipArchive();
         if ($zip->open($templatePath) !== true) {
+            unlink($templatePath);
             throw new RuntimeException('ODT-Template konnte nicht geöffnet werden.');
         }
 
         $tmp = tempnam(sys_get_temp_dir(), 'brtop-odt-');
         if ($tmp === false) {
             $zip->close();
+            unlink($templatePath);
             throw new RuntimeException('Temporäre ODT-Datei konnte nicht erzeugt werden.');
         }
 
         $out = new ZipArchive();
         if ($out->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             $zip->close();
+            unlink($templatePath);
             throw new RuntimeException('ODT-Zieldatei konnte nicht geschrieben werden.');
         }
 
@@ -74,6 +76,7 @@ class OdtTemplateRenderer {
 
         $zip->close();
         $out->close();
+        unlink($templatePath);
 
         $result = file_get_contents($tmp);
         @unlink($tmp);

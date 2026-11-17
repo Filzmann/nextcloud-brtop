@@ -5,23 +5,15 @@ declare(strict_types=1);
 namespace OCA\BrTop\Service;
 
 use OCA\BrTop\Exception\AccessDeniedException;
-use OCP\IGroupManager;
-
 class BrAccessService {
-    public function __construct(
-        private IGroupManager $groupManager,
-        private BrGroupsService $groups,
-        private ?TemporaryAdminAccessChecker $temporaryAdminAccess = null,
-    ) {
-    }
+    public function __construct(private BrPermissionService $permissions) {}
 
     public function isAdmin(string $uid): bool {
-        return $uid !== '' && $this->groupManager->isAdmin($uid) && ($this->temporaryAdminAccess?->hasActiveGrant($uid) ?? false);
+        return $this->permissions->has($uid, BrPermissionService::SETTINGS_MANAGE);
     }
 
     public function canUse(string $uid): bool {
-        return $this->isAdmin($uid)
-            || ($uid !== '' && $this->groupManager->isInGroup($uid, $this->groups->memberGroupName()));
+        return $this->permissions->has($uid, BrPermissionService::SESSION_READ);
     }
 
     public function assertCanUse(string $uid): void {
@@ -31,8 +23,14 @@ class BrAccessService {
     }
 
     public function assertAdmin(string $uid): void {
-        if (!$this->isAdmin($uid)) {
-            throw new AccessDeniedException('Diese BRTop-Funktion benötigt eine aktive app-lokale Adminfreigabe.');
-        }
+        $this->permissions->assert($uid, BrPermissionService::SETTINGS_MANAGE);
+    }
+
+    public function can(string $uid, string $permission): bool {
+        return $this->permissions->has($uid, $permission);
+    }
+
+    public function assertPermission(string $uid, string $permission): void {
+        $this->permissions->assert($uid, $permission);
     }
 }

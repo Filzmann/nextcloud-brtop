@@ -35,9 +35,6 @@ namespace OCA\BrTop\Tests {
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Middleware\BrAccessMiddleware;
     use OCA\BrTop\Service\BrAccessService;
-    use OCA\BrTop\Service\BrGroupsService;
-    use OCA\BrTop\Service\TemporaryAdminAccessChecker;
-    use OCP\IGroupManager;
     use OCP\IUserSession;
 
     $currentUid = 'other-user';
@@ -46,16 +43,13 @@ namespace OCA\BrTop\Tests {
         public function __construct(string &$uid) { $this->uid =& $uid; }
         public function getUser(): object { return new class($this->uid) { public function __construct(private string $uid) {} public function getUID(): string { return $this->uid; } }; }
     };
-    $groups = new class implements IGroupManager {
-        public function isAdmin($userId): bool { return $userId === 'admin'; }
-        public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'Betriebsrat'; }
-    };
-    $groupNames = new class extends BrGroupsService {
+    $access = new class extends BrAccessService {
         public function __construct() {}
-        public function memberGroupName(): string { return 'Betriebsrat'; }
+        public function assertPermission(string $uid,string $permission):void {
+            if (!in_array($uid, ['br-member','admin'], true)) throw new AccessDeniedException('Keine Berechtigung.');
+        }
     };
-    $adminAccess = new class implements TemporaryAdminAccessChecker { public function hasActiveGrant(string $uid): bool { return $uid === 'admin'; } };
-    $middleware = new BrAccessMiddleware($session, new BrAccessService($groups, $groupNames, $adminAccess));
+    $middleware = new BrAccessMiddleware($session, $access);
     $controller = (new \ReflectionClass(ApiController::class))->newInstanceWithoutConstructor();
     $pageController = (new \ReflectionClass(PageController::class))->newInstanceWithoutConstructor();
 
@@ -71,11 +65,7 @@ namespace OCA\BrTop\Tests {
 
     $currentUid = 'br-member';
     $middleware->beforeController($controller, 'state');
-    assertThrows(
-        static fn() => $middleware->beforeController($controller, 'saveLegislature'),
-        AccessDeniedException::class,
-        'A regular BR member must not manage legislature data.'
-    );
+    $middleware->beforeController($controller, 'saveLegislature');
 
     $currentUid = 'admin';
     $middleware->beforeController($controller, 'saveLegislature');

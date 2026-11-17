@@ -22,9 +22,21 @@ class MeetingStore {
         );
     }
 
+    public function recent(): array {
+        return array_map(
+            fn(array $row): Meeting => $this->fromRow($row),
+            $this->meetingRepository->findRecent()
+        );
+    }
+
     public function getOwned(int $meetingId, string $uid): ?Meeting {
         $row = $this->meetingRepository->findByIdAndOwner($meetingId, $uid);
 
+        return $row === null ? null : $this->fromRow($row);
+    }
+
+    public function get(int $meetingId): ?Meeting {
+        $row = $this->meetingRepository->findById($meetingId);
         return $row === null ? null : $this->fromRow($row);
     }
 

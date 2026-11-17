@@ -19,6 +19,7 @@ use OCA\BrTop\Service\MeetingAbsenceService;
 use OCA\BrTop\Service\MeetingStateService;
 use OCA\BrTop\Service\LegislatureService;
 use OCA\BrTop\Service\ProtocolBlockService;
+use OCA\BrTop\Service\BrPermissionService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -60,15 +61,20 @@ class ApiController extends Controller {
     public function state(): DataResponse {
         $uid = $this->uid();
         return new DataResponse([
-            'meetings' => $this->meetingStateService->meetingsForOwner($uid),
+            'meetings' => $this->meetingStateService->meetings(),
             'settings' => $this->settingsPayload(),
             'capabilities' => [
-                'canManageLegislature' => $this->accessService->isAdmin($uid),
+                'canManageSession' => $this->accessService->can($uid, BrPermissionService::SESSION_MANAGE),
+                'canGenerateDocuments' => $this->accessService->can($uid, BrPermissionService::DOCUMENT_GENERATE),
+                'canManageSettings' => $this->accessService->can($uid, BrPermissionService::SETTINGS_MANAGE),
+                'canManageLegislature' => $this->accessService->can($uid, BrPermissionService::LEGISLATURE_MANAGE),
+                'canConfirmAbsence' => $this->accessService->can($uid, BrPermissionService::ABSENCE_CONFIRM),
             ],
             'notice' => 'Standardstruktur: 1 Protokolle, 2 Personelle Angelegenheiten (§99/§100/§102), 3 Arbeitsorganisatorisches, 4 Sprechstundenbericht. Einladung zusammengefasst, Protokoll und Beschlüsse getrennt.'
         ]);
     }
 
+    #[NoAdminRequired]
     public function legislature(): DataResponse {
         return new DataResponse([
             'ok' => true,
@@ -76,6 +82,7 @@ class ApiController extends Controller {
         ]);
     }
 
+    #[NoAdminRequired]
     public function saveLegislature(string $configurationJson): DataResponse {
         return $this->responder->respond(
             function () use ($configurationJson): array {
@@ -95,6 +102,7 @@ class ApiController extends Controller {
         );
     }
 
+    #[NoAdminRequired]
     public function activateLegislature(int $legislatureId): DataResponse {
         return $this->responder->respond(
             fn(): array => [
@@ -108,6 +116,7 @@ class ApiController extends Controller {
         );
     }
 
+    #[NoAdminRequired]
     public function absenceSuggestions(int $meetingId): DataResponse {
         return new DataResponse([
             'ok' => true,
@@ -115,6 +124,7 @@ class ApiController extends Controller {
         ]);
     }
 
+    #[NoAdminRequired]
     public function saveConfirmedAbsences(int $meetingId, string $memberIdsJson = '[]'): DataResponse {
         return $this->responder->respond(
             function () use ($meetingId, $memberIdsJson): array {
@@ -141,6 +151,7 @@ class ApiController extends Controller {
         return $settings;
     }
 
+    #[NoAdminRequired]
     public function updateSettings(
         string $defaultMeetingTitle,
         int $regularMeetingWeekday,
@@ -368,6 +379,7 @@ class ApiController extends Controller {
         return new DataResponse(['ok' => true]);
     }
 
+    #[NoAdminRequired]
     public function seedDemo(): DataResponse {
         return new DataResponse(['ok' => true] + $this->demoDataService->seedForOwner($this->uid()));
     }
@@ -479,7 +491,7 @@ class ApiController extends Controller {
     }
 
     private function assertMeetingOwner(int $meetingId): Meeting {
-        return $this->meetingService->assertOwnedMeeting($meetingId, $this->uid());
+        return $this->meetingService->assertMeetingExists($meetingId);
     }
 
 }

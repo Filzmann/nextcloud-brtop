@@ -82,7 +82,7 @@
         currentSettings = data.settings || {};
         capabilities = data.capabilities || {};
         byId('manage-legislature').hidden = !capabilities.canManageLegislature;
-        byId('review-absences').hidden = !capabilities.canManageLegislature;
+        byId('review-absences').hidden = !capabilities.canConfirmAbsence;
 
         if (selectedMeetingId && !findMeeting(selectedMeetingId)) {
             selectedMeetingId = null;

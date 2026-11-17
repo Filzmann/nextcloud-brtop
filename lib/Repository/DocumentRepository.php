@@ -25,7 +25,14 @@ class DocumentRepository {
         return $qb->executeQuery()->fetchAll();
     }
 
-    public function insert(int $meetingId, string $type, string $title, string $path): void {
+    public function insert(
+        int $meetingId,
+        string $type,
+        string $title,
+        string $path,
+        ?string $templateKey = null,
+        ?int $templateVersion = null
+    ): void {
         $qb = $this->db->getQueryBuilder();
         $qb->insert('brtop_documents')
             ->values([
@@ -33,16 +40,25 @@ class DocumentRepository {
                 'document_type' => $qb->createNamedParameter($type),
                 'title' => $qb->createNamedParameter($title),
                 'file_path' => $qb->createNamedParameter($path),
+                'template_key' => $qb->createNamedParameter($templateKey, $templateKey === null ? IQueryBuilder::PARAM_NULL : IQueryBuilder::PARAM_STR),
+                'template_version' => $qb->createNamedParameter($templateVersion, $templateVersion === null ? IQueryBuilder::PARAM_NULL : IQueryBuilder::PARAM_INT),
                 'created_at' => $qb->createNamedParameter(new DateTimeImmutable(), IQueryBuilder::PARAM_DATE),
             ]);
         $qb->executeStatement();
     }
 
-    public function replaceForMeetingAndType(int $meetingId, string $type, string $title, string $path): void {
+    public function replaceForMeetingAndType(
+        int $meetingId,
+        string $type,
+        string $title,
+        string $path,
+        ?string $templateKey = null,
+        ?int $templateVersion = null
+    ): void {
         $this->db->beginTransaction();
         try {
             $this->deleteForMeetingAndType($meetingId, $type);
-            $this->insert($meetingId, $type, $title, $path);
+            $this->insert($meetingId, $type, $title, $path, $templateKey, $templateVersion);
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();

@@ -22,20 +22,16 @@ class InvitationContentService {
         return 'Ladung zur Sitzung am ' . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']);
     }
 
-    public function email(array|Meeting $meeting, array $tops, array $recipients = []): string {
+    public function templateValues(array|Meeting $meeting, array $tops, array $recipients, array $organization): array {
         $meetingData = $this->meetingData($meeting);
-        $lines = [];
-
-        $lines[] = 'Liebe Kolleg*innen,';
-        $lines[] = '';
-        $lines[] = 'hiermit lade ich euch zur Sitzung ein.';
-        $lines[] = '';
-        $lines[] = 'Sitzung: ' . (($meetingData['title'] ?? '') ?: 'ohne Titel');
-        $lines[] = 'Datum: ' . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']);
-        $lines[] = 'Uhrzeit: ' . (($meetingData['meeting_time'] ?? '') ?: 'noch offen');
-        $lines[] = 'Ort: ' . (($meetingData['location'] ?? '') ?: 'noch offen');
-        $lines[] = '';
-        $lines[] = 'Geladene BR-Mitglieder: ' . count(array_filter(
+        $meetingLines = [
+            'Sitzung: ' . (($meetingData['title'] ?? '') ?: 'ohne Titel'),
+            'Datum: ' . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']),
+            'Uhrzeit: ' . (($meetingData['meeting_time'] ?? '') ?: 'noch offen'),
+            'Ort: ' . (($meetingData['location'] ?? '') ?: 'noch offen'),
+        ];
+        $recipientLines = [];
+        $recipientLines[] = 'Geladene BR-Mitglieder: ' . count(array_filter(
             $recipients,
             static fn(array $recipient): bool => ($recipient['invitation_type'] ?? 'initial') === 'initial'
         ));
@@ -44,23 +40,20 @@ class InvitationContentService {
             static fn(array $recipient): bool => ($recipient['member_role'] ?? '') === 'replacement'
         ));
         if ($replacementCount > 0) {
-            $lines[] = 'Geladene Nachrücker*innen: ' . $replacementCount;
+            $recipientLines[] = 'Geladene Nachrücker*innen: ' . $replacementCount;
         }
-        $lines[] = '';
-        $lines[] = 'Tagesordnung:';
-        $lines[] = '';
+        $agendaLines = [];
+        $this->appendAgendaLines($agendaLines, $tops);
 
-        $this->appendAgendaLines($lines, $tops);
-
-        $lines[] = '';
-        $lines[] = 'Viele Grüße';
-        $lines[] = '{{ABSENDER}}';
-
-        return implode("\n", $lines) . "\n";
-    }
-
-    public function markdown(string $subject, string $email): string {
-        return "# " . $subject . "\n\n```text\n" . $email . "\n```\n";
+        return [
+            'SALUTATION' => (string)($organization['invitationSalutation'] ?? ''),
+            'INVITATION_INTRO' => (string)($organization['invitationIntroduction'] ?? ''),
+            'MEETING_DETAILS' => implode("\n", $meetingLines),
+            'RECIPIENT_SUMMARY' => implode("\n", $recipientLines),
+            'AGENDA' => implode("\n", $agendaLines),
+            'CLOSING' => (string)($organization['invitationClosing'] ?? ''),
+            'SENDER' => (string)($organization['invitationSender'] ?? ''),
+        ];
     }
 
     public function recipientList(array $recipients): string {

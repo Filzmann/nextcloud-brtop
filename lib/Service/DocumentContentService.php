@@ -12,7 +12,9 @@ class DocumentContentService {
     public function __construct(
         private AgendaService $agendaService,
         private InvitationContentService $invitationContentService,
-        private DocumentDateFormatter $dateFormatter
+        private DocumentDateFormatter $dateFormatter,
+        private DocumentTemplateProvider $templates,
+        private BrtopSettingsService $settings
     ) {
     }
 
@@ -21,11 +23,25 @@ class DocumentContentService {
     }
 
     public function invitationEmail(array|Meeting $meeting, array $tops, array $recipients = []): string {
-        return $this->invitationContentService->email($meeting, $tops, $recipients);
+        return $this->renderInvitationEmail($meeting, $tops, $recipients)['content'];
+    }
+
+    public function renderInvitationEmail(array|Meeting $meeting, array $tops, array $recipients = []): array {
+        return $this->templates->renderActive(
+            'invitation_email',
+            $this->invitationContentService->templateValues($meeting, $tops, $recipients, $this->settings->documentOrganization())
+        );
     }
 
     public function invitationMarkdown(string $subject, string $email): string {
-        return $this->invitationContentService->markdown($subject, $email);
+        return $this->renderInvitationMarkdown($subject, $email)['content'];
+    }
+
+    public function renderInvitationMarkdown(string $subject, string $email): array {
+        return $this->templates->renderActive('invitation_markdown', [
+            'SUBJECT' => $subject,
+            'EMAIL_BODY' => rtrim($email),
+        ]);
     }
 
     public function invitationRecipientList(array $recipients): string {
@@ -33,6 +49,20 @@ class DocumentContentService {
     }
 
     public function protocolTemplate(array|Meeting $meeting, array $tops): string {
+        return $this->renderProtocol($meeting, $tops)['content'];
+    }
+
+    public function renderProtocol(array|Meeting $meeting, array $tops): array {
+        $organization = $this->settings->documentOrganization();
+        return $this->templates->renderActive('protocol_markdown', [
+            'COUNCIL_NAME' => (string)$organization['councilName'],
+            'COUNCIL_ADDRESS' => (string)$organization['councilAddress'],
+            'ISSUE_PLACE' => (string)$organization['issuePlace'],
+            'PROTOCOL_BODY' => $this->protocolBody($meeting, $tops),
+        ]);
+    }
+
+    private function protocolBody(array|Meeting $meeting, array $tops): string {
         $meetingData = $this->meetingData($meeting);
         $lines = [];
 
@@ -61,6 +91,20 @@ class DocumentContentService {
     }
 
     public function resolutionDocument(array|Meeting $meeting, array|AgendaItem $top, int $resolutionIndex = 1): string {
+        return $this->renderResolution($meeting, $top, $resolutionIndex)['content'];
+    }
+
+    public function renderResolution(array|Meeting $meeting, array|AgendaItem $top, int $resolutionIndex = 1): array {
+        $organization = $this->settings->documentOrganization();
+        return $this->templates->renderActive('resolution_markdown', [
+            'COUNCIL_NAME' => (string)$organization['councilName'],
+            'COUNCIL_ADDRESS' => (string)$organization['councilAddress'],
+            'ISSUE_PLACE' => (string)$organization['issuePlace'],
+            'RESOLUTION_BODY' => $this->resolutionBody($meeting, $top, $resolutionIndex),
+        ]);
+    }
+
+    private function resolutionBody(array|Meeting $meeting, array|AgendaItem $top, int $resolutionIndex): string {
         $meetingData = $this->meetingData($meeting);
         $topData = $this->topData($top);
         $lines = [];

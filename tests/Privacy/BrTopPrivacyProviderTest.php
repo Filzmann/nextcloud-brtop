@@ -14,6 +14,7 @@ namespace OCA\BrTop\Privacy {
     }
 }
 namespace OCA\BrTop\Repository { class TemporaryAdminAccessRepository { public array $items=[]; public function historyForUid(string $uid,int $limit):array{return array_slice(array_values(array_filter($this->items,static fn(array $item):bool=>in_array($uid,[$item['targetUid'],$item['grantedBy'],$item['revokedBy']],true))),0,$limit);} } }
+namespace OCA\BrTop\Service { class BrDpoAssignmentService { public array $assigned=[]; public function isStoredForSubject(string $uid):bool{return in_array($uid,$this->assigned,true);} } }
 
 namespace {
     use OCA\BrTop\Privacy\BrTopPersonalDataProvider;
@@ -23,6 +24,7 @@ namespace {
     use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
     use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
     use OCA\BrTop\Repository\TemporaryAdminAccessRepository;
+    use OCA\BrTop\Service\BrDpoAssignmentService;
 
     $repository = new BrTopPrivacyRepository();
     $repository->records = [
@@ -35,7 +37,9 @@ namespace {
         ['kind'=>'activity','id'=>5,'activity'=>'legislature_created','occurred_at'=>'2026-08-22'],
     ];
     $adminAccess=new TemporaryAdminAccessRepository();$adminAccess->items=[['id'=>8,'targetUid'=>'other-admin','grantedBy'=>'self','startsAt'=>new DateTimeImmutable('2026-08-25T08:00:00+00:00'),'endsAt'=>new DateTimeImmutable('2026-08-25T12:00:00+00:00'),'revokedAt'=>new DateTimeImmutable('2026-08-25T10:00:00+00:00'),'revokedBy'=>'self']];
-    $provider = new BrTopPersonalDataProvider($repository,$adminAccess);
+    $dpoAssignments = new BrDpoAssignmentService();
+    $dpoAssignments->assigned = ['self'];
+    $provider = new BrTopPersonalDataProvider($repository,$adminAccess,$dpoAssignments);
     $descriptor = $provider->descriptor();
     if ($descriptor->appId() !== 'brtop' || !$descriptor->supportsSubjectType('nextcloud-user') || $descriptor->contractVersion() !== '1.0') {
         throw new RuntimeException('BRTop beschreibt den Standalone-V1-Vertrag nicht korrekt.');
@@ -43,14 +47,14 @@ namespace {
 
     $subject = new DataSubjectRef('nextcloud-user', 'self');
     $page = $provider->collect(new PersonalDataRequest($subject, 'de', 'access-report', 50, []));
-    if ($page->status() !== 'partial' || count($page->entries()) !== 8 || $page->restrictions() === []) {
+    if ($page->status() !== 'partial' || count($page->entries()) !== 9 || $page->restrictions() === []) {
         throw new RuntimeException('BRTop weist die bewusst ausgeschlossenen Inhaltsklassen nicht als Teilantwort aus.');
     }
     $json = json_encode(array_map(static fn($entry): array => [
         'categoryId'=>$entry->categoryId(), 'reference'=>$entry->reference(), 'summary'=>$entry->summary(), 'source'=>$entry->source(), 'recipientCategories'=>$entry->recipientCategories(), 'attributes'=>$entry->attributes(),
         'thirdPartyContentNotice'=>$entry->thirdPartyContentNotice(),
     ], $page->entries()), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    foreach (['Test Mitglied','mitglied@example.invalid','25.08.2026','Reguläre BR-Sitzung','Protokolldokument','Abwesenheitsprüfung','Admin-Vollzugriff','Freigebendes Mitglied von Datenschutzbeauftragte','Widerrufendes Mitglied von Datenschutzbeauftragte','App-lokale Freigabesteuerung in BRTop'] as $expected) {
+    foreach (['Test Mitglied','mitglied@example.invalid','25.08.2026','Reguläre BR-Sitzung','Protokolldokument','Abwesenheitsprüfung','Admin-Vollzugriff','BR-Datenschutzberechtigung','Freigebendes BR-Mitglied','Widerrufendes BR-Mitglied','App-lokale Freigabesteuerung in BRTop'] as $expected) {
         if (!str_contains($json, $expected)) throw new RuntimeException("Erforderliche BRTop-Metadaten fehlen: {$expected}");
     }
     foreach (['other-person','other-admin','Vertraulicher Sitzungstitel','Personalfall Beispiel','Geheimer Raum','BR-Sitzungen/','Vertraulicher Dateiinhalt','Nicht ausgeben'] as $forbidden) {
@@ -68,7 +72,7 @@ namespace {
         throw new RuntimeException('Ein begrenzter BRTop-Bericht benennt das Seitenlimit nicht.');
     }
     $emptyRepository = new BrTopPrivacyRepository();
-    $empty = (new BrTopPersonalDataProvider($emptyRepository,new TemporaryAdminAccessRepository()))->collect(new PersonalDataRequest($subject, 'de', 'access-report', 50, []));
+    $empty = (new BrTopPersonalDataProvider($emptyRepository,new TemporaryAdminAccessRepository(),new BrDpoAssignmentService()))->collect(new PersonalDataRequest($subject, 'de', 'access-report', 50, []));
     if ($empty->status() !== 'partial' || $empty->entries() !== []) throw new RuntimeException('Nicht sicher zuordenbare Freitexterwähnungen werden bei leerer UID-Projektion verschwiegen.');
     $unsupported = $provider->collect(new PersonalDataRequest(new DataSubjectRef('external-person', 'self'), 'de', 'access-report', 50, []));
     if ($unsupported->status() !== 'not_applicable' || $unsupported->entries() !== []) throw new RuntimeException('Ein fremder Subject-Typ erhält BRTop-Daten.');

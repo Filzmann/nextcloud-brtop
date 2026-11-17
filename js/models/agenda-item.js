@@ -1,5 +1,5 @@
 (function() {
-    const { Model } = window.LocalBase.models;
+    const { Model } = window.OCA.BrTop.Shared.models;
     const { ProtocolBlock } = window.BRTop.models;
 
     class AgendaItem extends Model {

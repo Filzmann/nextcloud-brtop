@@ -2,7 +2,7 @@ const assert = require('assert');
 
 const calls = [];
 global.window = {};
-require('../../../localbase/js/repositories/repository.js');
+require('../../js/shared/repository.js');
 window.BRTop = {};
 require('../../js/repositories/legislature-repository.js');
 

@@ -1,5 +1,5 @@
 (function() {
-    const { Notice, byId, esc } = window.LocalBase.ui;
+    const { Notice, byId, esc } = window.OCA.BrTop.Shared.ui;
     const noticeBox = new Notice('brtop-notice', {
         baseClass: 'brtop-notice',
         typeClassPrefix: 'brtop-notice-'

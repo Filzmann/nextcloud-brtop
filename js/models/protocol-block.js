@@ -1,5 +1,5 @@
 (function() {
-    const { Model } = window.LocalBase.models;
+    const { Model } = window.OCA.BrTop.Shared.models;
 
     class ProtocolBlock extends Model {
         constructor(data = {}) {
