@@ -23,6 +23,23 @@ Retention-Policies und zweckgebundene Sperren.
 - Dokumente werden aus den kanonischen Sitzungs- und TOP-Daten abgeleitet;
   erzeugte Dateien bilden keine zweite Fachwahrheit.
 
+## App-lokales Browserbundle
+
+Die zustandslosen Browserbausteine `ApiClient`, `Model`, `Repository` und
+`Notice` aus `flz_shared` 0.1.0 liegen reproduzierbar unter `js/shared` und
+werden ausschließlich im app-eigenen Namespace `window.OCA.BrTop.Shared`
+bereitgestellt. Die Paketversion und der Quellhash stehen in
+`js/shared/flz-shared.lock.json`. Zur Laufzeit lädt BRTop weder Dateien aus
+einem benachbarten Repository noch LocalBase-Browserassets; bestehende
+Kategorie-B-Verträge bleiben getrennt.
+
+Das Bundle hat keinen eigenen Nextcloud-Lebenszyklus und keinen persistenten
+Zustand. Installation, Aktualisierung und Deinstallation erfolgen mit der
+jeweiligen BRTop-Version. Ein Update von `flz_shared` erfordert ein neu
+gebautes und geprüftes BRTop-Artefakt; der Rückbau auf die vorherige
+BRTop-Version stellt zugleich deren festgeschriebene Bundleversion wieder
+her.
+
 ## Rechte und Integrationen
 
 Der LocalBase-BR-Gruppenvertrag ist die einzige Laufzeitquelle für Mitglieder,

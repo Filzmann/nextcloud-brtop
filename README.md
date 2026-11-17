@@ -39,6 +39,13 @@ Nextcloud 34 hat keinen `occ migrations:migrate`-Befehl. App-Migrationen laufen
 beim Aktivieren der App beziehungsweise über `occ upgrade`, wenn `occ status`
 `needsDbUpgrade: true` meldet.
 
+Die zustandslosen Browserbausteine aus `flz_shared` 0.1.0 werden reproduzierbar
+im app-lokalen `js/shared`-Bundle unter `window.OCA.BrTop.Shared` ausgeliefert.
+BRTop benötigt dafür weder eine installierte `flz_shared`-Laufzeit-App noch
+LocalBase-Browserassets. Änderungen am gemeinsamen Paket werden mit einer
+neuen BRTop-Appversion ausgeliefert; ein Rückbau auf die vorherige Appversion
+stellt deren festgeschriebene Bundleversion wieder her.
+
 ## Test
 
 ```bash

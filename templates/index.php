@@ -1,7 +1,7 @@
 <?php
 use OCA\BrTop\View\UiComponents;
 
-script('localbase', 'api/api-client');
+script('brtop', 'shared/api-client');
 script('brtop', 'modules/api');
 script('orgsuite', 'suite-navigation');
 script('brtop', 'admin-access');
@@ -10,16 +10,16 @@ if ($_['canAssignBrDpo'] ?? false) {
     script('brtop', 'br-dpo-settings');
 }
 if ($_['hasBrTopAccess'] ?? false) {
-    script('localbase', 'ui/ui');
+    script('brtop', 'shared/ui');
     script('brtop', 'modules/ui');
     script('brtop', 'modules/view-router');
     script('brtop', 'modules/persistent-horizontal-scroll');
-    script('localbase', 'models/model');
+    script('brtop', 'shared/model');
     script('brtop', 'models/protocol-block');
     script('brtop', 'models/agenda-item');
     script('brtop', 'models/generated-document');
     script('brtop', 'models/meeting');
-    script('localbase', 'repositories/repository');
+    script('brtop', 'shared/repository');
     script('brtop', 'repositories/meeting-repository');
     script('brtop', 'repositories/legislature-repository');
     script('brtop', 'components/meeting-list');

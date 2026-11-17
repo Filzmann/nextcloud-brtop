@@ -1,5 +1,5 @@
 (function() {
-    const { Model } = window.LocalBase.models;
+    const { Model } = window.OCA.BrTop.Shared.models;
     const { AgendaItem, GeneratedDocument } = window.BRTop.models;
 
     class Meeting extends Model {

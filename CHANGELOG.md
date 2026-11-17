@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Zustandslose Browserbausteine aus `flz_shared` 0.1.0 werden als geprüftes,
+  app-lokales Bundle unter `window.OCA.BrTop.Shared` ausgeliefert. LocalBase-
+  Browserassets sind keine Laufzeitabhängigkeit.
+- Browser-Consumer-Smoke ordnet die ausgeführten App-Quellen über absolute
+  VM-Dateipfade der Coverage zu und prüft verweigerte, nicht als JSON gelieferte
+  sowie leere API-Antworten. Die Produktivlogik bleibt unverändert.
 - Getrennte BRTop-Fachrechte für Sitzungslesen, Sitzungsbearbeitung,
   Dokumenterzeugung, Einstellungen, Legislatur und Abwesenheitsbestätigung
   eingeführt. Alle aktuellen BR-Mitglieder erhalten diese Rechte als Default

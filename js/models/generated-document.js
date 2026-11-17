@@ -1,5 +1,5 @@
 (function() {
-    const { Model } = window.LocalBase.models;
+    const { Model } = window.OCA.BrTop.Shared.models;
 
     class GeneratedDocument extends Model {
         constructor(data = {}) {

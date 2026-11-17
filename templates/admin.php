@@ -1,5 +1,5 @@
 <?php
-script('localbase', 'api/api-client');
+script('brtop', 'shared/api-client');
 script('brtop', 'modules/api');
 script('brtop', 'admin-document-configuration');
 style('brtop', 'style');
