@@ -16,6 +16,7 @@
   Freigabesteuerung einzelnen aktuellen BR-Mitgliedern als persönliche
   BR-Datenschutzberechtigung über ein Auswahlmenü übertragen. Provider,
   Art.-15-Projektion und Verarbeitungskatalog bilden die neue Grenze ab.
+- BR-Datenschutzberechtigung auf native Nextcloud-Gruppe umgestellt (SSOT): `BrDpoAssignmentService` speichert nur noch die Gruppen-ID (AppConfig `br_dpo_group`, Default `br_dpo`); `replace()` setzt/entzieht die Mitgliedschaft in der Gruppe, `isAssigned()` prüft `IGroupManager::isInGroup` plus BR-Mitgliedschaft. Die alte UID-Liste `br_dpo_permission_uids` wird nicht mehr gelesen oder geschrieben (Fresh Install/Reinstall ist der autorisierte Übergang). API-Payload (UID-Liste) und UI bleiben unverändert.
 - Dokumentkonfiguration ergänzt: Organisationsstammdaten und Ausschusskataloge
   werden validiert gespeichert; Text- und Protokoll-ODT-Vorlagen können als
   Entwurf versioniert, geprüft und ausdrücklich freigegeben werden. Neue

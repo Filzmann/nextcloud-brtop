@@ -36,7 +36,7 @@ final class BrTopPersonalDataProvider implements PersonalDataProvider {
         if ($request->cursor() !== null) throw new InvalidArgumentException('BRTop does not support cursor paging.');
         $rows = $this->repository->forSubject($request->subject()->subjectId(), $request->pageLimit() + 1);
         $adminHistory = $this->adminAccess->historyForUid($request->subject()->subjectId(), $request->pageLimit() + 1);
-        $hasDpoAssignment = $this->dpoAssignments->isStoredForSubject($request->subject()->subjectId());
+        $hasDpoAssignment = $this->dpoAssignments->isAssignedToSubject($request->subject()->subjectId());
         $limited = count($rows) + count($adminHistory) + ($hasDpoAssignment ? 1 : 0) > $request->pageLimit();
         $restrictions = self::CONTENT_RESTRICTIONS;
         if ($limited) $restrictions[] = 'Ausgabelimit erreicht; weitere BRTop-Metadaten können vorhanden sein.';

@@ -4,6 +4,7 @@ use OCA\BrTop\View\UiComponents;
 script('brtop', 'shared/api-client');
 script('brtop', 'modules/api');
 script('orgsuite', 'suite-navigation');
+script('brtop', 'shared/overlay');
 script('brtop', 'admin-access');
 script('brtop', 'settings-tabs');
 if ($_['canAssignBrDpo'] ?? false) {
@@ -41,14 +42,7 @@ style('orgsuite', 'suite-navigation');
     <div class="brtop-title-row">
         <h1>BR TOP- und Sitzungsverwaltung</h1>
         <?php if ($_['showMissingAdminGrant'] ?? false): ?>
-            <details class="brtop-admin-access-warning">
-                <summary aria-label="Informationen zum fehlenden fachlichen Admin-Vollzugriff"><span aria-hidden="true">⚠</span></summary>
-                <div class="brtop-admin-access-warning__panel">
-                    <strong>Kein zeitlich begrenzter fachlicher Vollzugriff aktiv.</strong>
-                    <p>Native Nextcloud-Administration reicht nicht aus. Der BR-Vorsitz oder ein aktuell persönlich berechtigtes BR-Mitglied kann eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
-                    <?php if ($_['showAdminAccessLink'] ?? false): ?><a href="#brtop-full-access-heading" target="_blank" rel="noopener noreferrer">Freigabesteuerung in neuem Tab öffnen</a><?php endif; ?>
-                </div>
-            </details>
+            <button type="button" id="brtop-admin-access-warning" class="flz-shared-warn-trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="brtop-admin-access-overlay" aria-label="Fehlender fachlicher Admin-Vollzugriff: Freigabesteuerung im Overlay öffnen"><span aria-hidden="true">⚠</span></button>
         <?php endif; ?>
     </div>
     <div id="brtop-notice" class="brtop-notice" role="status" aria-live="polite" hidden></div>
@@ -74,16 +68,6 @@ style('orgsuite', 'suite-navigation');
                     <p id="brtop-br-dpo-status" role="status" aria-live="polite"></p>
                 </section>
             <?php endif; ?>
-
-    <?php if ($_['canManageAdminAccess'] ?? false): ?>
-        <section id="brtop-full-access" class="brtop-card brtop-access-card" aria-labelledby="brtop-full-access-heading">
-            <h2 id="brtop-full-access-heading" tabindex="-1">Zeitlich begrenzter Admin-Vollzugriff</h2>
-            <p>Der BR-Vorsitz oder ein aktuell persönlich berechtigtes BR-Mitglied darf aktuellen Nextcloud-Administrationskonten fachlichen Vollzugriff erteilen. Maximal 24 Stunden sind zulässig.</p>
-            <form id="brtop-full-access-form"><label>Admin-Benutzerkennung <input name="targetUid" required maxlength="64" autocomplete="off"></label><label>Dauer <select name="durationMinutes" required><option value="60">1 Stunde</option><option value="240">4 Stunden</option><option value="480">8 Stunden</option><option value="1440">24 Stunden</option></select></label><label><input id="brtop-full-access-enabled" name="enabled" type="checkbox" required> Vollzugriff für diesen Zeitraum aktivieren</label><button type="submit" class="primary">Freigabe aktivieren</button></form>
-            <p id="brtop-full-access-status" role="status" aria-live="polite"></p>
-            <div class="brtop-table-wrap" data-persistent-horizontal-scroll tabindex="0" role="region" aria-label="Protokollierte Admin-Vollzugriffszeiträume"><table><caption>Protokollierte Admin-Vollzugriffszeiträume</caption><thead><tr><th>Ziel-Admin</th><th>Freigegeben von</th><th>Von</th><th>Geplant bis</th><th>Tatsächlich bis / Status</th><th>Aktion</th></tr></thead><tbody id="brtop-full-access-history"><tr><td colspan="6">Freigaben werden geladen.</td></tr></tbody></table></div>
-        </section>
-    <?php endif; ?>
 
         </section>
         <?php endif; ?>
@@ -162,6 +146,34 @@ style('orgsuite', 'suite-navigation');
             <?= UiComponents::preset('close', ['id' => 'document-overlay-close']) ?>
         </div>
         <iframe id="document-overlay-frame" title="Dokumentvorschau"></iframe>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (($_['showMissingAdminGrant'] ?? false) || ($_['canManageAdminAccess'] ?? false)): ?>
+<div id="brtop-admin-access-overlay" class="flz-shared-overlay" hidden>
+    <div class="flz-shared-overlay__panel" role="dialog" aria-modal="true" aria-labelledby="brtop-admin-access-overlay-title">
+        <div class="flz-shared-overlay__head">
+            <h2 id="brtop-admin-access-overlay-title">Zeitlich begrenzter Admin-Vollzugriff</h2>
+            <?= UiComponents::preset('close', ['id' => 'brtop-admin-access-overlay-close']) ?>
+        </div>
+        <div class="flz-shared-overlay__content">
+            <?php if ($_['showMissingAdminGrant'] ?? false): ?>
+                <div class="flz-shared-overlay__warning">
+                    <strong>Kein zeitlich begrenzter fachlicher Vollzugriff aktiv.</strong>
+                    <p>Native Nextcloud-Administration reicht nicht aus. Der BR-Vorsitz oder ein aktuell persönlich berechtigtes BR-Mitglied kann eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
+                </div>
+            <?php endif; ?>
+            <?php if ($_['canManageAdminAccess'] ?? false): ?>
+                <section id="brtop-full-access" class="brtop-access-card" aria-labelledby="brtop-full-access-heading">
+                    <h3 id="brtop-full-access-heading">Freigabesteuerung</h3>
+                    <p>Der BR-Vorsitz oder ein aktuell persönlich berechtigtes BR-Mitglied darf aktuellen Nextcloud-Administrationskonten fachlichen Vollzugriff erteilen. Maximal 24 Stunden sind zulässig.</p>
+                    <form id="brtop-full-access-form"><label>Admin-Benutzerkennung <input name="targetUid" required maxlength="64" autocomplete="off"></label><label>Dauer <select name="durationMinutes" required><option value="60">1 Stunde</option><option value="240">4 Stunden</option><option value="480">8 Stunden</option><option value="1440">24 Stunden</option></select></label><label><input id="brtop-full-access-enabled" name="enabled" type="checkbox" required> Vollzugriff für diesen Zeitraum aktivieren</label><button type="submit" class="primary">Freigabe aktivieren</button></form>
+                    <p id="brtop-full-access-status" role="status" aria-live="polite"></p>
+                    <div class="brtop-table-wrap" data-persistent-horizontal-scroll tabindex="0" role="region" aria-label="Protokollierte Admin-Vollzugriffszeiträume"><table><caption>Protokollierte Admin-Vollzugriffszeiträume</caption><thead><tr><th>Ziel-Admin</th><th>Freigegeben von</th><th>Von</th><th>Geplant bis</th><th>Tatsächlich bis / Status</th><th>Aktion</th></tr></thead><tbody id="brtop-full-access-history"><tr><td colspan="6">Freigaben werden geladen.</td></tr></tbody></table></div>
+                </section>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 <?php endif; ?>

@@ -8,6 +8,7 @@ const bundleRoot = resolve(appRoot, 'js/shared');
 const requiredAssets = [
     'api-client.js',
     'model.js',
+    'overlay.js',
     'repository.js',
     'ui.js',
     'LICENSE',
@@ -41,7 +42,7 @@ if (!license.includes('SPDX-License-Identifier: AGPL-3.0-or-later')
 
 const indexTemplate = readFileSync(resolve(appRoot, 'templates/index.php'), 'utf8');
 const adminTemplate = readFileSync(resolve(appRoot, 'templates/admin.php'), 'utf8');
-for (const asset of ['api-client', 'model', 'repository', 'ui']) {
+for (const asset of ['api-client', 'model', 'overlay', 'repository', 'ui']) {
     if (!indexTemplate.includes(`script('brtop', 'shared/${asset}')`)) {
         throw new Error(`Das Haupttemplate lädt shared/${asset} nicht app-lokal.`);
     }
@@ -53,6 +54,7 @@ if (!adminTemplate.includes("script('brtop', 'shared/api-client')")) {
 const loadOrder = new Map([
     ['shared/api-client', 'modules/api'],
     ['shared/ui', 'modules/ui'],
+    ['shared/overlay', 'admin-access'],
     ['shared/model', 'models/protocol-block'],
     ['shared/repository', 'repositories/meeting-repository'],
 ]);
@@ -128,6 +130,7 @@ const context = vm.createContext({
 for (const relative of [
     'js/shared/api-client.js',
     'js/shared/model.js',
+    'js/shared/overlay.js',
     'js/shared/repository.js',
     'js/shared/ui.js',
     'js/modules/api.js',
@@ -148,7 +151,9 @@ const shared = window.OCA?.BrTop?.Shared;
 if (!shared?.api?.ApiClient
     || !shared?.models?.Model
     || !shared?.repositories?.Repository
-    || !shared?.ui?.Notice) {
+    || !shared?.ui?.Notice
+    || !shared?.ui?.Overlay
+    || !shared?.ui?.AdminAccessOverlay) {
     throw new Error('Das app-lokale Browser-Bundle stellt seine Primitives nicht vollständig isoliert bereit.');
 }
 if ('LocalBase' in window) {

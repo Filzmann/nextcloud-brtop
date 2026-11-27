@@ -53,7 +53,11 @@ Nextcloud-Administration benötigt für fachlichen Vollzugriff eine app-lokale,
 zeitlich begrenzte Freigabe. Der aktuelle BR-Vorsitz darf die
 Freigabehistorie lesen, Freigaben für aktuelle native Administrationskonten
 erteilen oder widerrufen und die persönliche BR-Datenschutzberechtigung
-ausschließlich aktuellen BR-Mitgliedern zuweisen. Persönlich Berechtigte
+ausschließlich aktuellen BR-Mitgliedern zuweisen. Die Zuweisung erfolgt als
+Mitgliedschaft in der nativen Nextcloud-Gruppe `br_dpo` (Gruppen-ID per AppConfig
+`br_dpo_group` konfigurierbar, Default `br_dpo`) — Single Source of Truth für
+„wer dazugehört“ ist die Core-Gruppenverwaltung, keine app-eigene UID-Liste
+(altes `br_dpo_permission_uids` wird nicht mehr geschrieben). Persönlich Berechtigte
 dürfen Freigaben verwalten, aber die Berechtigung nicht weiterdelegieren.
 Die authentifizierten Endpunkte sind deshalb nicht an die native Adminroute
 gebunden; Schreibrequests bleiben CSRF-geschützt und prüfen Rolle, Zielkonto

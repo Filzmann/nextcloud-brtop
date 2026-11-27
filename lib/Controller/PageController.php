@@ -35,7 +35,7 @@ class PageController extends Controller {
         $hasBrTopAccess = $this->access->canUse($uid);
         $canManageSettings = $this->access->can($uid, BrPermissionService::SETTINGS_MANAGE);
         $canAssignBrDpo = $this->access->can($uid, BrPermissionService::BR_DPO_ASSIGN);
-        $canAccessSettings = $canManageSettings || $canAssignBrDpo || $canManageAdminAccess;
+        $canAccessSettings = $canManageSettings || $canAssignBrDpo;
         if (!$hasBrTopAccess && !$canManageAdminAccess && !$showMissingAdminGrant) {
             return new TemplateResponse('core', '403', [], 'guest', Http::STATUS_FORBIDDEN);
         }

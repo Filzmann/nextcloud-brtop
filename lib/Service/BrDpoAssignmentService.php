@@ -5,33 +5,63 @@ declare(strict_types=1);
 namespace OCA\BrTop\Service;
 
 use InvalidArgumentException;
-use JsonException;
 use OCA\BrTop\AppInfo\Application;
 use OCA\BrTop\Exception\AccessDeniedException;
 use OCP\IConfig;
+use OCP\IGroupManager;
+use OCP\IUserManager;
 
-/** App-local user assignment for the dedicated BR data-protection capability. */
+/**
+ * BR-Datenschutzberechtigung als native Nextcloud-Gruppe (Single Source of Truth für
+ * „wer dazugehört“: die Gruppenmitgliedschaft liegt in Core, nicht in einer app-eigenen UID-Liste).
+ * Die App speichert nur die Gruppen-ID (AppConfig br_dpo_group, Default br_dpo).
+ */
 final class BrDpoAssignmentService {
-    private const CONFIG_KEY = 'br_dpo_permission_uids';
+    private const GROUP_KEY = 'br_dpo_group';
+    private const DEFAULT_GROUP = 'br_dpo';
     private const MAX_ASSIGNMENTS = 100;
 
-    public function __construct(private IConfig $config, private BrRoleService $roles) {}
+    public function __construct(
+        private IConfig $config,
+        private BrRoleService $roles,
+        private IGroupManager $groups,
+        private IUserManager $users,
+    ) {}
 
     public function isAssigned(string $uid): bool {
         $uid = trim($uid);
-        return $uid !== '' && $this->roles->isMember($uid) && in_array($uid, $this->storedUids(), true);
+        return $uid !== '' && $this->roles->isMember($uid) && $this->groups->isInGroup($uid, $this->dpoGroupId());
     }
 
     /** @return list<string> */
     public function assignedUids(): array {
-        return array_values(array_filter($this->storedUids(), fn(string $uid): bool => $this->roles->isMember($uid)));
+        $group = $this->groups->get($this->dpoGroupId());
+        if ($group === null || !method_exists($group, 'getUsers')) {
+            return [];
+        }
+        $uids = [];
+        foreach ($group->getUsers() as $user) {
+            if (!is_object($user) || !method_exists($user, 'getUID')) {
+                continue;
+            }
+            $uid = trim((string)$user->getUID());
+            if ($uid !== '' && $this->roles->isMember($uid)) {
+                $uids[$uid] = true;
+            }
+        }
+        $uids = array_keys($uids);
+        sort($uids, SORT_STRING);
+        return $uids;
     }
 
     /** @return array{members:list<array{uid:string,displayName:string,assigned:bool}>} */
     public function state(string $actorUid): array {
         $this->assertChair($actorUid);
-        $assigned = array_fill_keys($this->assignedUids(), true);
-        return ['members' => array_map(static fn(array $member): array => $member + ['assigned' => isset($assigned[$member['uid']])], $this->roles->members())];
+        $gid = $this->dpoGroupId();
+        return ['members' => array_map(
+            static fn(array $member): array => $member + ['assigned' => $member['uid'] !== '' && $this->groups->isInGroup($member['uid'], $gid)],
+            $this->roles->members(),
+        )];
     }
 
     /** @param list<mixed> $uids @return list<string> */
@@ -53,37 +83,37 @@ final class BrDpoAssignmentService {
         }
         $uids = array_keys($normalized);
         sort($uids, SORT_STRING);
-        $this->config->setAppValue(Application::APP_ID, self::CONFIG_KEY, json_encode($uids, JSON_THROW_ON_ERROR));
+
+        // Mitgliedschaft in der nativen Gruppe setzen/entziehen; erst nach erfolgreicher Validierung.
+        $group = $this->groups->get($this->dpoGroupId());
+        if ($group === null) {
+            $group = $this->groups->createGroup($this->dpoGroupId());
+        }
+        if ($group === null || !method_exists($group, 'addUser') || !method_exists($group, 'removeUser')) {
+            throw new \RuntimeException('Die BR-Datenschutzgruppe kann nicht verwaltet werden.');
+        }
+        foreach ($this->roles->members() as $member) {
+            $user = $this->users->get($member['uid']);
+            if ($user === null) {
+                continue;
+            }
+            if (isset($normalized[$member['uid']])) {
+                $group->addUser($user);
+            } else {
+                $group->removeUser($user);
+            }
+        }
         return $uids;
     }
 
-    public function isStoredForSubject(string $uid): bool {
-        return in_array(trim($uid), $this->storedUids(), true);
+    public function isAssignedToSubject(string $uid): bool {
+        $uid = trim($uid);
+        return $uid !== '' && $this->groups->isInGroup($uid, $this->dpoGroupId());
     }
 
-    /** @return list<string> */
-    private function storedUids(): array {
-        $raw = trim((string)$this->config->getAppValue(Application::APP_ID, self::CONFIG_KEY, '[]'));
-        try {
-            $decoded = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            return [];
-        }
-        if (!is_array($decoded) || count($decoded) > self::MAX_ASSIGNMENTS) {
-            return [];
-        }
-        $uids = [];
-        foreach ($decoded as $uid) {
-            if (!is_string($uid)) {
-                return [];
-            }
-            $uid = trim($uid);
-            if ($uid === '' || strlen($uid) > 64 || preg_match('/[\x00-\x1F\x7F]/u', $uid) === 1) {
-                return [];
-            }
-            $uids[$uid] = true;
-        }
-        return array_keys($uids);
+    private function dpoGroupId(): string {
+        $gid = trim($this->config->getAppValue(Application::APP_ID, self::GROUP_KEY, self::DEFAULT_GROUP));
+        return $gid !== '' ? $gid : self::DEFAULT_GROUP;
     }
 
     private function assertChair(string $uid): void {

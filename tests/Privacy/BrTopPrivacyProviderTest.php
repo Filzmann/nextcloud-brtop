@@ -14,7 +14,7 @@ namespace OCA\BrTop\Privacy {
     }
 }
 namespace OCA\BrTop\Repository { class TemporaryAdminAccessRepository { public array $items=[]; public function historyForUid(string $uid,int $limit):array{return array_slice(array_values(array_filter($this->items,static fn(array $item):bool=>in_array($uid,[$item['targetUid'],$item['grantedBy'],$item['revokedBy']],true))),0,$limit);} } }
-namespace OCA\BrTop\Service { class BrDpoAssignmentService { public array $assigned=[]; public function isStoredForSubject(string $uid):bool{return in_array($uid,$this->assigned,true);} } }
+namespace OCA\BrTop\Service { class BrDpoAssignmentService { public array $assigned=[]; public function isAssignedToSubject(string $uid):bool{return in_array($uid,$this->assigned,true);} } }
 
 namespace {
     use OCA\BrTop\Privacy\BrTopPersonalDataProvider;
