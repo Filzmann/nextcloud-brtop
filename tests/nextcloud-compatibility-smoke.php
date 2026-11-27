@@ -26,7 +26,9 @@ return [
     'preGrantUiStatuses' => [200],
     'postGrantUiStatuses' => [200],
     'grantService' => TemporaryAdminAccessService::class,
-    'grantManagerGroups' => ['Datenschutzbeauftragte'],
+    // BrDpoAssignmentService::dpoGroupId() default; the LocalBase BR definition
+    // is seeded by the compatibility stage, so isAssigned() becomes true here.
+    'grantManagerGroups' => ['br_dpo'],
     'permissionProbe' => static fn(string $uid): bool => OCP\Server::get(TemporaryAdminAccessService::class)
         ->hasActiveGrant($uid),
     'apiSmokes' => [
