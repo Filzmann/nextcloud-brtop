@@ -5,8 +5,11 @@ declare(strict_types=1);
 use OCA\BrTop\Service\TemporaryAdminAccessService;
 use OCA\BrTop\Repository\MeetingRepository;
 use OCA\BrTop\Service\FileExportService;
+use OCA\LocalBase\PublicApi\V1\BrMembershipSnapshotService;
 use OCP\Files\File;
 use OCP\Files\IRootFolder;
+use OCP\IGroupManager;
+use OCP\IUserManager;
 
 $objectStorageExportPath = 'BR-Sitzungen/2035-01-02_-_FR-08/compatibility-export.txt';
 $postgresqlMeetingTitle = 'FR-04 PostgreSQL Upgrade-Bestand';
@@ -25,9 +28,27 @@ return [
     'uiPath' => '/index.php/apps/brtop/',
     'preGrantUiStatuses' => [200],
     'postGrantUiStatuses' => [200],
-    'grantService' => TemporaryAdminAccessService::class,
-    // BrDpoAssignmentService::dpoGroupId() default; the LocalBase BR definition
-    // is seeded by the compatibility stage, so isAssigned() becomes true here.
+    // canManage() requires an active LocalBase BR membership snapshot (seeded
+    // by the compatibility stage) plus membership in the member and br_dpo
+    // groups; grantManagerGroups adds br_dpo, the membership is ensured here so
+    // that pre-grant probes stay false for membership-based apps like brstunden.
+    'grantService' => static function (string $uid): void {
+        $snapshot = OCP\Server::get(BrMembershipSnapshotService::class)->snapshot();
+        if (!$snapshot->isValid()) {
+            throw new RuntimeException('Der LocalBase-BR-Mitgliedervertrag ist nicht gueltig.');
+        }
+        $groups = OCP\Server::get(IGroupManager::class);
+        $user = OCP\Server::get(IUserManager::class)->get($uid);
+        $member = $groups->get((string)$snapshot->memberGroupId());
+        if ($user === null || $member === null) {
+            throw new RuntimeException('Compatibility membership prerequisites are missing.');
+        }
+        if (!$groups->isInGroup($uid, (string)$snapshot->memberGroupId())) {
+            $member->addUser($user);
+        }
+        OCP\Server::get(TemporaryAdminAccessService::class)->activate($uid, 60);
+    },
+    // BrDpoAssignmentService::dpoGroupId() default.
     'grantManagerGroups' => ['br_dpo'],
     'permissionProbe' => static fn(string $uid): bool => OCP\Server::get(TemporaryAdminAccessService::class)
         ->hasActiveGrant($uid),
