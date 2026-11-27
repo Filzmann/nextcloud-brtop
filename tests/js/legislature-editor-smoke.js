@@ -2,7 +2,7 @@ const assert = require('assert');
 
 global.window = {};
 global.document = { getElementById() { return null; } };
-require('../../../localbase/js/ui/ui.js');
+require('../../js/shared/ui.js');
 require('../../js/modules/ui.js');
 require('../../js/components/legislature-editor.js');
 

@@ -29,6 +29,20 @@ class MeetingRepository {
         return $qb->executeQuery()->fetchAll();
     }
 
+    public function findRecent(?int $limit = null): array {
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')
+            ->from('brtop_meetings')
+            ->orderBy('meeting_date', 'DESC')
+            ->addOrderBy('id', 'DESC');
+
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb->executeQuery()->fetchAll();
+    }
+
     public function findByIdAndOwner(int $meetingId, string $uid): ?array {
         $qb = $this->db->getQueryBuilder();
         $qb->select('*')

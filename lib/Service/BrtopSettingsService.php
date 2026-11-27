@@ -6,11 +6,16 @@ namespace OCA\BrTop\Service;
 
 use OCA\BrTop\AppInfo\Application;
 use OCP\IConfig;
+use OCP\IL10N;
 
 class BrtopSettingsService {
-    public function __construct(
-        private IConfig $config
-    ) {
+    public function __construct(private IConfig $config, private ?IL10N $l10n = null) {
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function values(): array {
@@ -33,7 +38,7 @@ class BrtopSettingsService {
         string $defaultLocation,
         string $regularAgendaTemplateJson
     ): array {
-        $this->setStringValue('default_meeting_title', $defaultMeetingTitle, 'Ordentliche BR-Sitzung');
+        $this->setStringValue('default_meeting_title', $defaultMeetingTitle, $this->t('Ordentliche BR-Sitzung'));
         $this->setWeekdayValue('regular_meeting_weekday', $regularMeetingWeekday);
         $this->setWeekdayValue('invitation_weekday', $invitationWeekday);
         $this->setTimeValue('default_meeting_time', $defaultMeetingTime);
@@ -44,7 +49,7 @@ class BrtopSettingsService {
     }
 
     public function defaultMeetingTitle(): string {
-        return $this->stringValue('default_meeting_title', 'Ordentliche BR-Sitzung');
+        return $this->stringValue('default_meeting_title', $this->t('Ordentliche BR-Sitzung'));
     }
 
     public function regularMeetingWeekday(): int {
@@ -74,22 +79,75 @@ class BrtopSettingsService {
 
     public function meetingTypes(): array {
         return [
-            ['value' => 'regular_br', 'label' => 'Reguläre BR-Sitzung', 'requiresCommittee' => false],
-            ['value' => 'monthly_talk', 'label' => 'Monatsgespräch', 'requiresCommittee' => false],
+            ['value' => 'regular_br', 'label' => $this->t('Reguläre BR-Sitzung'), 'requiresCommittee' => false],
+            ['value' => 'monthly_talk', 'label' => $this->t('Monatsgespräch'), 'requiresCommittee' => false],
             ['value' => 'works_committee', 'label' => 'Betriebsausschuss', 'requiresCommittee' => false],
             ['value' => 'committee', 'label' => 'Ausschuss / AG', 'requiresCommittee' => true],
-            ['value' => 'custom', 'label' => 'Freie Sitzung', 'requiresCommittee' => false],
+            ['value' => 'custom', 'label' => $this->t('Freie Sitzung'), 'requiresCommittee' => false],
         ];
     }
 
     public function committeeCodes(): array {
-        return [
+        $defaults = [
             ['value' => 'ASA', 'label' => 'ASA'],
             ['value' => 'DPA', 'label' => 'DPA'],
             ['value' => 'IKT', 'label' => 'IKT'],
             ['value' => 'BA', 'label' => 'BA'],
             ['value' => 'IBF', 'label' => 'IBF'],
         ];
+        $json = trim($this->config->getAppValue(Application::APP_ID, 'document_committee_codes_json', ''));
+        if ($json === '') {
+            return $defaults;
+        }
+
+        try {
+            return $this->normalizeCommitteeCodes($json);
+        } catch (\InvalidArgumentException) {
+            return $defaults;
+        }
+    }
+
+    public function documentOrganization(): array {
+        return [
+            'councilName' => $this->stringValue('document_council_name', $this->t('Betriebsrat ambulante dienste e.V.')),
+            'councilAddress' => $this->textValue('document_council_address', $this->t('Wilhelm-Kabus-Str. 21-35, 10829 Berlin')),
+            'issuePlace' => $this->stringValue('document_issue_place', 'Berlin'),
+            'committeeCodes' => $this->committeeCodes(),
+            'invitationSalutation' => $this->textValue('document_invitation_salutation', 'Liebe Kolleg*innen,'),
+            'invitationIntroduction' => $this->textValue('document_invitation_introduction', $this->t('hiermit lade ich euch zur Sitzung ein.')),
+            'invitationClosing' => $this->textValue('document_invitation_closing', $this->t('Viele Grüße')),
+            'invitationSender' => $this->textValue('document_invitation_sender', '{{ABSENDER}}'),
+        ];
+    }
+
+    public function saveDocumentOrganization(
+        string $councilName,
+        string $councilAddress,
+        string $issuePlace,
+        string $committeeCodesJson,
+        string $invitationSalutation,
+        string $invitationIntroduction,
+        string $invitationClosing,
+        string $invitationSender
+    ): array {
+        $values = [
+            'document_council_name' => $this->requiredText($councilName, 'Gremienname', 255),
+            'document_council_address' => $this->requiredText($councilAddress, 'Anschrift', 2000),
+            'document_issue_place' => $this->requiredText($issuePlace, 'Ausstellungsort', 255),
+            'document_invitation_salutation' => $this->requiredText($invitationSalutation, $this->t('Anrede'), 500),
+            'document_invitation_introduction' => $this->requiredText($invitationIntroduction, 'Einladungstext', 4000),
+            'document_invitation_closing' => $this->requiredText($invitationClosing, $this->t('Grußformel'), 500),
+            'document_invitation_sender' => $this->requiredText($invitationSender, 'Absender', 500),
+        ];
+        $committeeCodes = $this->normalizeCommitteeCodes($committeeCodesJson);
+        $encodedCodes = json_encode($committeeCodes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+
+        foreach ($values as $key => $value) {
+            $this->config->setAppValue(Application::APP_ID, $key, $value);
+        }
+        $this->config->setAppValue(Application::APP_ID, 'document_committee_codes_json', $encodedCodes);
+
+        return $this->documentOrganization();
     }
 
     public function normalizeMeetingType(string $meetingType): string {
@@ -118,6 +176,59 @@ class BrtopSettingsService {
         $value = trim($this->config->getAppValue(Application::APP_ID, $key, $default));
 
         return $value !== '' ? $value : $default;
+    }
+
+    private function textValue(string $key, string $default): string {
+        $value = trim(str_replace(["\r\n", "\r"], "\n", $this->config->getAppValue(Application::APP_ID, $key, $default)));
+        return $value !== '' ? $value : $default;
+    }
+
+    private function requiredText(string $value, string $label, int $maxLength): string {
+        $value = trim(str_replace(["\r\n", "\r", "\0"], ["\n", "\n", ''], $value));
+        if ($value === '') {
+            throw new \InvalidArgumentException($label . ' darf nicht leer sein.');
+        }
+        if (strlen($value) > $maxLength) {
+            throw new \InvalidArgumentException($label . ' ist zu lang.');
+        }
+        if (preg_match('/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/u', $value) === 1) {
+            throw new \InvalidArgumentException($label . ' enthält ungültige Steuerzeichen.');
+        }
+        return $value;
+    }
+
+    private function normalizeCommitteeCodes(string $json): array {
+        try {
+            $items = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new \InvalidArgumentException('Der Ausschusskatalog ist kein gültiges JSON-Array.', 0, $e);
+        }
+        if (!is_array($items) || $items === [] || count($items) > 30) {
+            throw new \InvalidArgumentException('Der Ausschusskatalog muss zwischen 1 und 30 Einträge enthalten.');
+        }
+
+        $normalized = [];
+        $seen = [];
+        foreach ($items as $index => $item) {
+            if (!is_array($item)) {
+                throw new \InvalidArgumentException('Ausschusscode ' . ($index + 1) . ' ist kein Objekt.');
+            }
+            $value = strtoupper(trim((string)($item['value'] ?? '')));
+            $label = trim((string)($item['label'] ?? ''));
+            if (preg_match('/^[A-Z][A-Z0-9_-]{1,15}$/', $value) !== 1) {
+                throw new \InvalidArgumentException('Ausschusscode ' . ($index + 1) . ' ist ungültig.');
+            }
+            if ($label === '' || strlen($label) > 80) {
+                throw new \InvalidArgumentException('Bezeichnung für Ausschusscode ' . $value . ' ist ungültig.');
+            }
+            if (isset($seen[$value])) {
+                throw new \InvalidArgumentException('Ausschusscode ' . $value . ' ist doppelt vorhanden.');
+            }
+            $seen[$value] = true;
+            $normalized[] = ['value' => $value, 'label' => $label];
+        }
+
+        return $normalized;
     }
 
     private function weekdayValue(string $key, int $default): int {

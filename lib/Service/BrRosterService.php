@@ -3,8 +3,16 @@
 declare(strict_types=1);
 
 namespace OCA\BrTop\Service;
+use OCP\IL10N;
 
 class BrRosterService {
+    public function __construct(private ?IL10N $l10n = null) {}
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
     public const ROLE_REGULAR = 'regular';
     public const ROLE_REPLACEMENT = 'replacement';
 
@@ -19,8 +27,8 @@ class BrRosterService {
             'minorityGender' => 'female',
             'absenceCalendarName' => 'BR-Abwesenheiten',
             'lists' => [
-                ['name' => 'Liste Zukunft', 'seats' => 10],
-                ['name' => 'Liste Dialog', 'seats' => 3],
+                ['name' => $this->t('Liste Zukunft'), 'seats' => 10],
+                ['name' => $this->t('Liste Dialog'), 'seats' => 3],
             ],
             'members' => $this->demoMembers(),
         ];
@@ -188,35 +196,35 @@ class BrRosterService {
 
     private function demoMembers(): array {
         return [
-            $this->member('brtop-lz-01', 'Anna Berger', 'Berger', 'female', 'Liste Zukunft', 10, 1, self::ROLE_REGULAR),
-            $this->member('brtop-lz-02', 'Ben Schneider', 'Schneider', 'male', 'Liste Zukunft', 10, 2, self::ROLE_REGULAR),
-            $this->member('brtop-lz-03', 'Clara Neumann', 'Neumann', 'female', 'Liste Zukunft', 10, 3, self::ROLE_REGULAR),
-            $this->member('brtop-lz-04', 'David Krüger', 'Krüger', 'male', 'Liste Zukunft', 10, 4, self::ROLE_REGULAR),
-            $this->member('brtop-lz-05', 'Elif Yilmaz', 'Yilmaz', 'female', 'Liste Zukunft', 10, 5, self::ROLE_REGULAR),
-            $this->member('brtop-lz-06', 'Florian Becker', 'Becker', 'male', 'Liste Zukunft', 10, 6, self::ROLE_REGULAR),
-            $this->member('brtop-lz-07', 'Gina Hoffmann', 'Hoffmann', 'female', 'Liste Zukunft', 10, 7, self::ROLE_REGULAR),
-            $this->member('brtop-lz-08', 'Hannes Wolf', 'Wolf', 'male', 'Liste Zukunft', 10, 8, self::ROLE_REGULAR),
-            $this->member('brtop-lz-09', 'Ivan Braun', 'Braun', 'male', 'Liste Zukunft', 10, 9, self::ROLE_REGULAR),
-            $this->member('brtop-lz-10', 'Jonas Richter', 'Richter', 'male', 'Liste Zukunft', 10, 10, self::ROLE_REGULAR),
-            $this->member('brtop-ld-01', 'Katrin Sommer', 'Sommer', 'female', 'Liste Dialog', 3, 1, self::ROLE_REGULAR),
-            $this->member('admin', 'Admin', 'Admin', 'male', 'Liste Dialog', 3, 2, self::ROLE_REGULAR),
-            $this->member('brtop-ld-03', 'Markus Lehmann', 'Lehmann', 'male', 'Liste Dialog', 3, 3, self::ROLE_REGULAR),
-            $this->member('brtop-lz-e01', 'Nora Seidel', 'Seidel', 'female', 'Liste Zukunft', 10, 11, self::ROLE_REPLACEMENT),
-            $this->member('brtop-lz-e02', 'Oliver Hartmann', 'Hartmann', 'male', 'Liste Zukunft', 10, 12, self::ROLE_REPLACEMENT),
-            $this->member('brtop-lz-e03', 'Paula König', 'König', 'female', 'Liste Zukunft', 10, 13, self::ROLE_REPLACEMENT),
-            $this->member('brtop-lz-e04', 'Robert Lang', 'Lang', 'male', 'Liste Zukunft', 10, 14, self::ROLE_REPLACEMENT),
-            $this->member('brtop-lz-e05', 'Sina Mertens', 'Mertens', 'female', 'Liste Zukunft', 10, 15, self::ROLE_REPLACEMENT),
-            $this->member('brtop-lz-e06', 'Tobias Ernst', 'Ernst', 'male', 'Liste Zukunft', 10, 16, self::ROLE_REPLACEMENT),
-            $this->member('brtop-lz-e07', 'Ulrike Vogler', 'Vogler', 'female', 'Liste Zukunft', 10, 17, self::ROLE_REPLACEMENT),
-            $this->member('brtop-lz-e08', 'Viktor Schramm', 'Schramm', 'male', 'Liste Zukunft', 10, 18, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e01', 'Quirin Brandt', 'Brandt', 'male', 'Liste Dialog', 3, 4, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e02', 'Rita Vogt', 'Vogt', 'female', 'Liste Dialog', 3, 5, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e03', 'Selma Aydin', 'Aydin', 'female', 'Liste Dialog', 3, 6, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e04', 'Thomas Krämer', 'Krämer', 'male', 'Liste Dialog', 3, 7, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e05', 'Ute Lenz', 'Lenz', 'female', 'Liste Dialog', 3, 8, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e06', 'Volker Meier', 'Meier', 'male', 'Liste Dialog', 3, 9, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e07', 'Wiebke Peters', 'Peters', 'female', 'Liste Dialog', 3, 10, self::ROLE_REPLACEMENT),
-            $this->member('brtop-ld-e08', 'Xaver Scholz', 'Scholz', 'male', 'Liste Dialog', 3, 11, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-01', $this->t('Anna Berger'), 'Berger', 'female', $this->t('Liste Zukunft'), 10, 1, self::ROLE_REGULAR),
+            $this->member('brtop-lz-02', $this->t('Ben Schneider'), 'Schneider', 'male', $this->t('Liste Zukunft'), 10, 2, self::ROLE_REGULAR),
+            $this->member('brtop-lz-03', $this->t('Clara Neumann'), 'Neumann', 'female', $this->t('Liste Zukunft'), 10, 3, self::ROLE_REGULAR),
+            $this->member('brtop-lz-04', $this->t('David Krüger'), $this->t('Krüger'), 'male', $this->t('Liste Zukunft'), 10, 4, self::ROLE_REGULAR),
+            $this->member('brtop-lz-05', $this->t('Elif Yilmaz'), 'Yilmaz', 'female', $this->t('Liste Zukunft'), 10, 5, self::ROLE_REGULAR),
+            $this->member('brtop-lz-06', $this->t('Florian Becker'), 'Becker', 'male', $this->t('Liste Zukunft'), 10, 6, self::ROLE_REGULAR),
+            $this->member('brtop-lz-07', $this->t('Gina Hoffmann'), 'Hoffmann', 'female', $this->t('Liste Zukunft'), 10, 7, self::ROLE_REGULAR),
+            $this->member('brtop-lz-08', $this->t('Hannes Wolf'), 'Wolf', 'male', $this->t('Liste Zukunft'), 10, 8, self::ROLE_REGULAR),
+            $this->member('brtop-lz-09', $this->t('Ivan Braun'), 'Braun', 'male', $this->t('Liste Zukunft'), 10, 9, self::ROLE_REGULAR),
+            $this->member('brtop-lz-10', $this->t('Jonas Richter'), 'Richter', 'male', $this->t('Liste Zukunft'), 10, 10, self::ROLE_REGULAR),
+            $this->member('brtop-ld-01', $this->t('Katrin Sommer'), 'Sommer', 'female', $this->t('Liste Dialog'), 3, 1, self::ROLE_REGULAR),
+            $this->member('admin', $this->t('Admin'), $this->t('Admin'), 'male', $this->t('Liste Dialog'), 3, 2, self::ROLE_REGULAR),
+            $this->member('brtop-ld-03', $this->t('Markus Lehmann'), 'Lehmann', 'male', $this->t('Liste Dialog'), 3, 3, self::ROLE_REGULAR),
+            $this->member('brtop-lz-e01', $this->t('Nora Seidel'), 'Seidel', 'female', $this->t('Liste Zukunft'), 10, 11, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-e02', $this->t('Oliver Hartmann'), 'Hartmann', 'male', $this->t('Liste Zukunft'), 10, 12, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-e03', $this->t('Paula König'), $this->t('König'), 'female', $this->t('Liste Zukunft'), 10, 13, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-e04', $this->t('Robert Lang'), 'Lang', 'male', $this->t('Liste Zukunft'), 10, 14, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-e05', $this->t('Sina Mertens'), 'Mertens', 'female', $this->t('Liste Zukunft'), 10, 15, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-e06', $this->t('Tobias Ernst'), 'Ernst', 'male', $this->t('Liste Zukunft'), 10, 16, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-e07', $this->t('Ulrike Vogler'), 'Vogler', 'female', $this->t('Liste Zukunft'), 10, 17, self::ROLE_REPLACEMENT),
+            $this->member('brtop-lz-e08', $this->t('Viktor Schramm'), 'Schramm', 'male', $this->t('Liste Zukunft'), 10, 18, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e01', $this->t('Quirin Brandt'), 'Brandt', 'male', $this->t('Liste Dialog'), 3, 4, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e02', $this->t('Rita Vogt'), 'Vogt', 'female', $this->t('Liste Dialog'), 3, 5, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e03', $this->t('Selma Aydin'), 'Aydin', 'female', $this->t('Liste Dialog'), 3, 6, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e04', $this->t('Thomas Krämer'), $this->t('Krämer'), 'male', $this->t('Liste Dialog'), 3, 7, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e05', $this->t('Ute Lenz'), 'Lenz', 'female', $this->t('Liste Dialog'), 3, 8, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e06', $this->t('Volker Meier'), 'Meier', 'male', $this->t('Liste Dialog'), 3, 9, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e07', $this->t('Wiebke Peters'), 'Peters', 'female', $this->t('Liste Dialog'), 3, 10, self::ROLE_REPLACEMENT),
+            $this->member('brtop-ld-e08', $this->t('Xaver Scholz'), 'Scholz', 'male', $this->t('Liste Dialog'), 3, 11, self::ROLE_REPLACEMENT),
         ];
     }
 

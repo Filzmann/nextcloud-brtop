@@ -19,17 +19,18 @@ use OCA\BrTop\Service\MeetingAbsenceService;
 use OCA\BrTop\Service\MeetingStateService;
 use OCA\BrTop\Service\LegislatureService;
 use OCA\BrTop\Service\ProtocolBlockService;
+use OCA\BrTop\Service\BrPermissionService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
 
 class ApiController extends Controller {
-    public function __construct(
-        IRequest $request,
+    public function __construct(IRequest $request,
         private IUserSession $userSession,
         private BrtopLogger $logger,
         private BrtopSettingsService $settings,
@@ -43,9 +44,15 @@ class ApiController extends Controller {
         private LegislatureService $legislatureService,
         private MeetingAbsenceService $meetingAbsenceService,
         private BrAccessService $accessService,
-        private ApiResponder $responder
-    ) {
+        private ApiResponder $responder,
+        private ?IL10N $l10n = null) {
         parent::__construct(Application::APP_ID, $request);
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     private function uid(): string {
@@ -60,15 +67,20 @@ class ApiController extends Controller {
     public function state(): DataResponse {
         $uid = $this->uid();
         return new DataResponse([
-            'meetings' => $this->meetingStateService->meetingsForOwner($uid),
+            'meetings' => $this->meetingStateService->meetings(),
             'settings' => $this->settingsPayload(),
             'capabilities' => [
-                'canManageLegislature' => $this->accessService->isAdmin($uid),
+                'canManageSession' => $this->accessService->can($uid, BrPermissionService::SESSION_MANAGE),
+                'canGenerateDocuments' => $this->accessService->can($uid, BrPermissionService::DOCUMENT_GENERATE),
+                'canManageSettings' => $this->accessService->can($uid, BrPermissionService::SETTINGS_MANAGE),
+                'canManageLegislature' => $this->accessService->can($uid, BrPermissionService::LEGISLATURE_MANAGE),
+                'canConfirmAbsence' => $this->accessService->can($uid, BrPermissionService::ABSENCE_CONFIRM),
             ],
             'notice' => 'Standardstruktur: 1 Protokolle, 2 Personelle Angelegenheiten (§99/§100/§102), 3 Arbeitsorganisatorisches, 4 Sprechstundenbericht. Einladung zusammengefasst, Protokoll und Beschlüsse getrennt.'
         ]);
     }
 
+    #[NoAdminRequired]
     public function legislature(): DataResponse {
         return new DataResponse([
             'ok' => true,
@@ -76,6 +88,7 @@ class ApiController extends Controller {
         ]);
     }
 
+    #[NoAdminRequired]
     public function saveLegislature(string $configurationJson): DataResponse {
         return $this->responder->respond(
             function () use ($configurationJson): array {
@@ -91,10 +104,11 @@ class ApiController extends Controller {
             [$this->logger, 'error'],
             'save_legislature',
             [],
-            'Die Legislatur konnte nicht gespeichert werden.'
+            $this->t('Die Legislatur konnte nicht gespeichert werden.')
         );
     }
 
+    #[NoAdminRequired]
     public function activateLegislature(int $legislatureId): DataResponse {
         return $this->responder->respond(
             fn(): array => [
@@ -104,10 +118,11 @@ class ApiController extends Controller {
             [$this->logger, 'error'],
             'activate_legislature',
             ['legislature_id' => $legislatureId],
-            'Die Legislatur konnte nicht aktiviert werden.'
+            $this->t('Die Legislatur konnte nicht aktiviert werden.')
         );
     }
 
+    #[NoAdminRequired]
     public function absenceSuggestions(int $meetingId): DataResponse {
         return new DataResponse([
             'ok' => true,
@@ -115,6 +130,7 @@ class ApiController extends Controller {
         ]);
     }
 
+    #[NoAdminRequired]
     public function saveConfirmedAbsences(int $meetingId, string $memberIdsJson = '[]'): DataResponse {
         return $this->responder->respond(
             function () use ($meetingId, $memberIdsJson): array {
@@ -130,7 +146,7 @@ class ApiController extends Controller {
             [$this->logger, 'error'],
             'save_confirmed_absences',
             ['meeting_id' => $meetingId],
-            'Die bestaetigten Verhinderungen konnten nicht gespeichert werden.'
+            $this->t('Die bestaetigten Verhinderungen konnten nicht gespeichert werden.')
         );
     }
 
@@ -141,6 +157,7 @@ class ApiController extends Controller {
         return $settings;
     }
 
+    #[NoAdminRequired]
     public function updateSettings(
         string $defaultMeetingTitle,
         int $regularMeetingWeekday,
@@ -177,7 +194,7 @@ class ApiController extends Controller {
             [$this->logger, 'error'],
             'update_settings',
             [],
-            'Die Einstellungen konnten nicht gespeichert werden. Details stehen im Nextcloud-Log.'
+            $this->t('Die Einstellungen konnten nicht gespeichert werden. Details stehen im Nextcloud-Log.')
         );
     }
 
@@ -217,7 +234,7 @@ class ApiController extends Controller {
             [$this->logger, 'error'],
             'plan_next_regular_meeting',
             [],
-            'Die nächste BR-Sitzung konnte nicht geplant werden. Details stehen im Nextcloud-Log.'
+            $this->t('Die nächste BR-Sitzung konnte nicht geplant werden. Details stehen im Nextcloud-Log.')
         );
     }
 
@@ -299,7 +316,7 @@ class ApiController extends Controller {
                 $this->agendaMutationService->deleteItemWithProtocolBlocks($meetingId, $topId);
             },
             'delete_top',
-            'Der TOP konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.',
+            $this->t('Der TOP konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.'),
             [
                 'meeting_id' => $meetingId,
                 'top_id' => $topId,
@@ -319,7 +336,7 @@ class ApiController extends Controller {
             [$this->logger, 'error'],
             'delete_meeting',
             ['meeting_id' => $meetingId],
-            'Die Sitzung konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.'
+            $this->t('Die Sitzung konnte nicht gelöscht werden. Details stehen im Nextcloud-Log.')
         );
     }
 
@@ -337,7 +354,7 @@ class ApiController extends Controller {
         } catch (\OutOfBoundsException $e) {
             return new DataResponse([
                 'ok' => false,
-                'message' => $e->getMessage(),
+                'message' => $this->t($e->getMessage()),
             ], Http::STATUS_NOT_FOUND);
         }
 
@@ -361,13 +378,14 @@ class ApiController extends Controller {
         } catch (\OutOfBoundsException $e) {
             return new DataResponse([
                 'ok' => false,
-                'message' => $e->getMessage(),
+                'message' => $this->t($e->getMessage()),
             ], Http::STATUS_NOT_FOUND);
         }
 
         return new DataResponse(['ok' => true]);
     }
 
+    #[NoAdminRequired]
     public function seedDemo(): DataResponse {
         return new DataResponse(['ok' => true] + $this->demoDataService->seedForOwner($this->uid()));
     }
@@ -382,7 +400,7 @@ class ApiController extends Controller {
             return $this->documentErrorResponse(
                 'generate_invitation',
                 $e,
-                'Die Einladung konnte nicht erzeugt werden. Details stehen im Nextcloud-Log.',
+                $this->t('Die Einladung konnte nicht erzeugt werden. Details stehen im Nextcloud-Log.'),
                 ['meeting_id' => $meetingId, 'document_type' => 'invitation'],
                 $this->partialDocumentData($e)
             );
@@ -399,7 +417,7 @@ class ApiController extends Controller {
             return $this->documentErrorResponse(
                 'generate_protocol',
                 $e,
-                'Das Protokoll konnte nicht erzeugt werden. Details stehen im Nextcloud-Log.',
+                $this->t('Das Protokoll konnte nicht erzeugt werden. Details stehen im Nextcloud-Log.'),
                 ['meeting_id' => $meetingId, 'document_type' => 'protocol'],
                 $this->partialDocumentData($e)
             );
@@ -416,7 +434,7 @@ class ApiController extends Controller {
             return $this->documentErrorResponse(
                 'generate_resolutions',
                 $e,
-                'Die Beschlussdokumente konnten nicht erzeugt werden. Details stehen im Nextcloud-Log.',
+                $this->t('Die Beschlussdokumente konnten nicht erzeugt werden. Details stehen im Nextcloud-Log.'),
                 ['meeting_id' => $meetingId, 'document_type' => 'resolutions'],
                 $this->partialDocumentData($e)
             );
@@ -445,7 +463,7 @@ class ApiController extends Controller {
         } catch (\InvalidArgumentException $e) {
             return new DataResponse([
                 'ok' => false,
-                'message' => $e->getMessage(),
+                'message' => $this->t($e->getMessage()),
             ], Http::STATUS_BAD_REQUEST);
         } catch (\Throwable $e) {
             if ($serverErrorAction === null) {
@@ -479,7 +497,7 @@ class ApiController extends Controller {
     }
 
     private function assertMeetingOwner(int $meetingId): Meeting {
-        return $this->meetingService->assertOwnedMeeting($meetingId, $this->uid());
+        return $this->meetingService->assertMeetingExists($meetingId);
     }
 
 }

@@ -3,26 +3,35 @@
 declare(strict_types=1);
 
 namespace OCA\BrTop\View;
+use OCP\IL10N;
 
 final class UiComponents {
-    private const PRESETS = [
-        'newMeeting' => ['icon' => '+', 'label' => 'Neue Sitzung', 'class' => ''],
-        'backSessions' => ['icon' => '&larr;', 'label' => 'Zurück', 'class' => ''],
-        'createInvitation' => ['icon' => '&#9993;', 'label' => 'Ladung erzeugen', 'class' => ''],
-        'editProtocol' => ['icon' => '&#9998;', 'label' => 'Protokoll bearbeiten', 'class' => ''],
-        'addTop' => ['icon' => '+', 'label' => 'TOP hinzufügen', 'class' => 'brtop-icon-button-primary'],
-        'close' => ['icon' => '&times;', 'label' => 'Schließen', 'class' => ''],
-        'saveTop' => ['icon' => '&#10003;', 'label' => 'TOP speichern', 'class' => 'brtop-icon-button-primary'],
-        'backDetail' => ['icon' => '&larr;', 'label' => 'Zur Sitzung', 'class' => ''],
-        'generateProtocolDocument' => ['icon' => '&#10003;', 'label' => 'Protokolldokument erzeugen', 'class' => ''],
-    ];
+    /** Lokalisierung fachlicher Texte; ohne IL10N identity. */
+    private static function t(?IL10N $l10n, string $text): string
+    {
+        return $l10n?->t($text) ?? $text;
+    }
 
-    public static function preset(string $preset, array $attrs = [], string $class = ''): string {
-        if (!isset(self::PRESETS[$preset])) {
+    private static function presets(?IL10N $l10n = null): array {
+        return [
+        'newMeeting' => ['icon' => '+', 'label' => self::t($l10n, 'Neue Sitzung'), 'class' => ''],
+        'backSessions' => ['icon' => '&larr;', 'label' => self::t($l10n, 'Zurück'), 'class' => ''],
+        'createInvitation' => ['icon' => '&#9993;', 'label' => self::t($l10n, 'Ladung erzeugen'), 'class' => ''],
+        'editProtocol' => ['icon' => '&#9998;', 'label' => self::t($l10n, 'Protokoll bearbeiten'), 'class' => ''],
+        'addTop' => ['icon' => '+', 'label' => self::t($l10n, 'TOP hinzufügen'), 'class' => 'brtop-icon-button-primary'],
+        'close' => ['icon' => '&times;', 'label' => self::t($l10n, 'Schließen'), 'class' => ''],
+        'saveTop' => ['icon' => '&#10003;', 'label' => self::t($l10n, 'TOP speichern'), 'class' => 'brtop-icon-button-primary'],
+        'backDetail' => ['icon' => '&larr;', 'label' => self::t($l10n, 'Zur Sitzung'), 'class' => ''],
+        'generateProtocolDocument' => ['icon' => '&#10003;', 'label' => self::t($l10n, 'Protokolldokument erzeugen'), 'class' => ''],
+        ];
+    }
+
+    public static function preset(string $preset, array $attrs = [], string $class = '', ?IL10N $l10n = null): string {
+        if (!isset(self::presets($l10n)[$preset])) {
             throw new \InvalidArgumentException('Unbekanntes BRTop-UI-Preset: ' . $preset);
         }
 
-        $button = self::PRESETS[$preset];
+        $button = self::presets($l10n)[$preset];
 
         return self::iconButton(
             (string)$button['icon'],

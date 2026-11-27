@@ -21,33 +21,15 @@ Entwicklungsruntime ist davon getrennt und ersetzt keinen RC-Nachweis.
 
 ## Freigegebene Umsetzungsaufgaben
 
-### BRT-DOCUMENT-CONFIG – Stammdaten und Dokumentvorlagen versionieren
-
-Status: bereit nach fachlicher Trennung fester und editierbarer Inhalte
-
-- Gremienname, Anschrift, Ausstellungsort, Ausschusskataloge und
-  organisationsspezifische Texte in validierte App-Administration überführen.
-- Rechtlich beziehungsweise fachlich unveränderbare Semantik getrennt halten
-  und vor unbeabsichtigter Entfernung durch Vorlagen schützen.
-- ODT-, Markdown-, Einladungs-, Protokoll- und Beschlussvorlagen versionieren;
-  nur validierte, nicht ausführbare Platzhalter zulassen.
-- Vorschau, Freigabestatus und Rückfall auf die letzte freigegebene Version
-  anbieten. Erzeugte Dokumente speichern die verwendete Vorlagenversion und
-  werden später nicht umgedeutet.
-- Bestehende Werte als kompatible Defaults sowie Validierung,
-  Platzhalterescaping, historische Reproduktion, ungültige Vorlage und
-  Rückfall testen.
-
 ## Aktueller Fokus
 
-- Die manuellen Prüfungen werden im ausfüllbaren
-  [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
 - Den bestehenden Sitzungs-, Agenda- und Dokumentprozess fachlich
   charakterisieren und auf einem realitätsnahen Staging abnehmen.
 - Vor produktiver Nutzung ein vollständiges Rollen-, Rechte-, Datenschutz-
   und Aufbewahrungskonzept festlegen und serverseitig absichern.
-- Bestehende Dokumentvorlagen, Organisationsstammdaten und Ausschusskataloge
-  auf fachlich feste und organisationsspezifische Inhalte prüfen.
+- Die implementierte Dokumentkonfiguration auf Staging fachlich und visuell
+  abnehmen; insbesondere ODT-ZIP-Runtime, Freigabe, Fallback und historische
+  Dokumentmetadaten prüfen.
 
 ## Geplante Erweiterungen
 
@@ -65,8 +47,6 @@ Status: bereit nach fachlicher Trennung fester und editierbarer Inhalte
 
 - Zusammensetzung des Gremiums, Listen, Ersatzmitglieder und Reihenfolge der
   Nachladung.
-- Rechte für Vorsitz, Stellvertretung, Schriftführung, Ausschüsse und normale
-  BR-Mitglieder.
 - Rechtsverbindlichkeit, Versionierung, Korrektur und Aufbewahrung erzeugter
   Dokumente.
 - Ablageort, Dateirechte, Lösch- und Rückbauvertrag.

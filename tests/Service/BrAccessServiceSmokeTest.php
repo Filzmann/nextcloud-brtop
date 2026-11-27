@@ -2,33 +2,22 @@
 
 declare(strict_types=1);
 
-namespace OCP {
-    if (!interface_exists(IGroupManager::class)) {
-        interface IGroupManager { public function isAdmin($userId); public function isInGroup($userId, $group); }
-    }
-}
-
 namespace OCA\BrTop\Tests {
 
     use OCA\BrTop\Exception\AccessDeniedException;
     use OCA\BrTop\Service\BrAccessService;
-    use OCA\BrTop\Service\BrGroupsService;
-    use OCA\BrTop\Service\TemporaryAdminAccessChecker;
-    use OCP\IGroupManager;
+    use OCA\BrTop\Service\BrPermissionService;
 
-    $groups = new class implements IGroupManager {
-        public function isAdmin($userId): bool { return $userId === 'admin'; }
-        public function isInGroup($userId, $group): bool { return $userId === 'br-member' && $group === 'BR Custom'; }
-    };
-    $groupNames = new class extends BrGroupsService {
+    $permissions = new class extends BrPermissionService {
         public function __construct() {}
-        public function memberGroupName(): string { return 'BR Custom'; }
+        public function has(string $uid,string $permission):bool{return $uid==='br-member'||($uid==='admin'&&$this->active);}
+        public function assert(string $uid,string $permission):void{if(!$this->has($uid,$permission))throw new AccessDeniedException('Keine Berechtigung.');}
+        public bool $active=false;
     };
-    $adminAccess = new class implements TemporaryAdminAccessChecker { public bool $active=false; public function hasActiveGrant(string $uid):bool{return $this->active;} };
-    $service = new BrAccessService($groups, $groupNames, $adminAccess);
+    $service = new BrAccessService($permissions);
 
     assertSameValue(false, $service->canUse('admin'), 'Native Nextcloud admins must not receive BRTop access without an app-local grant.');
-    $adminAccess->active=true;
+    $permissions->active=true;
     assertSameValue(true, $service->canUse('admin'), 'An active app-local grant should enable BRTop admin access.');
     assertSameValue(true, $service->canUse('br-member'), 'Members of the configured BR group should be allowed to use BRTop.');
     assertSameValue(false, $service->canUse('other-user'), 'Unrelated authenticated users must be denied.');
@@ -38,9 +27,9 @@ namespace OCA\BrTop\Tests {
         'The service must deny unrelated users server-side.'
     );
     assertThrows(
-        static fn() => $service->assertAdmin('br-member'),
+        static fn() => $service->assertPermission('other-user', BrPermissionService::LEGISLATURE_MANAGE),
         AccessDeniedException::class,
-        'Legislature management must remain restricted to Nextcloud admins.'
+        'Legislature management must remain restricted to holders of the separate capability.'
     );
 
     echo 'BrAccessService smoke tests passed' . PHP_EOL;

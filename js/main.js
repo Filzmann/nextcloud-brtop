@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     let meetings = [];
     let currentSettings = {};
     let selectedMeetingId = null;
@@ -82,7 +83,7 @@
         currentSettings = data.settings || {};
         capabilities = data.capabilities || {};
         byId('manage-legislature').hidden = !capabilities.canManageLegislature;
-        byId('review-absences').hidden = !capabilities.canManageLegislature;
+        byId('review-absences').hidden = !capabilities.canConfirmAbsence;
 
         if (selectedMeetingId && !findMeeting(selectedMeetingId)) {
             selectedMeetingId = null;
@@ -107,12 +108,12 @@
         const editor = byId('protocol-editor');
 
         if (!meeting) {
-            byId('protocol-heading').textContent = 'Protokoll bearbeiten';
-            editor.innerHTML = '<p>Die Sitzung wurde nicht gefunden.</p>';
+            byId('protocol-heading').textContent = translate('brtop', translate('brtop', 'Protokoll bearbeiten'));
+            editor.innerHTML = '<p>' + translate('brtop', translate('brtop', 'Die Sitzung wurde nicht gefunden.')) + '</p>';
             return;
         }
 
-        byId('protocol-heading').textContent = `Protokoll: ${meeting.title || 'Sitzung'}`;
+        byId('protocol-heading').textContent = `Protokoll: ${meeting.title || translate('brtop', translate('brtop', 'Sitzung'))}`;
 
         const tops = meeting.tops || [];
         editor.innerHTML = protocolEditorHtml(tops);
@@ -128,13 +129,13 @@
         const result = await meetingRepository.createNextRegular();
         await loadState();
         openMeetingDetail(result.id);
-        showNotice('Sitzung angelegt.', 'success');
+        showNotice(translate('brtop', translate('brtop', 'Sitzung angelegt.')), 'success');
     }
 
     async function deleteMeeting(id) {
         const meeting = findMeeting(id);
         const label = meeting ? fmtMeeting(meeting) : 'diese Sitzung';
-        if (!confirm(`Sitzung "${label}" wirklich löschen?`)) {
+        if (!confirm(`Sitzung "${label}" ${translate('brtop', translate('brtop', 'wirklich löschen?'))}`)) {
             return;
         }
 
@@ -144,14 +145,14 @@
         }
         await loadState();
         viewRouter.show('sessions-view');
-        showNotice('Sitzung geloescht.', 'success');
+        showNotice(translate('brtop', translate('brtop', 'Sitzung geloescht.')), 'success');
     }
 
     async function generateInvitation() {
         const result = await meetingRepository.createInvitation(selectedMeetingId);
         await loadState();
         renderMeetingDetail();
-        showDocumentResult(result, 'Ladung erzeugt.');
+        showDocumentResult(result, translate('brtop', translate('brtop', 'Ladung erzeugt.')));
     }
 
     async function generateProtocolDocument() {
@@ -160,7 +161,7 @@
         const result = await meetingRepository.createProtocol(selectedMeetingId);
         await loadState();
         renderProtocolEditor();
-        showDocumentResult(result, 'Protokolldokument erzeugt.');
+        showDocumentResult(result, translate('brtop', translate('brtop', 'Protokolldokument erzeugt.')));
     }
 
     function openDocumentOverlay(link) {
@@ -172,7 +173,7 @@
             return;
         }
 
-        title.textContent = link.getAttribute('data-document-title') || link.textContent || 'Dokument';
+        title.textContent = link.getAttribute('data-document-title') || link.textContent || translate('brtop', translate('brtop', 'Dokument'));
         frame.src = link.href;
         overlay.hidden = false;
         documentOverlayTrigger = link;
@@ -201,7 +202,7 @@
         try {
             await createNewMeeting();
         } catch (e) {
-            showError(e, 'Sitzung konnte nicht angelegt werden.');
+            showError(e, translate('brtop', translate('brtop', 'Sitzung konnte nicht angelegt werden.')));
         }
     });
 
@@ -221,7 +222,7 @@
                 await deleteMeeting(id);
             }
         } catch (e) {
-            showError(e, 'Aktion konnte nicht ausgefuehrt werden.');
+            showError(e, translate('brtop', translate('brtop', 'Aktion konnte nicht ausgefuehrt werden.')));
         }
     });
 
@@ -234,7 +235,7 @@
             await legislatureEditor.load();
             viewRouter.show('legislature-view');
         } catch (e) {
-            showError(e, 'Legislatur konnte nicht geladen werden.');
+            showError(e, translate('brtop', translate('brtop', 'Legislatur konnte nicht geladen werden.')));
         }
     });
 
@@ -247,7 +248,7 @@
             await absenceReview.load(selectedMeetingId);
             viewRouter.show('absence-view');
         } catch (e) {
-            showError(e, 'Verhinderungen konnten nicht geladen werden.');
+            showError(e, translate('brtop', translate('brtop', 'Verhinderungen konnten nicht geladen werden.')));
         }
     });
 
@@ -259,7 +260,7 @@
         try {
             await generateInvitation();
         } catch (e) {
-            showError(e, 'Ladung konnte nicht erzeugt werden.');
+            showError(e, translate('brtop', translate('brtop', 'Ladung konnte nicht erzeugt werden.')));
         }
     });
 
@@ -322,7 +323,7 @@
             await loadState();
             openMeetingDetail(selectedMeetingId);
         } catch (e) {
-            showError(e, 'Protokoll konnte nicht gespeichert werden.');
+            showError(e, translate('brtop', translate('brtop', 'Protokoll konnte nicht gespeichert werden.')));
         }
     });
 
@@ -330,7 +331,7 @@
         try {
             await generateProtocolDocument();
         } catch (e) {
-            showError(e, 'Protokoll konnte nicht erzeugt werden.');
+            showError(e, translate('brtop', translate('brtop', 'Protokoll konnte nicht erzeugt werden.')));
         }
     });
 
@@ -340,5 +341,5 @@
     protocolEditor.init();
     topForm.init();
     window.BRTop.persistentHorizontalScroll.bind(byId('brtop-app'));
-    loadState().catch(e => showError(e, 'Sitzungen konnten nicht geladen werden.'));
+    loadState().catch(e => showError(e, translate('brtop', translate('brtop', 'Sitzungen konnten nicht geladen werden.'))));
 })();

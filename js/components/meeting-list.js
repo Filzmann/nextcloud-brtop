@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const {
         esc,
         fmtDate,
@@ -8,14 +9,14 @@
 
     function sessionTableHtml(meetings) {
         if (meetings.length === 0) {
-            return '<p>Noch keine Sitzung vorhanden.</p>';
+            return '<p>' + translate('brtop', translate('brtop', 'Noch keine Sitzung vorhanden.')) + '</p>';
         }
 
         const rows = meetings.map(meeting => `
             <tr>
                 <td>${esc(fmtDate(meeting.meeting_date))}</td>
                 <td>${esc(fmtTime(meeting.meeting_time))}</td>
-                <td>${esc(meeting.title || 'ohne Titel')}</td>
+                <td>${esc(meeting.title || translate('brtop', translate('brtop', 'ohne Titel')))}</td>
                 <td class="brtop-table-actions">
                     ${buttonPresetHtml('editMeeting', { 'data-id': meeting.id })}
                     ${buttonPresetHtml('deleteMeeting', { 'data-id': meeting.id })}
@@ -28,10 +29,10 @@
                 <table class="brtop-session-table">
                     <thead>
                         <tr>
-                            <th>Datum</th>
-                            <th>Uhrzeit</th>
-                            <th>Titel</th>
-                            <th>Aktionen</th>
+                            <th>${translate('brtop', translate('brtop', 'Datum'))}</th>
+                            <th>${translate('brtop', translate('brtop', 'Uhrzeit'))}</th>
+                            <th>${translate('brtop', translate('brtop', 'Titel'))}</th>
+                            <th>${translate('brtop', translate('brtop', 'Aktionen'))}</th>
                         </tr>
                     </thead>
                     <tbody>${rows}</tbody>

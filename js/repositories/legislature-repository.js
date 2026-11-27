@@ -1,5 +1,5 @@
 (function() {
-    const { Repository } = window.LocalBase.repositories;
+    const { Repository } = window.OCA.BrTop.Shared.repositories;
 
     class LegislatureRepository extends Repository {
         load() {

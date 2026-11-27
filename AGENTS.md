@@ -83,6 +83,9 @@ Beschluesse:
 
 ## Repository und gemeinsamer Arbeitsablauf
 
+- Lokalisierung (ZM-06): Sichtbare Texte ausschließlich über Nextcloud-l10n — deutsche Quelltexte via `IL10N::t()`/`window.t('brtop', …)`, Kataloge `l10n/en.*` und `l10n/en_GB.*` (Englisch); technische IDs bleiben unübersetzt. `tests/Ui/L10nCatalogContractTest.php` erzwingt das Rohtext-Gate (siehe `docs/l10n-inventory.md`).
+
+
 - Dieses Verzeichnis ist ein eigenstaendiges Git-Repository fuer die BR-App `brtop`.
 - Andere eigene Nextcloud-Apps, zum Beispiel `adplaner`, leben in eigenen Repositories.
 - Diese Datei und lokal referenzierte Skills bilden bei einem direkten Start in diesem Repository die vollständige Repository-Steuerung.
@@ -132,7 +135,8 @@ Wichtige Pruefungen:
 - Der app-eigene Processing-Katalog unter
   `resources/privacy-processing.json` ist die kanonische Metadatenquelle für
   Legislatur/Besetzung, Sitzungen/Agenda/Protokoll, Ladung/Abwesenheit,
-  Dokumenterzeugung/Dateiablage und temporären Admin-Vollzugriff. Er enthält
+  Dokumenterzeugung/Dateiablage, temporären Admin-Vollzugriff und die
+  persönliche BR-Datenschutzberechtigung. Er enthält
   keine personenbezogenen Laufzeitdaten und markiert ungeklärte Rechtsgrundlagen,
   Empfänger-, Retention-, Backup-, Kalender- und Dateientscheidungen mit
   `PRIVACY-DECISION-REQUIRED`. Der öffentliche V1-Provider liest ausschließlich
@@ -143,8 +147,8 @@ Wichtige Pruefungen:
 - BRTop besitzt keinen eigenen Nextcloud-Hauptnavigationseintrag. `orgsuite` stellt den gemeinsamen Einstieg `BR` bereit.
 - Das Template bindet das zentrale OrgSuite-Menue mit `data-suite="br"` und `data-current-app="brtop"` ein.
 - BR- und Sitzungsrechte bleiben ausschliesslich serverseitig im BRTop; Menuesichtbarkeit ist keine Berechtigung.
-- Native Nextcloud-Administration erteilt keinen fachlichen BRTop-Vollzugriff. Er setzt pro Administrationskonto eine aktive, app-lokale Freigabe von höchstens 24 Stunden voraus; Beginn, geplantes Ende und Widerruf bleiben historisch protokolliert. Ausschließlich Mitglieder der nativen Gruppe `Datenschutzbeauftragte` lesen die Historie und erteilen oder widerrufen Freigaben in der BRTop-Fachoberfläche.
-- Ein fehlender Vollzugriff wird nur dem betroffenen Administrationskonto angezeigt; ein direkter Link zur Freigabesteuerung erscheint ausschließlich, wenn dasselbe Konto zugleich Mitglied von `Datenschutzbeauftragte` ist. Änderungen an Freigabehistorie oder BRTop-Rechten werden gleichzeitig im PersonalDataProvider und PermissionProvider nachgeführt.
+- Native Nextcloud-Administration erteilt keinen fachlichen BRTop-Vollzugriff. Er setzt pro Administrationskonto eine aktive, app-lokale Freigabe von höchstens 24 Stunden voraus; Beginn, geplantes Ende und Widerruf bleiben historisch protokolliert. Der aktuelle BR-Vorsitz sowie aktuelle BR-Mitglieder mit einer durch den Vorsitz explizit zugewiesenen persönlichen BR-Datenschutzberechtigung lesen die Historie und erteilen oder widerrufen Freigaben in der BRTop-Fachoberfläche.
+- Die persönliche BR-Datenschutzberechtigung darf ausschließlich aktuellen Mitgliedern des kanonischen LocalBase-BR-Vertrags zugewiesen werden, verliert ohne Mitgliedschaft sofort ihre Wirkung und erlaubt keine Weiterdelegation. Ein fehlender Vollzugriff wird nur dem betroffenen Administrationskonto angezeigt; ein direkter Link zur Freigabesteuerung erscheint ausschließlich, wenn dasselbe Konto die Freigaben fachlich verwalten darf. Änderungen an Freigabehistorie oder BRTop-Rechten werden gleichzeitig im PersonalDataProvider und PermissionProvider nachgeführt.
 
 
 ## Tests

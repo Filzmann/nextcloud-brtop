@@ -1,8 +1,9 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const { esc } = window.BRTop.ui;
 
     function html(state) {
-        if (!state) return '<p>Keine Verhinderungsdaten geladen.</p>';
+        if (!state) return '<p>' + translate('brtop', translate('brtop', 'Keine Verhinderungsdaten geladen.')) + '</p>';
         const locked = Boolean(state.snapshot_locked);
         const rows = (state.members || []).map(member => {
             const checked = ['suggested', 'confirmed'].includes(member.absence_status) ? 'checked' : '';
@@ -25,9 +26,9 @@
             <div class="brtop-table-wrap" data-persistent-horizontal-scroll><table class="brtop-session-table">
                 <caption>Verhinderungen und nicht verfügbare Ersatzmitglieder</caption>
                 <thead><tr><th scope="col">Verhindert</th><th scope="col">Name</th><th scope="col">Liste</th><th scope="col">Rang</th><th scope="col">Rolle/Quelle</th></tr></thead>
-                <tbody>${rows || '<tr><td colspan="5">Keine Mitglieder in der Legislatur.</td></tr>'}</tbody>
+                <tbody>${rows || '<tr><td colspan="5">' + translate('brtop', translate('brtop', 'Keine Mitglieder in der Legislatur.')) + '</td></tr>'}</tbody>
             </table></div>
-            ${locked ? '' : '<button class="primary" type="submit">Verhinderungen verbindlich bestätigen</button>'}
+            ${locked ? '' : '<button class="primary" type="submit">' + translate('brtop', translate('brtop', 'Verhinderungen verbindlich bestätigen')) + '</button>'}
         </form>`;
     }
 
@@ -52,9 +53,9 @@
                 const result = await repository.saveAbsences(meetingId, ids);
                 state = result.absenceState;
                 render();
-                showNotice('Verhinderungen verbindlich bestätigt.', 'success');
+                showNotice(translate('brtop', translate('brtop', 'Verhinderungen verbindlich bestätigt.')), 'success');
             } catch (error) {
-                showError(error, 'Verhinderungen konnten nicht bestätigt werden.');
+                showError(error, translate('brtop', translate('brtop', 'Verhinderungen konnten nicht bestätigt werden.')));
             }
         }
 

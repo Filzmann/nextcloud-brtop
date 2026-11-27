@@ -8,8 +8,10 @@ use OCA\BrTop\Model\Meeting;
 use OCA\BrTop\Model\ProtocolBlock;
 use OCA\BrTop\Service\AgendaAttachmentService;
 use OCA\BrTop\Service\AgendaService;
+use OCA\BrTop\Service\BrtopSettingsService;
 use OCA\BrTop\Service\DocumentContentService;
 use OCA\BrTop\Service\DocumentDateFormatter;
+use OCA\BrTop\Service\DocumentTemplateProvider;
 use OCA\BrTop\Service\InvitationContentService;
 use function OCA\BrTop\Tests\assertContainsString;
 
@@ -17,7 +19,35 @@ $agendaService = (new ReflectionClass(AgendaService::class))->newInstanceWithout
 $attachmentService = new AgendaAttachmentService();
 $dateFormatter = new DocumentDateFormatter();
 $invitationContentService = new InvitationContentService($agendaService, $attachmentService, $dateFormatter);
-$contentService = new DocumentContentService($agendaService, $invitationContentService, $dateFormatter);
+$templates = new class implements DocumentTemplateProvider {
+    public function active(string $templateKey): array { return []; }
+    public function renderActive(string $templateKey, array $values): array {
+        $content = match ($templateKey) {
+            'invitation_email' => implode("\n\n", [
+                $values['SALUTATION'], $values['INVITATION_INTRO'], $values['MEETING_DETAILS'],
+                $values['RECIPIENT_SUMMARY'], "Tagesordnung:\n\n" . $values['AGENDA'],
+                $values['CLOSING'] . "\n" . $values['SENDER'],
+            ]) . "\n",
+            'invitation_markdown' => "# {$values['SUBJECT']}\n\n```text\n{$values['EMAIL_BODY']}\n```\n",
+            'protocol_markdown' => $values['PROTOCOL_BODY'],
+            'resolution_markdown' => $values['RESOLUTION_BODY'],
+            default => throw new InvalidArgumentException('Unexpected template key'),
+        };
+        return ['templateKey' => $templateKey, 'version' => 0, 'format' => 'text', 'status' => 'built_in', 'content' => $content];
+    }
+};
+$settings = new class extends BrtopSettingsService {
+    public function __construct() {}
+    public function documentOrganization(): array {
+        return [
+            'councilName' => 'Betriebsrat', 'councilAddress' => 'Adresse', 'issuePlace' => 'Berlin',
+            'committeeCodes' => [], 'invitationSalutation' => 'Liebe Kolleg*innen,',
+            'invitationIntroduction' => 'hiermit lade ich euch zur Sitzung ein.',
+            'invitationClosing' => 'Viele Grüße', 'invitationSender' => '{{ABSENDER}}',
+        ];
+    }
+};
+$contentService = new DocumentContentService($agendaService, $invitationContentService, $dateFormatter, $templates, $settings);
 
 $meeting = new Meeting([
     'id' => 3,

@@ -1,5 +1,6 @@
 (function() {
-    const { Model } = window.LocalBase.models;
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+    const { Model } = window.OCA.BrTop.Shared.models;
 
     class GeneratedDocument extends Model {
         constructor(data = {}) {
@@ -7,6 +8,8 @@
             this.id = data.id ?? null;
             this.meeting_id = data.meeting_id || data.meetingId || 0;
             this.document_type = data.document_type || data.documentType || '';
+            this.template_key = data.template_key || data.templateKey || '';
+            this.template_version = data.template_version ?? data.templateVersion ?? null;
             this.title = data.title || '';
             this.file_path = data.file_path || data.filePath || '';
             this.created_at = data.created_at || data.createdAt || '';
@@ -18,15 +21,15 @@
 
         typeLabel() {
             const labels = {
-                invitation_email: 'Einladung E-Mail',
-                invitation_markdown: 'Ladung',
-                invitation_recipients: 'Ladungsliste',
-                protocol_markdown: 'Protokollvorlage',
+                invitation_email: translate('brtop', translate('brtop', 'Einladung E-Mail')),
+                invitation_markdown: translate('brtop', translate('brtop', 'Ladung')),
+                invitation_recipients: translate('brtop', translate('brtop', 'Ladungsliste')),
+                protocol_markdown: translate('brtop', translate('brtop', 'Protokollvorlage')),
                 protocol_odt: 'Protokollvorlage ODT',
-                resolution_markdown: 'Beschlussdokument'
+                resolution_markdown: translate('brtop', translate('brtop', 'Beschlussdokument'))
             };
 
-            return labels[this.document_type] || 'Dokument';
+            return labels[this.document_type] || translate('brtop', translate('brtop', 'Dokument'));
         }
 
         toArray() {
@@ -34,6 +37,8 @@
                 id: this.id,
                 meeting_id: this.meeting_id,
                 document_type: this.document_type,
+                template_key: this.template_key,
+                template_version: this.template_version,
                 title: this.title,
                 file_path: this.file_path,
                 created_at: this.created_at

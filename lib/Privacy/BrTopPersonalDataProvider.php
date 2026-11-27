@@ -11,6 +11,7 @@ use OCA\FlzDataProtection\PublicApi\V1\PersonalDataProvider;
 use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
 use OCA\FlzDataProtection\PublicApi\V1\ProviderDescriptor;
 use OCA\BrTop\Repository\TemporaryAdminAccessRepository;
+use OCA\BrTop\Service\BrDpoAssignmentService;
 
 final class BrTopPersonalDataProvider implements PersonalDataProvider {
     private const CONTENT_RESTRICTIONS = [
@@ -19,7 +20,11 @@ final class BrTopPersonalDataProvider implements PersonalDataProvider {
         'Nicht strukturiert per Nextcloud-UID zuordenbare Freitexterwähnungen können nicht automatisch ermittelt werden.',
     ];
 
-    public function __construct(private BrTopPrivacyRepository $repository, private TemporaryAdminAccessRepository $adminAccess) {
+    public function __construct(
+        private BrTopPrivacyRepository $repository,
+        private TemporaryAdminAccessRepository $adminAccess,
+        private BrDpoAssignmentService $dpoAssignments,
+    ) {
     }
 
     public function descriptor(): ProviderDescriptor {
@@ -31,18 +36,37 @@ final class BrTopPersonalDataProvider implements PersonalDataProvider {
         if ($request->cursor() !== null) throw new InvalidArgumentException('BRTop does not support cursor paging.');
         $rows = $this->repository->forSubject($request->subject()->subjectId(), $request->pageLimit() + 1);
         $adminHistory = $this->adminAccess->historyForUid($request->subject()->subjectId(), $request->pageLimit() + 1);
-        $limited = count($rows) + count($adminHistory) > $request->pageLimit();
+        $hasDpoAssignment = $this->dpoAssignments->isAssignedToSubject($request->subject()->subjectId());
+        $limited = count($rows) + count($adminHistory) + ($hasDpoAssignment ? 1 : 0) > $request->pageLimit();
         $restrictions = self::CONTENT_RESTRICTIONS;
         if ($limited) $restrictions[] = 'Ausgabelimit erreicht; weitere BRTop-Metadaten können vorhanden sein.';
         $items = array_map(fn(array $row): PersonalDataEntry => $this->item($row), $rows);
         foreach ($adminHistory as $grant) $items[] = $this->adminAccessItem($request->subject()->subjectId(), $grant);
+        if ($hasDpoAssignment) $items[] = $this->dpoAssignmentItem();
         if ($limited) $items = array_slice($items, 0, $request->pageLimit());
         return new PersonalDataPage('partial', $items, $restrictions);
     }
 
     private function adminAccessItem(string $uid, array $grant): PersonalDataEntry {
-        $roles=[];if($grant['targetUid']===$uid)$roles[]='Ziel der Vollzugriffsfreigabe';if($grant['grantedBy']===$uid)$roles[]='Freigebendes Mitglied von Datenschutzbeauftragte';if($grant['revokedBy']===$uid)$roles[]='Widerrufendes Mitglied von Datenschutzbeauftragte';$actualEnd=$grant['revokedAt']??$grant['endsAt'];
+        $roles=[];if($grant['targetUid']===$uid)$roles[]='Ziel der Vollzugriffsfreigabe';if($grant['grantedBy']===$uid)$roles[]='Freigebendes BR-Mitglied';if($grant['revokedBy']===$uid)$roles[]='Widerrufendes BR-Mitglied';$actualEnd=$grant['revokedAt']??$grant['endsAt'];
         return new PersonalDataEntry('admin-access','Zeitlich begrenzter Admin-Vollzugriff','admin-access:'.$grant['id'],'Admin-Vollzugriff vom '.self::dateTime($grant['startsAt']),'Nachweis einer zeitlich begrenzten administrativen BRTop-Freigabe','App-lokale Freigabesteuerung in BRTop',['Betroffene Person und ausdrücklich berechtigte Datenschutz-Prüfrolle'],'Keine feste Löschfrist festgelegt; die sicherheitsrelevante Freigabehistorie bleibt bis zu einer gesonderten Aufbewahrungsentscheidung erhalten.','Durch BRTop sind keine Drittlandübermittlungen vorgesehen.','Der Server beendet den Vollzugriff spätestens nach 24 Stunden automatisch.','Kennungen anderer beteiligter Personen werden nicht ausgegeben.',['Eigene Rolle im Vorgang'=>implode(', ',$roles),'Beginn'=>self::dateTime($grant['startsAt']),'Geplantes Ende'=>self::dateTime($grant['endsAt']),'Tatsächliches Ende'=>self::dateTime($actualEnd),'Status'=>$grant['revokedAt']===null?'planmäßig beendet oder noch aktiv':'widerrufen']);
+    }
+
+    private function dpoAssignmentItem(): PersonalDataEntry {
+        return new PersonalDataEntry(
+            'br-dpo-permission',
+            'BR-Datenschutzberechtigung',
+            'br-dpo-permission:current',
+            'Aktuelle persönliche BR-Datenschutzberechtigung',
+            'Verwaltung zeitlich begrenzter fachlicher Adminfreigaben',
+            'App-lokale BRTop-Berechtigungszuweisung',
+            ['Betroffene Person und BR-Vorsitz'],
+            'Bis zum ausdrücklichen Entzug; ohne aktuelle BR-Mitgliedschaft ist die Berechtigung nicht wirksam.',
+            'Durch BRTop sind keine Drittlandübermittlungen vorgesehen.',
+            'Es findet keine automatisierte Personenentscheidung statt.',
+            null,
+            ['Status' => 'persönlich zugewiesen'],
+        );
     }
 
     /** @param array<string, mixed> $row */

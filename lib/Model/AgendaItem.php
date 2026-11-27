@@ -6,6 +6,7 @@ namespace OCA\BrTop\Model;
 
 use OCA\LocalBase\Model\ModelApiTrait;
 use OCA\BrTop\Store\AgendaItemStore;
+use OCP\IL10N;
 
 class AgendaItem {
     use ModelApiTrait;
@@ -32,7 +33,7 @@ class AgendaItem {
     public string $agendaNumber;
     public array $protocolBlocks;
 
-    public function __construct(array $data = [], ?AgendaItemStore $store = null) {
+    public function __construct(array $data = [], ?AgendaItemStore $store = null, private ?IL10N $l10n = null) {
         $this->store = $store;
         $this->id = isset($data['id']) ? (int)$data['id'] : null;
         $this->meetingId = (int)($data['meeting_id'] ?? $data['meetingId'] ?? 0);
@@ -56,6 +57,12 @@ class AgendaItem {
         $this->protocolBlocks = is_array($data['protocol_blocks'] ?? null)
             ? ProtocolBlock::get_all($data['protocol_blocks'])
             : [];
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function setStore(AgendaItemStore $store): void {
@@ -89,13 +96,13 @@ class AgendaItem {
     public function typeLabel(): string {
         return match ($this->type) {
             'protocol', 'protokolle' => 'Protokolle',
-            'personnel' => 'Personelle Angelegenheiten',
-            'personnel_99', 'personelle_einzelmassnahme', 'pe_einstellung', 'pe_sonstige' => 'Personelle Einzelmaßnahme nach § 99 BetrVG',
-            'personnel_100' => 'Vorläufige personelle Maßnahme nach § 100 BetrVG',
-            'personnel_102', 'kuendigung', 'pe_kuendigung' => 'Anhörung zu Kündigung nach § 102 BetrVG',
+            'personnel' => $this->t('Personelle Angelegenheiten'),
+            'personnel_99', 'personelle_einzelmassnahme', 'pe_einstellung', 'pe_sonstige' => $this->t('Personelle Einzelmaßnahme nach § 99 BetrVG'),
+            'personnel_100' => $this->t('Vorläufige personelle Maßnahme nach § 100 BetrVG'),
+            'personnel_102', 'kuendigung', 'pe_kuendigung' => $this->t('Anhörung zu Kündigung nach § 102 BetrVG'),
             'organisation' => 'Arbeitsorganisatorisches',
-            'consultation_report', 'sprechstunden' => 'Bericht aus den Sprechstunden',
-            default => 'Weiterer Tagesordnungspunkt',
+            'consultation_report', 'sprechstunden' => $this->t('Bericht aus den Sprechstunden'),
+            default => $this->t('Weiterer Tagesordnungspunkt'),
         };
     }
 
@@ -133,20 +140,20 @@ class AgendaItem {
     public function defaultResolutionText(): string {
         $measure = trim($this->subject) !== ''
             ? trim($this->subject)
-            : (trim($this->personName) !== '' ? trim($this->personName) : 'die Maßnahme');
+            : (trim($this->personName) !== '' ? trim($this->personName) : $this->t('die Maßnahme'));
 
         return match ($this->type) {
             'personnel_99', 'personelle_einzelmassnahme', 'pe_einstellung', 'pe_sonstige'
-                => 'Wer verweigert die Zustimmung zu ' . $measure . ' und widerspricht ihr damit?',
+                => $this->t('Wer verweigert die Zustimmung zu ') . $measure . $this->t(' und widerspricht ihr damit?'),
 
             'personnel_100'
-                => 'Wer bestreitet, dass die vorläufige Durchführung der personellen Maßnahme ' . $measure . ' aus sachlichen Gründen dringend erforderlich ist?',
+                => $this->t('Wer bestreitet, dass die vorläufige Durchführung der personellen Maßnahme ') . $measure . $this->t(' aus sachlichen Gründen dringend erforderlich ist?'),
 
             'personnel_102', 'kuendigung', 'pe_kuendigung'
-                => 'Wer widerspricht der beabsichtigten Kündigung ' . $measure . ' gemäß § 102 BetrVG?',
+                => $this->t('Wer widerspricht der beabsichtigten Kündigung ') . $measure . $this->t(' gemäß § 102 BetrVG?'),
 
             default
-                => 'Wer stimmt ' . $measure . ' zu?',
+                => $this->t('Wer stimmt ') . $measure . ' zu?',
         };
     }
 

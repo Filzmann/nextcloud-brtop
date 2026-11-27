@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const {
         esc,
         fmtDate,
@@ -31,12 +32,12 @@
         const snapshotRowHtml = (recipient) => {
             const invitationType = recipient.invitation_type || 'initial';
             const status = invitationType === 'absent'
-                ? 'Nicht geladen – Verhinderung bestätigt'
-                : invitationType === 'replacement' ? 'Als Ersatzmitglied geladen' : 'Geladen';
+                ? translate('brtop', translate('brtop', 'Nicht geladen – Verhinderung bestätigt'))
+                : invitationType === 'replacement' ? 'Als Ersatzmitglied geladen' : translate('brtop', translate('brtop', 'Geladen'));
             const list = [recipient.list_name || '', recipient.list_rank ? `Rang ${recipient.list_rank}` : '']
                 .filter(Boolean).join(', ');
             const replacement = recipient.replacement_for_name
-                ? `für ${recipient.replacement_for_name}`
+                ? `${translate('brtop', translate('brtop', 'für'))} ${recipient.replacement_for_name}`
                 : '';
             return `<tr>
                 <td>${esc(recipient.display_name || recipient.user_uid || '')}</td>
@@ -51,8 +52,8 @@
             if (recipients.length === 0) {
                 return `
                     <section class="brtop-invitation-status">
-                        <h3>Ladungsstatus</h3>
-                        <p class="brtop-meta">Noch keine Ladungsliste erzeugt.</p>
+                        <h3>${translate('brtop', translate('brtop', 'Ladungsstatus'))}</h3>
+                        <p class="brtop-meta">${translate('brtop', translate('brtop', 'Noch keine Ladungsliste erzeugt.'))}</p>
                     </section>
                 `;
             }
@@ -63,11 +64,11 @@
 
             return `
                 <section class="brtop-invitation-status">
-                    <h3>Ladungsstatus</h3>
-                    <p class="brtop-meta">Geladen: ${loaded.length}, davon Ersatzmitglieder: ${replacements.length}; bestätigte Verhinderungen: ${absent.length}.</p>
+                    <h3>${translate('brtop', translate('brtop', 'Ladungsstatus'))}</h3>
+                    <p class="brtop-meta">${translate('brtop', translate('brtop', 'Geladen:'))} ${loaded.length}, davon Ersatzmitglieder: ${replacements.length}; ${translate('brtop', translate('brtop', 'bestätigte Verhinderungen:'))} ${absent.length}.</p>
                     <div class="brtop-table-wrap" data-persistent-horizontal-scroll><table class="brtop-session-table">
-                        <caption>Unveränderlicher Empfängersnapshot der Einladung</caption>
-                        <thead><tr><th scope="col">Name</th><th scope="col">Status</th><th scope="col">Liste/Rang</th><th scope="col">Nachrückung</th></tr></thead>
+                        <caption>${translate('brtop', translate('brtop', 'Unveränderlicher Empfängersnapshot der Einladung'))}</caption>
+                        <thead><tr><th scope="col">${translate('brtop', translate('brtop', 'Name'))}</th><th scope="col">${translate('brtop', translate('brtop', 'Status'))}</th><th scope="col">Liste/Rang</th><th scope="col">${translate('brtop', translate('brtop', 'Nachrückung'))}</th></tr></thead>
                         <tbody>${recipients.map(snapshotRowHtml).join('')}</tbody>
                     </table></div>
                 </section>
@@ -108,15 +109,15 @@
             }
 
             if (!meeting) {
-                heading.textContent = 'Sitzung';
-                content.innerHTML = '<p>Die Sitzung wurde nicht gefunden.</p>';
+                heading.textContent = translate('brtop', translate('brtop', 'Sitzung'));
+                content.innerHTML = '<p>' + translate('brtop', translate('brtop', 'Die Sitzung wurde nicht gefunden.')) + '</p>';
                 documents.innerHTML = '';
                 return;
             }
 
             const meta = metaText(meeting);
 
-            heading.textContent = meeting.title || 'Sitzung';
+            heading.textContent = meeting.title || translate('brtop', translate('brtop', 'Sitzung'));
             content.innerHTML = `
                 ${meta ? `<p class="brtop-meta">${esc(meta)}</p>` : ''}
                 ${invitationStatusHtml(meeting)}

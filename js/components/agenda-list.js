@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const {
         esc,
         agendaKindLabel,
@@ -9,7 +10,7 @@
 
     function agendaListHtml(tops, editingTopId) {
         if (tops.length === 0) {
-            return '<p>Noch keine TOPs vorhanden.</p>';
+            return '<p>' + translate('brtop', translate('brtop', 'Noch keine TOPs vorhanden.')) + '</p>';
         }
 
         const items = tops.map(top => {
@@ -69,7 +70,7 @@
         const items = documents.map(document => {
             const title = typeof document.displayTitle === 'function'
                 ? document.displayTitle()
-                : (document.title || document.document_type || 'Dokument');
+                : (document.title || document.document_type || translate('brtop', translate('brtop', 'Dokument')));
             const filePath = document.file_path || '';
             const href = filePath ? fileLinkHref(filePath) : '';
             const titleHtml = href

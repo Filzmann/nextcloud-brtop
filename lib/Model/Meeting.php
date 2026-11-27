@@ -6,6 +6,7 @@ namespace OCA\BrTop\Model;
 
 use OCA\LocalBase\Model\ModelApiTrait;
 use OCA\BrTop\Store\MeetingStore;
+use OCP\IL10N;
 
 class Meeting {
     use ModelApiTrait;
@@ -29,7 +30,7 @@ class Meeting {
     public string $status;
     public string $createdAt;
 
-    public function __construct(array $data = [], ?MeetingStore $store = null) {
+    public function __construct(array $data = [], ?MeetingStore $store = null, private ?IL10N $l10n = null) {
         $this->store = $store;
         $this->id = isset($data['id']) ? (int)$data['id'] : null;
         $this->legislatureId = isset($data['legislature_id']) && $data['legislature_id'] !== null
@@ -59,6 +60,12 @@ class Meeting {
         if (is_array($data['invitation_recipients'] ?? $data['invitationRecipients'] ?? null)) {
             $this->setInvitationRecipients($data['invitation_recipients'] ?? $data['invitationRecipients']);
         }
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function setStore(MeetingStore $store): void {
@@ -115,7 +122,7 @@ class Meeting {
     }
 
     public function displayTitle(): string {
-        return trim($this->title) !== '' ? $this->title : 'ohne Titel';
+        return trim($this->title) !== '' ? $this->title : $this->t('ohne Titel');
     }
 
     public function toRepositoryData(): array {

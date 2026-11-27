@@ -7,13 +7,21 @@ namespace OCA\BrTop\Service;
 use OCA\BrTop\Model\AgendaItem;
 use OCA\BrTop\Model\Meeting;
 use OCA\BrTop\Model\ProtocolBlock;
+use OCP\IL10N;
 
 class DocumentContentService {
-    public function __construct(
-        private AgendaService $agendaService,
+    public function __construct(private AgendaService $agendaService,
         private InvitationContentService $invitationContentService,
-        private DocumentDateFormatter $dateFormatter
-    ) {
+        private DocumentDateFormatter $dateFormatter,
+        private DocumentTemplateProvider $templates,
+        private BrtopSettingsService $settings,
+        private ?IL10N $l10n = null) {
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function invitationSubject(array|Meeting $meeting): string {
@@ -21,11 +29,25 @@ class DocumentContentService {
     }
 
     public function invitationEmail(array|Meeting $meeting, array $tops, array $recipients = []): string {
-        return $this->invitationContentService->email($meeting, $tops, $recipients);
+        return $this->renderInvitationEmail($meeting, $tops, $recipients)['content'];
+    }
+
+    public function renderInvitationEmail(array|Meeting $meeting, array $tops, array $recipients = []): array {
+        return $this->templates->renderActive(
+            'invitation_email',
+            $this->invitationContentService->templateValues($meeting, $tops, $recipients, $this->settings->documentOrganization())
+        );
     }
 
     public function invitationMarkdown(string $subject, string $email): string {
-        return $this->invitationContentService->markdown($subject, $email);
+        return $this->renderInvitationMarkdown($subject, $email)['content'];
+    }
+
+    public function renderInvitationMarkdown(string $subject, string $email): array {
+        return $this->templates->renderActive('invitation_markdown', [
+            'SUBJECT' => $subject,
+            'EMAIL_BODY' => rtrim($email),
+        ]);
     }
 
     public function invitationRecipientList(array $recipients): string {
@@ -33,10 +55,24 @@ class DocumentContentService {
     }
 
     public function protocolTemplate(array|Meeting $meeting, array $tops): string {
+        return $this->renderProtocol($meeting, $tops)['content'];
+    }
+
+    public function renderProtocol(array|Meeting $meeting, array $tops): array {
+        $organization = $this->settings->documentOrganization();
+        return $this->templates->renderActive('protocol_markdown', [
+            'COUNCIL_NAME' => (string)$organization['councilName'],
+            'COUNCIL_ADDRESS' => (string)$organization['councilAddress'],
+            'ISSUE_PLACE' => (string)$organization['issuePlace'],
+            'PROTOCOL_BODY' => $this->protocolBody($meeting, $tops),
+        ]);
+    }
+
+    private function protocolBody(array|Meeting $meeting, array $tops): string {
         $meetingData = $this->meetingData($meeting);
         $lines = [];
 
-        $lines[] = '# Protokollvorlage';
+        $lines[] = $this->t('# Protokollvorlage');
         $lines[] = '';
         $lines[] = '**Sitzung:** ' . $meetingData['title'];
         $lines[] = '**Datum:** ' . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']);
@@ -46,11 +82,11 @@ class DocumentContentService {
         $lines[] = '**Ersatzmitglieder:** ';
         $lines[] = '**Verhinderte Mitglieder:** ';
         $lines[] = '';
-        $lines[] = 'Anwesenheit und ordnungsgemäße Einladung zu den Tagesordnungspunkten werden festgestellt. Der Betriebsrat ist beschlussfähig.';
+        $lines[] = $this->t('Anwesenheit und ordnungsgemäße Einladung zu den Tagesordnungspunkten werden festgestellt. Der Betriebsrat ist beschlussfähig.');
         $lines[] = '';
 
         if (count($tops) === 0) {
-            $lines[] = '_Keine Tagesordnungspunkte vorhanden._';
+            $lines[] = $this->t('_Keine Tagesordnungspunkte vorhanden._');
         }
 
         foreach ($tops as $top) {
@@ -61,12 +97,26 @@ class DocumentContentService {
     }
 
     public function resolutionDocument(array|Meeting $meeting, array|AgendaItem $top, int $resolutionIndex = 1): string {
+        return $this->renderResolution($meeting, $top, $resolutionIndex)['content'];
+    }
+
+    public function renderResolution(array|Meeting $meeting, array|AgendaItem $top, int $resolutionIndex = 1): array {
+        $organization = $this->settings->documentOrganization();
+        return $this->templates->renderActive('resolution_markdown', [
+            'COUNCIL_NAME' => (string)$organization['councilName'],
+            'COUNCIL_ADDRESS' => (string)$organization['councilAddress'],
+            'ISSUE_PLACE' => (string)$organization['issuePlace'],
+            'RESOLUTION_BODY' => $this->resolutionBody($meeting, $top, $resolutionIndex),
+        ]);
+    }
+
+    private function resolutionBody(array|Meeting $meeting, array|AgendaItem $top, int $resolutionIndex): string {
         $meetingData = $this->meetingData($meeting);
         $topData = $this->topData($top);
         $lines = [];
         $resolutionCount = max(1, $this->agendaService->resolutionCount($top));
 
-        $lines[] = '# Beschlussdokument';
+        $lines[] = $this->t('# Beschlussdokument');
         $lines[] = '';
         $lines[] = '**Sitzung:** ' . $meetingData['title'];
         $lines[] = '**Datum:** ' . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']);
@@ -78,29 +128,29 @@ class DocumentContentService {
         $lines[] = '**Rechtsgrundlage:** ' . (($topData['legal_basis'] ?? '') ?: '-');
         $lines[] = '**Betroffene Person:** ' . (($topData['person_name'] ?? '') ?: '-');
         $lines[] = '';
-        $lines[] = '## Beschlussfrage';
+        $lines[] = $this->t('## Beschlussfrage');
         $lines[] = '';
         $questions = $this->resolutionQuestionsForTop($top, $resolutionCount);
         $lines[] = $questions[max(0, min($resolutionCount - 1, $resolutionIndex - 1))];
         $lines[] = '';
-        $lines[] = '## Abstimmung';
+        $lines[] = $this->t('## Abstimmung');
         $lines[] = '';
-        $lines[] = '- Stimmberechtigte Anwesende: ';
-        $lines[] = '- Ja-Stimmen: ';
-        $lines[] = '- Nein-Stimmen: ';
-        $lines[] = '- Enthaltungen: ';
+        $lines[] = $this->t('- Stimmberechtigte Anwesende: ');
+        $lines[] = $this->t('- Ja-Stimmen: ');
+        $lines[] = $this->t('- Nein-Stimmen: ');
+        $lines[] = $this->t('- Enthaltungen: ');
         $lines[] = '';
-        $lines[] = '## Ergebnis';
+        $lines[] = $this->t('## Ergebnis');
         $lines[] = '';
         $lines[] = 'Der Beschluss wurde angenommen / abgelehnt.';
         $lines[] = '';
-        $lines[] = 'Hinweis: Auch bei gemeinsamer Abstimmung wird dieser Fall als eigenes Beschlussdokument geführt.';
+        $lines[] = $this->t('Hinweis: Auch bei gemeinsamer Abstimmung wird dieser Fall als eigenes Beschlussdokument geführt.');
         $lines[] = '';
-        $lines[] = '## Unterschriften';
+        $lines[] = $this->t('## Unterschriften');
         $lines[] = '';
-        $lines[] = 'Betriebsratsvorsitz: ___________________________';
+        $lines[] = $this->t('Betriebsratsvorsitz: ___________________________');
         $lines[] = '';
-        $lines[] = 'Protokollführung: _____________________________';
+        $lines[] = $this->t('Protokollführung: _____________________________');
 
         return implode("\n", $lines) . "\n";
     }
@@ -164,9 +214,9 @@ class DocumentContentService {
             $lines[] = '';
             $lines[] = '**Abstimmung:**';
             $lines[] = '';
-            $lines[] = '- Ja-Stimmen: ';
-            $lines[] = '- Nein-Stimmen: ';
-            $lines[] = '- Enthaltungen: ';
+            $lines[] = $this->t('- Ja-Stimmen: ');
+            $lines[] = $this->t('- Nein-Stimmen: ');
+            $lines[] = $this->t('- Enthaltungen: ');
             $lines[] = '';
             $lines[] = '**Ergebnis:**';
             $lines[] = '';
@@ -185,7 +235,7 @@ class DocumentContentService {
         }
 
         while (count($questions) < $resolutionCount) {
-            $questions[] = 'Beschlussfrage ' . (count($questions) + 1) . ' ergänzen.';
+            $questions[] = $this->t('Beschlussfrage ') . (count($questions) + 1) . $this->t(' ergänzen.');
         }
 
         return array_slice($questions, 0, $resolutionCount);

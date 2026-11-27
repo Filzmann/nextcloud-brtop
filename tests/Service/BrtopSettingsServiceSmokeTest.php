@@ -29,5 +29,28 @@ namespace OCA\BrTop\Tests {
     $service->save('Sitzung', 2, 5, '10:00', 'BR-Raum', '[]');
     assertSameValue(false, in_array('member_group_name', $config->writes, true), 'Saving BRTop settings must not rewrite the migrated legacy group setting.');
 
+    assertSameValue('Betriebsrat ambulante dienste e.V.', $service->documentOrganization()['councilName'], 'Existing organization values should remain compatible defaults.');
+    assertSameValue('Berlin', $service->documentOrganization()['issuePlace'], 'The compatible default issue place should be preserved.');
+    $saved = $service->saveDocumentOrganization(
+        'Betriebsrat Beispiel GmbH',
+        "Beispielweg 1\n12345 Beispielstadt",
+        'Beispielstadt',
+        '[{"value":"ASA","label":"Arbeitsschutz"},{"value":"IT","label":"IT-Ausschuss"}]',
+        'Guten Tag,',
+        'hiermit laden wir zur Sitzung ein.',
+        'Freundliche Grüße',
+        'Der Betriebsrat'
+    );
+    assertSameValue('Betriebsrat Beispiel GmbH', $saved['councilName'], 'Validated organization settings should round-trip through AppConfig.');
+    assertSameValue('IT', $saved['committeeCodes'][1]['value'], 'Validated committee codes should replace the built-in catalog.');
+    assertSameValue('IT', $service->normalizeCommitteeCode('it'), 'Configured committee codes should be normalized against the canonical catalog.');
+
+    try {
+        $service->saveDocumentOrganization('BR', 'Beispielweg 1', 'Ort', '[{"value":"../IT","label":"IT"}]', 'Hallo', 'Einladung', 'Gruß', 'BR');
+        throw new \RuntimeException('Manipulated committee codes must be rejected.');
+    } catch (\InvalidArgumentException $e) {
+        assertSameValue(true, str_contains($e->getMessage(), 'Ausschusscode'), 'Invalid committee codes should fail with a stable diagnostic.');
+    }
+
     echo 'BrtopSettingsService smoke tests passed' . PHP_EOL;
 }

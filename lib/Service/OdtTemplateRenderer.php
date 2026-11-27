@@ -4,41 +4,51 @@ declare(strict_types=1);
 
 namespace OCA\BrTop\Service;
 
+use OCP\IL10N;
 use RuntimeException;
 use ZipArchive;
 
 class OdtTemplateRenderer {
-    public function renderProtocol(array $meeting, array $tops): string {
-        $templatePath = __DIR__ . '/../../templates/odt/protokoll-template.odt';
+    public function __construct(private ?IL10N $l10n = null) {}
 
-        if (!is_file($templatePath)) {
-            throw new RuntimeException('ODT-Template nicht gefunden.');
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
+    public function renderProtocol(array $meeting, array $tops, string $templateContent, array $organization): string {
+        if ($templateContent === '') {
+            throw new RuntimeException('ODT-Template ist leer.');
         }
 
-        $settings = [
-            'GREMIENNAME' => 'Betriebsrat ambulante dienste e.V.',
-            'GREMIUM_ADRESSE' => 'Wilhelm-Kabus-Str. 21-35, 10829 Berlin',
+        $replacements = [
+            '{{GREMIENNAME}}' => (string)($organization['councilName'] ?? ''),
+            '{{GREMIUM_ADRESSE}}' => (string)($organization['councilAddress'] ?? ''),
+            '{{AUSSTELLUNGSORT}}' => (string)($organization['issuePlace'] ?? ''),
         ];
 
-        $replacements = [
-            '{{GREMIENNAME}}' => $settings['GREMIENNAME'],
-            '{{GREMIUM_ADRESSE}}' => $settings['GREMIUM_ADRESSE'],
-        ];
+        $templatePath = tempnam(sys_get_temp_dir(), 'brtop-odt-source-');
+        if ($templatePath === false || file_put_contents($templatePath, $templateContent) === false) {
+            throw new RuntimeException('Temporäre ODT-Vorlage konnte nicht erzeugt werden.');
+        }
 
         $zip = new ZipArchive();
         if ($zip->open($templatePath) !== true) {
+            unlink($templatePath);
             throw new RuntimeException('ODT-Template konnte nicht geöffnet werden.');
         }
 
         $tmp = tempnam(sys_get_temp_dir(), 'brtop-odt-');
         if ($tmp === false) {
             $zip->close();
+            unlink($templatePath);
             throw new RuntimeException('Temporäre ODT-Datei konnte nicht erzeugt werden.');
         }
 
         $out = new ZipArchive();
         if ($out->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             $zip->close();
+            unlink($templatePath);
             throw new RuntimeException('ODT-Zieldatei konnte nicht geschrieben werden.');
         }
 
@@ -74,6 +84,7 @@ class OdtTemplateRenderer {
 
         $zip->close();
         $out->close();
+        unlink($templatePath);
 
         $result = file_get_contents($tmp);
         @unlink($tmp);
@@ -103,7 +114,7 @@ class OdtTemplateRenderer {
         $xml = [];
 
         $xml[] = '<office:text>';
-        $xml[] = $this->p('BR-Sitzung ' . $date, 'TitleCenter');
+        $xml[] = $this->p($this->t('BR-Sitzung ') . $date, 'TitleCenter');
 
         $xml[] = '<table:table table:name="Anwesenheit" table:style-name="BoxTableFull">';
         $xml[] = '<table:table-column table:style-name="ColFull"/>';
@@ -114,34 +125,34 @@ class OdtTemplateRenderer {
         $xml[] = '</table:table-cell></table:table-row></table:table>';
 
         $xml[] = $this->emptyP();
-        $xml[] = $this->p('Moderation: {{MODERATION}}', 'SmallTight');
-        $xml[] = $this->p('Protokoll: {{PROTOKOLL}}', 'SmallTight');
+        $xml[] = $this->p($this->t('Moderation: {{MODERATION}}'), 'SmallTight');
+        $xml[] = $this->p($this->t('Protokoll: {{PROTOKOLL}}'), 'SmallTight');
         $xml[] = $this->emptyP();
-        $xml[] = $this->p('Anwesenheit und ordnungsgemäße Einladung zu den Tagesordnungspunkten werden festgestellt. Der Betriebsrat ist beschlussfähig.', 'SmallTight');
+        $xml[] = $this->p($this->t('Anwesenheit und ordnungsgemäße Einladung zu den Tagesordnungspunkten werden festgestellt. Der Betriebsrat ist beschlussfähig.'), 'SmallTight');
         $xml[] = $this->emptyP();
 
         $xml[] = $this->tocTable();
         $xml[] = $this->emptyP();
 
         $xml[] = $this->h('1. Protokolle', 1);
-        $this->appendSimpleTops($xml, $groups['protocol'], '1', 'Keine Protokolle eingetragen.');
+        $this->appendSimpleTops($xml, $groups['protocol'], '1', $this->t('Keine Protokolle eingetragen.'));
 
         $xml[] = $this->h('2. Personelle Angelegenheiten', 1);
 
         $xml[] = $this->h('2.1 Personelle Einzelmaßnahmen nach § 99 BetrVG', 2);
         if (count($groups['personnel_99']) === 0) {
-            $xml[] = $this->p('Keine personellen Einzelmaßnahmen nach § 99 BetrVG eingetragen.', 'Text_20_body');
+            $xml[] = $this->p($this->t('Keine personellen Einzelmaßnahmen nach § 99 BetrVG eingetragen.'), 'Text_20_body');
         } else {
             foreach ($groups['personnel_99'] as $index => $top) {
                 $n = $index + 1;
 
                 $xml[] = $this->h(
-                    '2.1.' . $n . '. ' . $this->subjectLabel($top, 'Personelle Einzelmaßnahme'),
+                    '2.1.' . $n . '. ' . $this->subjectLabel($top, $this->t('Personelle Einzelmaßnahme')),
                     3
                 );
 
-                $xml[] = $this->p('Person: ' . $this->personLabel($top), 'SmallTight');
-                $xml[] = $this->p('(Schreiben der GF vom {{GF_SCHREIBEN_VOM}}, empfangsbestätigt am {{EMPFANGSBESTAETIGT_AM}}).', 'SmallTight');
+                $xml[] = $this->p($this->t('Person: ') . $this->personLabel($top), 'SmallTight');
+                $xml[] = $this->p($this->t('(Schreiben der GF vom {{GF_SCHREIBEN_VOM}}, empfangsbestätigt am {{EMPFANGSBESTAETIGT_AM}}).'), 'SmallTight');
                 $xml[] = $this->beschlusskasten($this->resolutionQuestion($top), 'BeschlusskastenPersonell99' . $n);
                 $xml[] = $this->p('Damit ist die Zustimmung verweigert / nicht verweigert. Es geht ein Schreiben / kein Schreiben an GF.', 'SmallTight');
                 $xml[] = $this->emptyP();
@@ -150,18 +161,18 @@ class OdtTemplateRenderer {
 
         $xml[] = $this->h('2.2 Vorläufige personelle Maßnahmen nach § 100 BetrVG', 2);
         if (count($groups['personnel_100']) === 0) {
-            $xml[] = $this->p('Keine vorläufigen personellen Maßnahmen nach § 100 BetrVG eingetragen.', 'Text_20_body');
+            $xml[] = $this->p($this->t('Keine vorläufigen personellen Maßnahmen nach § 100 BetrVG eingetragen.'), 'Text_20_body');
         } else {
             foreach ($groups['personnel_100'] as $index => $top) {
                 $n = $index + 1;
 
                 $xml[] = $this->h(
-                    '2.2.' . $n . '. ' . $this->subjectLabel($top, 'Vorläufige personelle Maßnahme'),
+                    '2.2.' . $n . '. ' . $this->subjectLabel($top, $this->t('Vorläufige personelle Maßnahme')),
                     3
                 );
 
-                $xml[] = $this->p('Person: ' . $this->personLabel($top), 'SmallTight');
-                $xml[] = $this->p('(Schreiben der GF vom {{GF_SCHREIBEN_VOM}}, empfangsbestätigt am {{EMPFANGSBESTAETIGT_AM}}).', 'SmallTight');
+                $xml[] = $this->p($this->t('Person: ') . $this->personLabel($top), 'SmallTight');
+                $xml[] = $this->p($this->t('(Schreiben der GF vom {{GF_SCHREIBEN_VOM}}, empfangsbestätigt am {{EMPFANGSBESTAETIGT_AM}}).'), 'SmallTight');
                 $xml[] = $this->beschlusskasten($this->resolutionQuestion($top), 'BeschlusskastenPersonell100' . $n);
                 $xml[] = $this->p('Damit ist die Dringlichkeit bestritten / nicht bestritten. Es geht ein Schreiben / kein Schreiben an GF.', 'SmallTight');
                 $xml[] = $this->emptyP();
@@ -170,18 +181,18 @@ class OdtTemplateRenderer {
 
         $xml[] = $this->h('2.3 Anhörungen zu Kündigungen nach § 102 BetrVG', 2);
         if (count($groups['personnel_102']) === 0) {
-            $xml[] = $this->p('Keine Anhörungen zu Kündigungen nach § 102 BetrVG eingetragen.', 'Text_20_body');
+            $xml[] = $this->p($this->t('Keine Anhörungen zu Kündigungen nach § 102 BetrVG eingetragen.'), 'Text_20_body');
         } else {
             foreach ($groups['personnel_102'] as $index => $top) {
                 $n = $index + 1;
 
                 $xml[] = $this->h(
-                    '2.3.' . $n . '. ' . $this->subjectLabel($top, 'Anhörung zu Kündigung'),
+                    '2.3.' . $n . '. ' . $this->subjectLabel($top, $this->t('Anhörung zu Kündigung')),
                     3
                 );
 
-                $xml[] = $this->p('Person: ' . $this->personLabel($top), 'SmallTight');
-                $xml[] = $this->p('(Schreiben der GF vom {{GF_SCHREIBEN_VOM}}, empfangsbestätigt am {{EMPFANGSBESTAETIGT_AM}}).', 'SmallTight');
+                $xml[] = $this->p($this->t('Person: ') . $this->personLabel($top), 'SmallTight');
+                $xml[] = $this->p($this->t('(Schreiben der GF vom {{GF_SCHREIBEN_VOM}}, empfangsbestätigt am {{EMPFANGSBESTAETIGT_AM}}).'), 'SmallTight');
                 $xml[] = $this->beschlusskasten($this->resolutionQuestion($top), 'BeschlusskastenKuendigung102' . $n);
                 $xml[] = $this->p('Damit ist der beabsichtigten Kündigung widersprochen / nicht widersprochen. Es geht ein Schreiben / kein Schreiben an GF.', 'SmallTight');
                 $xml[] = $this->emptyP();
@@ -193,7 +204,7 @@ class OdtTemplateRenderer {
         $xml[] = $this->p('Vorbereitung:', 'SmallTight');
         $xml[] = $this->p('Nachbereitung:', 'SmallTight');
         $xml[] = $this->p('Moderation:', 'SmallTight');
-        $xml[] = $this->p('Protokoll:', 'SmallTight');
+        $xml[] = $this->p($this->t('Protokoll:'), 'SmallTight');
         $xml[] = $this->p('Nextcloud:', 'SmallTight');
         $xml[] = $this->p('TOPs:', 'SmallTight');
         $xml[] = $this->emptyP();
@@ -203,10 +214,10 @@ class OdtTemplateRenderer {
 
         $xml[] = $this->h('5. Weitere Tagesordnungspunkte', 1);
         if (count($groups['other']) === 0) {
-            $xml[] = $this->p('Keine weiteren Tagesordnungspunkte eingetragen.', 'Text_20_body');
+            $xml[] = $this->p($this->t('Keine weiteren Tagesordnungspunkte eingetragen.'), 'Text_20_body');
         }
         foreach ($groups['other'] as $index => $top) {
-            $xml[] = $this->h('5.' . ($index + 1) . '. ' . (string)($top['subject'] ?? 'weiterer TOP'), 2);
+            $xml[] = $this->h('5.' . ($index + 1) . '. ' . (string)($top['subject'] ?? $this->t('weiterer TOP')), 2);
             if ((int)($top['requires_resolution'] ?? 0) === 1) {
                 $xml[] = $this->beschlusskasten($this->resolutionQuestion($top), 'BeschlusskastenSonstige' . ($index + 1));
             }
@@ -230,9 +241,9 @@ class OdtTemplateRenderer {
             '<text:p text:style-name="SmallTight">Nach Erörterung stimmt der BR ab:<text:line-break/><text:span text:style-name="T_Bold">' . $this->xml($frage) . '</text:span></text:p>',
             '</table:table-cell><table:covered-table-cell/><table:covered-table-cell/></table:table-row>',
             '<table:table-row>',
-            '<table:table-cell table:style-name="VoteCell">' . $this->p('Ja-Stimmen: ?', 'SmallTight') . '</table:table-cell>',
-            '<table:table-cell table:style-name="VoteCell">' . $this->p('Enthaltungen: ?', 'SmallTight') . '</table:table-cell>',
-            '<table:table-cell table:style-name="VoteCell">' . $this->p('Nein-Stimmen: ?', 'SmallTight') . '</table:table-cell>',
+            '<table:table-cell table:style-name="VoteCell">' . $this->p($this->t('Ja-Stimmen: ?'), 'SmallTight') . '</table:table-cell>',
+            '<table:table-cell table:style-name="VoteCell">' . $this->p($this->t('Enthaltungen: ?'), 'SmallTight') . '</table:table-cell>',
+            '<table:table-cell table:style-name="VoteCell">' . $this->p($this->t('Nein-Stimmen: ?'), 'SmallTight') . '</table:table-cell>',
             '</table:table-row>',
             '</table:table>',
         ]);
@@ -321,10 +332,10 @@ class OdtTemplateRenderer {
         foreach ($tops as $index => $top) {
             $n = $index + 1;
 
-            $xml[] = $this->h($prefix . '.' . $n . '. ' . $this->subjectLabel($top, 'TOP ergänzen'), 2);
+            $xml[] = $this->h($prefix . '.' . $n . '. ' . $this->subjectLabel($top, $this->t('TOP ergänzen')), 2);
 
             if (!empty($top['legal_basis'])) {
-                $xml[] = $this->p('Rechtsgrundlage: ' . (string)$top['legal_basis'], 'SmallTight');
+                $xml[] = $this->p($this->t('Rechtsgrundlage: ') . (string)$top['legal_basis'], 'SmallTight');
             }
 
             if ((int)($top['requires_resolution'] ?? 0) === 1) {
@@ -386,7 +397,7 @@ class OdtTemplateRenderer {
             return $person;
         }
 
-        return 'die Maßnahme';
+        return $this->t('die Maßnahme');
     }
 
     private function resolutionQuestion(array $top): string {
@@ -399,13 +410,13 @@ class OdtTemplateRenderer {
 
         return match ((string)($top['type'] ?? '')) {
             'personnel_99', 'personelle_einzelmassnahme', 'pe_einstellung', 'pe_sonstige'
-                => 'Wer verweigert die Zustimmung zu ' . $measure . ' und widerspricht ihr damit?',
+                => $this->t('Wer verweigert die Zustimmung zu ') . $measure . $this->t(' und widerspricht ihr damit?'),
             'personnel_100'
-                => 'Wer bestreitet, dass die vorläufige Durchführung der personellen Maßnahme ' . $measure . ' aus sachlichen Gründen dringend erforderlich ist?',
+                => $this->t('Wer bestreitet, dass die vorläufige Durchführung der personellen Maßnahme ') . $measure . $this->t(' aus sachlichen Gründen dringend erforderlich ist?'),
             'personnel_102', 'kuendigung', 'pe_kuendigung'
-                => 'Wer widerspricht der beabsichtigten Kündigung ' . $measure . ' gemäß § 102 BetrVG?',
+                => $this->t('Wer widerspricht der beabsichtigten Kündigung ') . $measure . $this->t(' gemäß § 102 BetrVG?'),
             default
-                => 'Wer stimmt ' . $measure . ' zu?',
+                => $this->t('Wer stimmt ') . $measure . ' zu?',
         };
     }
 
@@ -415,7 +426,7 @@ class OdtTemplateRenderer {
             return $person;
         }
 
-        return trim((string)($top['subject'] ?? 'Person ergänzen'));
+        return trim((string)($top['subject'] ?? $this->t('Person ergänzen')));
     }
 
     private function xml(string $value): string {

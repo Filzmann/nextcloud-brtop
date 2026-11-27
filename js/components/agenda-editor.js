@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const { showError, showNotice } = window.BRTop.ui;
 
     function createController({
@@ -20,7 +21,7 @@
 
             const subject = input.value.trim();
             if (subject === '') {
-                showNotice('Der TOP-Betreff darf nicht leer sein.', 'error');
+                showNotice(translate('brtop', translate('brtop', 'Der TOP-Betreff darf nicht leer sein.')), 'error');
                 input.focus();
                 return;
             }
@@ -44,7 +45,7 @@
         };
 
         const deleteTop = async (topId, label) => {
-            if (!confirm(`TOP "${label}" wirklich löschen? Untergeordnete TOPs werden ebenfalls gelöscht.`)) {
+            if (!confirm(`TOP "${label}" ${translate('brtop', translate('brtop', 'wirklich löschen? Untergeordnete TOPs werden ebenfalls gelöscht.'))}`)) {
                 return;
             }
 
@@ -77,7 +78,7 @@
                     await deleteTop(topId, button.getAttribute('data-label') || 'diesen TOP');
                 }
             } catch (e) {
-                showError(e, 'TOP-Liste konnte nicht bearbeitet werden.');
+                showError(e, translate('brtop', translate('brtop', 'TOP-Liste konnte nicht bearbeitet werden.')));
             }
         };
 
@@ -102,7 +103,7 @@
             try {
                 await saveTopSubject(input.getAttribute('data-top-id'));
             } catch (e) {
-                showError(e, 'TOP konnte nicht gespeichert werden.');
+                showError(e, translate('brtop', translate('brtop', 'TOP konnte nicht gespeichert werden.')));
             }
         };
 
@@ -110,7 +111,7 @@
             try {
                 const meetingId = getMeetingId();
                 if (!meetingId) {
-                    showNotice('Bitte zuerst eine Sitzung oeffnen.', 'error');
+                    showNotice(translate('brtop', translate('brtop', 'Bitte zuerst eine Sitzung oeffnen.')), 'error');
                     return;
                 }
 
@@ -122,9 +123,9 @@
                 topForm.hide();
                 await loadState();
                 renderMeetingDetail();
-                showNotice('TOP gespeichert.', 'success');
+                showNotice(translate('brtop', translate('brtop', 'TOP gespeichert.')), 'success');
             } catch (e) {
-                showError(e, 'TOP konnte nicht gespeichert werden.');
+                showError(e, translate('brtop', translate('brtop', 'TOP konnte nicht gespeichert werden.')));
             }
         };
 

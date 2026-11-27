@@ -1,5 +1,6 @@
 (function() {
-    const { Model } = window.LocalBase.models;
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+    const { Model } = window.OCA.BrTop.Shared.models;
     const { AgendaItem, GeneratedDocument } = window.BRTop.models;
 
     class Meeting extends Model {
@@ -24,7 +25,7 @@
         }
 
         displayTitle() {
-            return String(this.title || '').trim() || 'ohne Titel';
+            return String(this.title || '').trim() || translate('brtop', translate('brtop', 'ohne Titel'));
         }
 
         isRegularBrMeeting() {

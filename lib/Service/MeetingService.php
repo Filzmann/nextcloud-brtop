@@ -32,6 +32,14 @@ class MeetingService {
         return $meeting;
     }
 
+    public function assertMeetingExists(int $meetingId): Meeting {
+        $meeting = $this->meetingStore->get($meetingId);
+        if ($meeting === null) {
+            throw new \RuntimeException('Sitzung nicht gefunden oder keine Berechtigung.');
+        }
+        return $meeting;
+    }
+
     public function create(
         string $uid,
         string $title,

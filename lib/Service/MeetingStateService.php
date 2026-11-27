@@ -35,6 +35,23 @@ class MeetingStateService {
         return $payload;
     }
 
+    public function meetings(): array {
+        return $this->payload($this->meetingStore->recent());
+    }
+
+    /** @param list<\OCA\BrTop\Model\Meeting> $meetings */
+    private function payload(array $meetings): array {
+        $payload = [];
+        foreach ($meetings as $meeting) {
+            $meetingId = (int)$meeting->id;
+            $meeting->setAgendaItems($this->attachProtocolBlocks($meetingId, $meeting->agendaItems()));
+            $meeting->setDocuments($this->documentStore->forMeeting($meetingId));
+            $meeting->setInvitationRecipients($this->invitationSnapshotService->recipientsForMeeting($meetingId));
+            $payload[] = $meeting->toArray();
+        }
+        return $payload;
+    }
+
     private function attachProtocolBlocks(int $meetingId, array $tops): array {
         $blocksByTop = $this->protocolBlockStore->groupedForMeeting($meetingId);
 
