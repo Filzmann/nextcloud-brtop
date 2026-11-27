@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     'use strict';
     const request = window.BRTop?.api?.request;
     const form = document.getElementById('brtop-br-dpo-form');
@@ -25,11 +26,11 @@
                 method: 'POST',
                 body: JSON.stringify({ memberUidsJson: JSON.stringify(selected) }),
             });
-            show('Die BR-Datenschutzberechtigung wurde gespeichert.');
+            show(translate('brtop', translate('brtop', 'Die BR-Datenschutzberechtigung wurde gespeichert.')));
             await load();
         } catch (error) {
-            show(error.message || 'Die BR-Datenschutzberechtigung konnte nicht gespeichert werden.');
+            show(error.message || translate('brtop', translate('brtop', 'Die BR-Datenschutzberechtigung konnte nicht gespeichert werden.')));
         }
     });
-    load().catch(error => show(error.message || 'Die BR-Mitglieder konnten nicht geladen werden.'));
+    load().catch(error => show(error.message || translate('brtop', translate('brtop', 'Die BR-Mitglieder konnten nicht geladen werden.'))));
 })();

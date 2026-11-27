@@ -3,16 +3,22 @@
 declare(strict_types=1);
 
 namespace OCA\BrTop\Service;
+use OCP\IL10N;
 
 class AgendaTemplateService {
     private const ALLOWED_KINDS = ['section', 'report', 'discussion', 'resolution'];
     private AgendaAttachmentService $attachmentService;
 
-    public function __construct(
-        private BrtopSettingsService $settings,
-        ?AgendaAttachmentService $attachmentService = null
-    ) {
+    public function __construct(private BrtopSettingsService $settings,
+        ?AgendaAttachmentService $attachmentService = null,
+        private ?IL10N $l10n = null) {
         $this->attachmentService = $attachmentService ?? new AgendaAttachmentService();
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function regularBrMeetingItems(): array {
@@ -67,11 +73,11 @@ class AgendaTemplateService {
             ],
             [
                 'type' => 'protocol',
-                'subject' => 'Protokoll der letzten Sitzung',
+                'subject' => $this->t('Protokoll der letzten Sitzung'),
                 'personName' => '',
                 'legalBasis' => '',
                 'requiresResolution' => true,
-                'resolutionText' => 'Wer stimmt dem Protokoll der letzten Sitzung zu?',
+                'resolutionText' => $this->t('Wer stimmt dem Protokoll der letzten Sitzung zu?'),
                 'level' => 2,
                 'parent' => 'protocols',
                 'agendaItemKind' => 'resolution',
@@ -80,7 +86,7 @@ class AgendaTemplateService {
             [
                 'key' => 'personnel',
                 'type' => 'personnel',
-                'subject' => 'Personelle Angelegenheiten',
+                'subject' => $this->t('Personelle Angelegenheiten'),
                 'personName' => '',
                 'legalBasis' => '',
                 'requiresResolution' => false,
@@ -93,9 +99,9 @@ class AgendaTemplateService {
             [
                 'key' => 'personnel_99',
                 'type' => 'personnel_99',
-                'subject' => 'Personelle Einzelmaßnahmen nach § 99 BetrVG',
+                'subject' => $this->t('Personelle Einzelmaßnahmen nach § 99 BetrVG'),
                 'personName' => '',
-                'legalBasis' => '§ 99 BetrVG',
+                'legalBasis' => $this->t('§ 99 BetrVG'),
                 'requiresResolution' => false,
                 'resolutionText' => '',
                 'level' => 2,
@@ -106,9 +112,9 @@ class AgendaTemplateService {
             [
                 'key' => 'personnel_100',
                 'type' => 'personnel_100',
-                'subject' => 'Vorläufige personelle Maßnahmen nach § 100 BetrVG',
+                'subject' => $this->t('Vorläufige personelle Maßnahmen nach § 100 BetrVG'),
                 'personName' => '',
-                'legalBasis' => '§ 100 BetrVG',
+                'legalBasis' => $this->t('§ 100 BetrVG'),
                 'requiresResolution' => false,
                 'resolutionText' => '',
                 'level' => 2,
@@ -119,9 +125,9 @@ class AgendaTemplateService {
             [
                 'key' => 'personnel_102',
                 'type' => 'personnel_102',
-                'subject' => 'Anhörungen zu Kündigungen nach § 102 BetrVG',
+                'subject' => $this->t('Anhörungen zu Kündigungen nach § 102 BetrVG'),
                 'personName' => '',
-                'legalBasis' => '§ 102 BetrVG',
+                'legalBasis' => $this->t('§ 102 BetrVG'),
                 'requiresResolution' => false,
                 'resolutionText' => '',
                 'level' => 2,
@@ -144,7 +150,7 @@ class AgendaTemplateService {
             ],
             [
                 'type' => 'organisation',
-                'subject' => 'Nächste Sitzung',
+                'subject' => $this->t('Nächste Sitzung'),
                 'personName' => '',
                 'legalBasis' => '',
                 'requiresResolution' => false,
@@ -156,7 +162,7 @@ class AgendaTemplateService {
             ],
             [
                 'type' => 'consultation_report',
-                'subject' => 'Bericht aus den Sprechstunden seit der letzten Sitzung',
+                'subject' => $this->t('Bericht aus den Sprechstunden seit der letzten Sitzung'),
                 'personName' => '',
                 'legalBasis' => '',
                 'requiresResolution' => false,

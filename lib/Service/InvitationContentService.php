@@ -7,31 +7,37 @@ namespace OCA\BrTop\Service;
 use OCA\BrTop\Model\AgendaItem;
 use OCA\BrTop\Model\Meeting;
 use OCA\BrTop\Model\ProtocolBlock;
+use OCP\IL10N;
 
 class InvitationContentService {
-    public function __construct(
-        private AgendaService $agendaService,
+    public function __construct(private AgendaService $agendaService,
         private AgendaAttachmentService $agendaAttachmentService,
-        private DocumentDateFormatter $dateFormatter
-    ) {
+        private DocumentDateFormatter $dateFormatter,
+        private ?IL10N $l10n = null) {
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function subject(array|Meeting $meeting): string {
         $meetingData = $this->meetingData($meeting);
 
-        return 'Ladung zur Sitzung am ' . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']);
+        return $this->t('Ladung zur Sitzung am ') . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']);
     }
 
     public function templateValues(array|Meeting $meeting, array $tops, array $recipients, array $organization): array {
         $meetingData = $this->meetingData($meeting);
         $meetingLines = [
-            'Sitzung: ' . (($meetingData['title'] ?? '') ?: 'ohne Titel'),
-            'Datum: ' . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']),
-            'Uhrzeit: ' . (($meetingData['meeting_time'] ?? '') ?: 'noch offen'),
-            'Ort: ' . (($meetingData['location'] ?? '') ?: 'noch offen'),
+            $this->t('Sitzung: ') . (($meetingData['title'] ?? '') ?: $this->t('ohne Titel')),
+            $this->t('Datum: ') . $this->dateFormatter->germanDate((string)$meetingData['meeting_date']),
+            $this->t('Uhrzeit: ') . (($meetingData['meeting_time'] ?? '') ?: 'noch offen'),
+            $this->t('Ort: ') . (($meetingData['location'] ?? '') ?: 'noch offen'),
         ];
         $recipientLines = [];
-        $recipientLines[] = 'Geladene BR-Mitglieder: ' . count(array_filter(
+        $recipientLines[] = $this->t('Geladene BR-Mitglieder: ') . count(array_filter(
             $recipients,
             static fn(array $recipient): bool => ($recipient['invitation_type'] ?? 'initial') === 'initial'
         ));
@@ -60,7 +66,7 @@ class InvitationContentService {
         $lines = [
             'Ladungsliste',
             '',
-            'Snapshot zum Zeitpunkt der Einladung. Spätere Gruppenänderungen verändern diese Liste nicht.',
+            $this->t('Snapshot zum Zeitpunkt der Einladung. Spätere Gruppenänderungen verändern diese Liste nicht.'),
             '',
         ];
 
@@ -127,24 +133,24 @@ class InvitationContentService {
         }
 
         $summary = [
-            'Feste BR-Mitglieder: ' . $regularCount,
+            $this->t('Feste BR-Mitglieder: ') . $regularCount,
         ];
         if (count($lists) > 0) {
             $listParts = [];
             foreach ($lists as $listName => $seats) {
-                $listParts[] = $listName . ($seats > 0 ? ' (' . $seats . ' Sitze)' : '');
+                $listParts[] = $listName . ($seats > 0 ? ' (' . $seats . $this->t(' Sitze)') : '');
             }
-            $summary[] = 'Listen: ' . implode(', ', $listParts);
+            $summary[] = $this->t('Listen: ') . implode(', ', $listParts);
         }
         if ($minorityGender !== '') {
-            $summary[] = 'Minderheitenschutz: ' . $attendingMinority
-                . ' von mindestens ' . $minorityMinimumSeats . ' Sitzen sichergestellt';
+            $summary[] = $this->t('Minderheitenschutz: ') . $attendingMinority
+                . $this->t(' von mindestens ') . $minorityMinimumSeats . $this->t(' Sitzen sichergestellt');
         }
         if ($replacementCount > 0) {
             $summary[] = 'Nachrücker*innen geladen: ' . $replacementCount;
         }
         if ($confirmedAbsentCount > 0) {
-            $summary[] = 'Administrativ bestaetigte Verhinderungen: ' . $confirmedAbsentCount;
+            $summary[] = $this->t('Administrativ bestaetigte Verhinderungen: ') . $confirmedAbsentCount;
         }
 
         return $summary;
@@ -156,18 +162,18 @@ class InvitationContentService {
         if (!empty($recipient['list_name'])) {
             $listDetail = (string)$recipient['list_name'];
             if (!empty($recipient['list_rank'])) {
-                $listDetail .= ', Rang ' . (int)$recipient['list_rank'];
+                $listDetail .= $this->t(', Rang ') . (int)$recipient['list_rank'];
             }
             $details[] = $listDetail;
         }
 
         if (($recipient['member_role'] ?? '') === 'replacement') {
             $details[] = 'Nachrücker*in'
-                . (!empty($recipient['replacement_for_name']) ? ' für ' . $recipient['replacement_for_name'] : '');
+                . (!empty($recipient['replacement_for_name']) ? $this->t(' für ') . $recipient['replacement_for_name'] : '');
         }
 
         if (($recipient['invitation_type'] ?? '') === 'absent') {
-            $details[] = 'nicht geladen; Verhinderung administrativ bestaetigt';
+            $details[] = $this->t('nicht geladen; Verhinderung administrativ bestaetigt');
         }
 
         return implode('; ', $details);
@@ -175,7 +181,7 @@ class InvitationContentService {
 
     private function appendAgendaLines(array &$lines, array $tops): void {
         if (count($tops) === 0) {
-            $lines[] = 'Keine Tagesordnungspunkte vorhanden.';
+            $lines[] = $this->t('Keine Tagesordnungspunkte vorhanden.');
             return;
         }
 
@@ -190,14 +196,14 @@ class InvitationContentService {
 
             $kind = $this->agendaService->itemKind($top);
             if ($kind === 'report') {
-                $line .= ' [Bericht]';
+                $line .= $this->t(' [Bericht]');
             } elseif ($this->agendaService->isResolutionItem($top)) {
                 $resolutionCount = max(1, $this->agendaService->resolutionCount($top));
                 $line .= $resolutionCount > 1
-                    ? ' [' . $resolutionCount . ' Beschlüsse vorgesehen]'
-                    : ' [Beschluss vorgesehen]';
+                    ? ' [' . $resolutionCount . $this->t(' Beschlüsse vorgesehen]')
+                    : $this->t(' [Beschluss vorgesehen]');
             } elseif ($kind === 'discussion') {
-                $line .= ' [Beratung]';
+                $line .= $this->t(' [Beratung]');
             }
 
             $lines[] = $line;
@@ -220,7 +226,7 @@ class InvitationContentService {
 
         $attachments = $this->agendaAttachmentService->attachmentPathLines((string)($topData['attachment_paths'] ?? ''));
         if (count($attachments) > 0) {
-            $lines[] = $indent . '- Anhänge: ' . implode('; ', $attachments);
+            $lines[] = $indent . $this->t('- Anhänge: ') . implode('; ', $attachments);
         }
     }
 

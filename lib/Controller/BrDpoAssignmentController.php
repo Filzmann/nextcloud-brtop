@@ -14,18 +14,24 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Throwable;
 
 final class BrDpoAssignmentController extends Controller {
-    public function __construct(
-        IRequest $request,
+    public function __construct(IRequest $request,
         private IUserSession $session,
         private BrDpoAssignmentService $assignments,
         private BrtopLogger $logger,
-    ) {
+        private ?IL10N $l10n = null) {
         parent::__construct(Application::APP_ID, $request);
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     #[NoCSRFRequired]
@@ -49,7 +55,7 @@ final class BrDpoAssignmentController extends Controller {
             }
             return new JSONResponse(['assignedUids' => $this->assignments->replace($this->uid(), $memberUids)]);
         } catch (JsonException|\InvalidArgumentException $error) {
-            return new JSONResponse(['message' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['message' => $this->t($error->getMessage())], Http::STATUS_BAD_REQUEST);
         } catch (AccessDeniedException) {
             return $this->denied();
         } catch (Throwable $error) {
@@ -62,11 +68,11 @@ final class BrDpoAssignmentController extends Controller {
     }
 
     private function denied(): JSONResponse {
-        return new JSONResponse(['message' => 'Keine Berechtigung.'], Http::STATUS_FORBIDDEN);
+        return new JSONResponse(['message' => $this->t('Keine Berechtigung.')], Http::STATUS_FORBIDDEN);
     }
 
     private function failed(Throwable $error): JSONResponse {
         $this->logger->error('br_dpo_assignment', $error);
-        return new JSONResponse(['message' => 'Die BR-Datenschutzberechtigung konnte nicht verarbeitet werden.'], Http::STATUS_INTERNAL_SERVER_ERROR);
+        return new JSONResponse(['message' => $this->t('Die BR-Datenschutzberechtigung konnte nicht verarbeitet werden.')], Http::STATUS_INTERNAL_SERVER_ERROR);
     }
 }

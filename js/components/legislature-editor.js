@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const { esc } = window.BRTop.ui;
 
     function emptyConfiguration() {
@@ -13,7 +14,7 @@
             absence_calendar_principal: 'principals/users/admin',
             absence_calendar_uri: '',
             status: 'draft',
-            lists: [emptyList('Liste 1'), emptyList('Liste 2')]
+            lists: [emptyList(translate('brtop', translate('brtop', 'Liste 1'))), emptyList(translate('brtop', translate('brtop', 'Liste 2')))]
         };
     }
 
@@ -39,7 +40,7 @@
         return `
             <tr data-member-index="${memberIndex}">
                 <td>${input(`${prefix}-uid`, 'Nextcloud-UID', member.user_uid, 'text', `data-member-field="user_uid" ${locked ? 'disabled' : 'required'}`)}</td>
-                <td>${input(`${prefix}-name`, 'Anzeigename', member.display_name, 'text', `data-member-field="display_name" ${locked ? 'disabled' : 'required'}`)}</td>
+                <td>${input(`${prefix}-name`, translate('brtop', translate('brtop', 'Anzeigename')), member.display_name, 'text', `data-member-field="display_name" ${locked ? 'disabled' : 'required'}`)}</td>
                 <td>${input(`${prefix}-email`, 'E-Mail', member.email, 'email', `data-member-field="email" ${locked ? 'disabled' : ''}`)}</td>
                 <td>
                     <label class="brtop-field" for="${prefix}-gender"><span>Geschlecht</span>
@@ -58,8 +59,8 @@
                         </select>
                     </label>
                 </td>
-                <td>${input(`${prefix}-rank`, 'Listenrang', member.list_rank, 'number', `min="1" data-member-field="list_rank" ${locked ? 'disabled' : 'required'}`)}</td>
-                <td>${locked ? '' : `<button type="button" data-action="remove-member" data-list-index="${listIndex}" data-member-index="${memberIndex}" aria-label="${esc(member.display_name || 'Mitglied')} entfernen">Entfernen</button>`}</td>
+                <td>${input(`${prefix}-rank`, translate('brtop', translate('brtop', 'Listenrang')), member.list_rank, 'number', `min="1" data-member-field="list_rank" ${locked ? 'disabled' : 'required'}`)}</td>
+                <td>${locked ? '' : `<button type="button" data-action="remove-member" data-list-index="${listIndex}" data-member-index="${memberIndex}" aria-label="${esc(member.display_name || translate('brtop', translate('brtop', 'Mitglied')))} entfernen">Entfernen</button>`}</td>
             </tr>`;
     }
 
@@ -69,18 +70,18 @@
             <fieldset class="brtop-legislature-list" data-list-index="${listIndex}">
                 <legend>Vorschlagsliste ${listIndex + 1}</legend>
                 <div class="brtop-form-grid">
-                    ${input(`leg-list-${listIndex}-name`, 'Listenname', list.name, 'text', `data-list-field="name" ${locked ? 'disabled' : 'required'}`)}
+                    ${input(`leg-list-${listIndex}-name`, translate('brtop', translate('brtop', 'Listenname')), list.name, 'text', `data-list-field="name" ${locked ? 'disabled' : 'required'}`)}
                     ${input(`leg-list-${listIndex}-seats`, 'Gewonnene Sitze', list.seat_count, 'number', `min="0" data-list-field="seat_count" ${locked ? 'disabled' : 'required'}`)}
-                    ${input(`leg-list-${listIndex}-votes`, 'Gültige Listenstimmen', list.vote_count, 'number', `min="0" data-list-field="vote_count" ${locked ? 'disabled' : 'required'}`)}
+                    ${input(`leg-list-${listIndex}-votes`, translate('brtop', translate('brtop', 'Gültige Listenstimmen')), list.vote_count, 'number', `min="0" data-list-field="vote_count" ${locked ? 'disabled' : 'required'}`)}
                 </div>
                 <div class="brtop-table-wrap" data-persistent-horizontal-scroll>
                     <table>
                         <caption>Mitglieder der ${esc(list.name || `Vorschlagsliste ${listIndex + 1}`)}</caption>
                         <thead><tr><th scope="col">UID</th><th scope="col">Name</th><th scope="col">E-Mail</th><th scope="col">Geschlecht</th><th scope="col">Rolle</th><th scope="col">Rang</th><th scope="col">Aktion</th></tr></thead>
-                        <tbody>${members || '<tr><td colspan="7">Noch keine Mitglieder eingetragen.</td></tr>'}</tbody>
+                        <tbody>${members || '<tr><td colspan="7">' + translate('brtop', translate('brtop', 'Noch keine Mitglieder eingetragen.')) + '</td></tr>'}</tbody>
                     </table>
                 </div>
-                ${locked ? '' : `<div class="brtop-actions"><button type="button" data-action="add-member" data-list-index="${listIndex}">Mitglied hinzufügen</button><button type="button" data-action="remove-list" data-list-index="${listIndex}">Liste entfernen</button></div>`}
+                ${locked ? '' : `<div class="brtop-actions"><button type="button" data-action="add-member" data-list-index="${listIndex}">${translate('brtop', translate('brtop', 'Mitglied hinzufügen'))}</button><button type="button" data-action="remove-list" data-list-index="${listIndex}">${translate('brtop', translate('brtop', 'Liste entfernen'))}</button></div>`}
             </fieldset>`;
     }
 
@@ -90,12 +91,12 @@
         return `
             <form id="legislature-form">
                 <p id="legislature-help">Die Konfiguration gilt für eine Legislatur. Nach der Aktivierung ist sie versiegelt. Bereits erzeugte Einladungssnapshots bleiben immer unverändert.</p>
-                <p><strong>Status:</strong> ${locked ? 'aktiv und versiegelt' : 'Entwurf'}</p>
+                <p><strong>Status:</strong> ${locked ? 'aktiv und versiegelt' : translate('brtop', translate('brtop', 'Entwurf'))}</p>
                 <div class="brtop-form-grid">
-                    ${input('leg-name', 'Bezeichnung', data.name, 'text', `data-root-field="name" ${locked ? 'disabled' : 'required'}`)}
-                    ${input('leg-start', 'Beginn', data.starts_on, 'date', `data-root-field="starts_on" ${locked ? 'disabled' : 'required'}`)}
-                    ${input('leg-end', 'Ende', data.ends_on, 'date', `data-root-field="ends_on" ${locked ? 'disabled' : 'required'}`)}
-                    ${input('leg-size', 'BR-Größe', data.council_size, 'number', `min="3" data-root-field="council_size" ${locked ? 'disabled' : 'required'}`)}
+                    ${input('leg-name', translate('brtop', translate('brtop', 'Bezeichnung')), data.name, 'text', `data-root-field="name" ${locked ? 'disabled' : 'required'}`)}
+                    ${input('leg-start', translate('brtop', translate('brtop', 'Beginn')), data.starts_on, 'date', `data-root-field="starts_on" ${locked ? 'disabled' : 'required'}`)}
+                    ${input('leg-end', translate('brtop', translate('brtop', 'Ende')), data.ends_on, 'date', `data-root-field="ends_on" ${locked ? 'disabled' : 'required'}`)}
+                    ${input('leg-size', translate('brtop', translate('brtop', 'BR-Größe')), data.council_size, 'number', `min="3" data-root-field="council_size" ${locked ? 'disabled' : 'required'}`)}
                     <label class="brtop-field" for="leg-minority-gender"><span>Minderheitengeschlecht</span>
                         <select id="leg-minority-gender" data-root-field="minority_gender" ${locked ? 'disabled' : ''}>
                             <option value="female" ${data.minority_gender === 'female' ? 'selected' : ''}>weiblich</option>
@@ -109,8 +110,8 @@
                 </div>
                 <div id="legislature-lists">${(data.lists || []).map((list, index) => listCard(list, index, locked)).join('')}</div>
                 ${locked
-                    ? '<div class="brtop-actions"><button type="button" data-action="new-legislature">Neue Legislatur als Entwurf vorbereiten</button></div>'
-                    : '<div class="brtop-actions"><button type="button" data-action="add-list">Vorschlagsliste hinzufügen</button><button class="primary" type="submit">Entwurf speichern</button>' + (data.id ? '<button type="button" data-action="activate-legislature">Legislatur aktivieren und versiegeln</button>' : '') + '</div>'}
+                    ? '<div class="brtop-actions"><button type="button" data-action="new-legislature">' + translate('brtop', translate('brtop', 'Neue Legislatur als Entwurf vorbereiten')) + '</button></div>'
+                    : '<div class="brtop-actions"><button type="button" data-action="add-list">' + translate('brtop', translate('brtop', 'Vorschlagsliste hinzufügen')) + '</button><button class="primary" type="submit">' + translate('brtop', translate('brtop', 'Entwurf speichern')) + '</button>' + (data.id ? '<button type="button" data-action="activate-legislature">Legislatur aktivieren und versiegeln</button>' : '') + '</div>'}
             </form>`;
     }
 
@@ -159,9 +160,9 @@
                 const result = await repository.save(readForm());
                 configuration = result.legislature;
                 render();
-                showNotice('Legislaturentwurf gespeichert.', 'success');
+                showNotice(translate('brtop', translate('brtop', 'Legislaturentwurf gespeichert.')), 'success');
             } catch (error) {
-                showError(error, 'Legislatur konnte nicht gespeichert werden.');
+                showError(error, translate('brtop', translate('brtop', 'Legislatur konnte nicht gespeichert werden.')));
             }
         }
 
@@ -177,19 +178,19 @@
                 render();
                 return;
             }
-            if (action === 'add-list') configuration.lists.push(emptyList(`Liste ${configuration.lists.length + 1}`));
+            if (action === 'add-list') configuration.lists.push(emptyList(`${translate('brtop', translate('brtop', 'Liste'))} ${configuration.lists.length + 1}`));
             if (action === 'remove-list') configuration.lists.splice(listIndex, 1);
             if (action === 'add-member') configuration.lists[listIndex].members.push(emptyMember(configuration.lists[listIndex].members.length + 1));
             if (action === 'remove-member') configuration.lists[listIndex].members.splice(memberIndex, 1);
             if (action === 'activate-legislature') {
-                if (!confirm('Legislatur jetzt aktivieren und unveränderlich versiegeln?')) return;
+                if (!confirm(translate('brtop', translate('brtop', 'Legislatur jetzt aktivieren und unveränderlich versiegeln?')))) return;
                 try {
                     const result = await repository.activate(configuration.id);
                     configuration = result.legislature;
                     render();
-                    showNotice('Legislatur aktiviert und versiegelt.', 'success');
+                    showNotice(translate('brtop', translate('brtop', 'Legislatur aktiviert und versiegelt.')), 'success');
                 } catch (error) {
-                    showError(error, 'Legislatur konnte nicht aktiviert werden.');
+                    showError(error, translate('brtop', translate('brtop', 'Legislatur konnte nicht aktiviert werden.')));
                 }
                 return;
             }

@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const {
         esc,
         agendaKindLabel,
@@ -18,21 +19,21 @@
                     data-action="protocol-block-content"
                     data-top-id="${esc(top.id)}"
                     data-block-id="${esc(block.id)}">${esc(content)}</textarea>
-                <small class="brtop-block-status">Gespeichert</small>
+                <small class="brtop-block-status">${translate('brtop', translate('brtop', 'Gespeichert'))}</small>
             </div>
         `;
     }
 
     function protocolEditorHtml(tops) {
         if (tops.length === 0) {
-            return '<p>Für diese Sitzung gibt es noch keine TOPs.</p>';
+            return '<p>' + translate('brtop', translate('brtop', 'Für diese Sitzung gibt es noch keine TOPs.')) + '</p>';
         }
 
         return tops.map(top => {
             const blocks = top.protocol_blocks || [];
             const blockList = blocks.length > 0
                 ? blocks.map(block => protocolBlockHtml(top, block)).join('')
-                : '<p class="brtop-meta">Noch kein Protokollinhalt.</p>';
+                : '<p class="brtop-meta">' + translate('brtop', translate('brtop', 'Noch kein Protokollinhalt.')) + '</p>';
             const kind = typeof top.kindLabel === 'function'
                 ? top.kindLabel()
                 : agendaKindLabel(top.agenda_item_kind, top.requires_resolution, top.resolution_count);
@@ -88,7 +89,7 @@
 
             textarea.dataset.lastSaved = textarea.value;
             textarea.dataset.dirty = '0';
-            status.textContent = 'Gespeichert';
+            status.textContent = translate('brtop', translate('brtop', 'Gespeichert'));
         }
 
         async function saveDirty() {
@@ -122,7 +123,7 @@
                     await saveDirty();
                     await addBlock(button.getAttribute('data-top-id'));
                 } catch (e) {
-                    showError(e, 'Protokollblock konnte nicht hinzugefuegt werden.');
+                    showError(e, translate('brtop', translate('brtop', 'Protokollblock konnte nicht hinzugefuegt werden.')));
                 }
             });
 
@@ -134,7 +135,7 @@
 
                 textarea.dataset.dirty = '1';
                 const status = textarea.closest('.brtop-protocol-block-row').querySelector('.brtop-block-status');
-                status.textContent = 'Ungespeichert';
+                status.textContent = translate('brtop', translate('brtop', 'Ungespeichert'));
             });
 
             byId('protocol-editor').addEventListener('blur', (event) => {
@@ -145,8 +146,8 @@
 
                 saveBlock(textarea).catch((e) => {
                     const status = textarea.closest('.brtop-protocol-block-row').querySelector('.brtop-block-status');
-                    status.textContent = 'Fehler beim Speichern';
-                    showError(e, 'Protokollblock konnte nicht gespeichert werden.');
+                    status.textContent = translate('brtop', translate('brtop', 'Fehler beim Speichern'));
+                    showError(e, translate('brtop', translate('brtop', 'Protokollblock konnte nicht gespeichert werden.')));
                 });
             }, true);
         }

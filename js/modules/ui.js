@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const { Notice, byId, esc } = window.OCA.BrTop.Shared.ui;
     const noticeBox = new Notice('brtop-notice', {
         baseClass: 'brtop-notice',
@@ -25,16 +26,16 @@
 
     const agendaKindLabel = (kind, requiresResolution, resolutionCount = 0) => {
         if (kind === 'section') {
-            return 'Gliederung';
+            return translate('brtop', translate('brtop', 'Gliederung'));
         }
         if (kind === 'report') {
-            return 'Bericht';
+            return translate('brtop', translate('brtop', 'Bericht'));
         }
         if (kind === 'resolution' || Number(requiresResolution) === 1) {
             const count = Math.max(1, Number(resolutionCount || 0));
-            return count > 1 ? `${count} Beschlüsse` : 'Beschluss';
+            return count > 1 ? `${count} Beschlüsse` : translate('brtop', translate('brtop', 'Beschluss'));
         }
-        return 'Beratung';
+        return translate('brtop', translate('brtop', 'Beratung'));
     };
 
     const agendaNumber = (top) => {
@@ -87,16 +88,16 @@
     });
 
     const buttonPresets = Object.freeze({
-        editMeeting: { action: 'edit-meeting', icon: 'edit', label: 'Bearbeiten' },
-        deleteMeeting: { action: 'delete-meeting', icon: 'delete', label: 'Löschen', className: 'brtop-icon-button-danger' },
-        editTop: { action: 'edit-top', icon: 'edit', label: 'Bearbeiten' },
-        saveTopTitle: { action: 'save-top-title', icon: 'save', label: 'Speichern', className: 'brtop-icon-button-primary' },
-        moveTopUp: { action: 'move-top', icon: 'up', label: 'Hoch' },
-        moveTopDown: { action: 'move-top', icon: 'down', label: 'Runter' },
-        outdentTop: { action: 'depth-top', icon: 'outdent', label: 'Ebene raus' },
-        indentTop: { action: 'depth-top', icon: 'indent', label: 'Ebene rein' },
-        deleteTop: { action: 'delete-top', icon: 'delete', label: 'Löschen', className: 'brtop-icon-button-danger' },
-        addProtocolBlock: { action: 'add-protocol-block', icon: 'plus', label: 'Block hinzufügen', className: 'brtop-icon-button-primary' }
+        editMeeting: { action: 'edit-meeting', icon: 'edit', label: translate('brtop', translate('brtop', 'Bearbeiten')) },
+        deleteMeeting: { action: 'delete-meeting', icon: 'delete', label: translate('brtop', translate('brtop', 'Löschen')), className: 'brtop-icon-button-danger' },
+        editTop: { action: 'edit-top', icon: 'edit', label: translate('brtop', translate('brtop', 'Bearbeiten')) },
+        saveTopTitle: { action: 'save-top-title', icon: 'save', label: translate('brtop', translate('brtop', 'Speichern')), className: 'brtop-icon-button-primary' },
+        moveTopUp: { action: 'move-top', icon: 'up', label: translate('brtop', translate('brtop', 'Hoch')) },
+        moveTopDown: { action: 'move-top', icon: 'down', label: translate('brtop', translate('brtop', 'Runter')) },
+        outdentTop: { action: 'depth-top', icon: 'outdent', label: translate('brtop', translate('brtop', 'Ebene raus')) },
+        indentTop: { action: 'depth-top', icon: 'indent', label: translate('brtop', translate('brtop', 'Ebene rein')) },
+        deleteTop: { action: 'delete-top', icon: 'delete', label: translate('brtop', translate('brtop', 'Löschen')), className: 'brtop-icon-button-danger' },
+        addProtocolBlock: { action: 'add-protocol-block', icon: 'plus', label: translate('brtop', translate('brtop', 'Block hinzufügen')), className: 'brtop-icon-button-primary' }
     });
 
     const attrsHtml = (attrs) => Object.entries(attrs)
@@ -152,7 +153,7 @@
         noticeBox.show(message, type);
     };
 
-    const showError = (error, fallback = 'Fehler') => {
+    const showError = (error, fallback = translate('brtop', translate('brtop', 'Fehler'))) => {
         noticeBox.error(error, fallback);
     };
 

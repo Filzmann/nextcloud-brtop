@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const { Model } = window.OCA.BrTop.Shared.models;
 
     class GeneratedDocument extends Model {
@@ -20,15 +21,15 @@
 
         typeLabel() {
             const labels = {
-                invitation_email: 'Einladung E-Mail',
-                invitation_markdown: 'Ladung',
-                invitation_recipients: 'Ladungsliste',
-                protocol_markdown: 'Protokollvorlage',
+                invitation_email: translate('brtop', translate('brtop', 'Einladung E-Mail')),
+                invitation_markdown: translate('brtop', translate('brtop', 'Ladung')),
+                invitation_recipients: translate('brtop', translate('brtop', 'Ladungsliste')),
+                protocol_markdown: translate('brtop', translate('brtop', 'Protokollvorlage')),
                 protocol_odt: 'Protokollvorlage ODT',
-                resolution_markdown: 'Beschlussdokument'
+                resolution_markdown: translate('brtop', translate('brtop', 'Beschlussdokument'))
             };
 
-            return labels[this.document_type] || 'Dokument';
+            return labels[this.document_type] || translate('brtop', translate('brtop', 'Dokument'));
         }
 
         toArray() {

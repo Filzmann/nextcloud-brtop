@@ -14,6 +14,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Middleware;
+use OCP\IL10N;
 use OCP\IUserSession;
 
 class BrAccessMiddleware extends Middleware {
@@ -41,10 +42,15 @@ class BrAccessMiddleware extends Middleware {
         'saveConfirmedAbsences' => BrPermissionService::ABSENCE_CONFIRM,
     ];
 
-    public function __construct(
-        private IUserSession $userSession,
-        private BrAccessService $accessService
-    ) {
+    public function __construct(private IUserSession $userSession,
+        private BrAccessService $accessService,
+        private ?IL10N $l10n = null) {
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function beforeController(Controller $controller, string $methodName): void {
@@ -69,7 +75,7 @@ class BrAccessMiddleware extends Middleware {
         if ($controller instanceof ApiController) {
             return new DataResponse([
                 'ok' => false,
-                'message' => $exception->getMessage(),
+                'message' => $this->t($exception->getMessage()),
             ], Http::STATUS_FORBIDDEN);
         }
 

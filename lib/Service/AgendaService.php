@@ -7,15 +7,21 @@ namespace OCA\BrTop\Service;
 use OCA\BrTop\Model\AgendaItem;
 use OCA\BrTop\Repository\AgendaItemRepository;
 use OCA\BrTop\Store\AgendaItemStore;
+use OCP\IL10N;
 
 class AgendaService {
-    public function __construct(
-        private AgendaItemRepository $agendaItemRepository,
+    public function __construct(private AgendaItemRepository $agendaItemRepository,
         private AgendaItemStore $agendaItemStore,
         private AgendaTemplateService $agendaTemplateService,
         private AgendaTreeService $agendaTreeService,
-        private AgendaAttachmentService $agendaAttachmentService
-    ) {
+        private AgendaAttachmentService $agendaAttachmentService,
+        private ?IL10N $l10n = null) {
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function itemsForMeeting(int $meetingId): array {
@@ -286,9 +292,9 @@ class AgendaService {
 
     private function defaultLegalBasis(string $type): string {
         return match ($type) {
-            'personnel_99' => '§ 99 BetrVG',
-            'personnel_100' => '§ 100 BetrVG',
-            'personnel_102' => '§ 102 BetrVG',
+            'personnel_99' => $this->t('§ 99 BetrVG'),
+            'personnel_100' => $this->t('§ 100 BetrVG'),
+            'personnel_102' => $this->t('§ 102 BetrVG'),
             default => '',
         };
     }

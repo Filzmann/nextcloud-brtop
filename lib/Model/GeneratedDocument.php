@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\BrTop\Model;
 
 use OCA\LocalBase\Model\ModelApiTrait;
+use OCP\IL10N;
 
 class GeneratedDocument {
     use ModelApiTrait;
@@ -18,7 +19,7 @@ class GeneratedDocument {
     public ?int $templateVersion;
     public string $createdAt;
 
-    public function __construct(array $data = []) {
+    public function __construct(array $data = [], private ?IL10N $l10n = null) {
         $this->id = isset($data['id']) ? (int)$data['id'] : null;
         $this->meetingId = (int)($data['meeting_id'] ?? $data['meetingId'] ?? 0);
         $this->documentType = (string)($data['document_type'] ?? $data['documentType'] ?? '');
@@ -31,19 +32,25 @@ class GeneratedDocument {
         $this->createdAt = (string)($data['created_at'] ?? $data['createdAt'] ?? '');
     }
 
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
+
     public function displayTitle(): string {
         return trim($this->title) !== '' ? $this->title : $this->typeLabel();
     }
 
     public function typeLabel(): string {
         return match ($this->documentType) {
-            'invitation_email' => 'Einladung E-Mail',
+            'invitation_email' => $this->t('Einladung E-Mail'),
             'invitation_markdown' => 'Ladung',
             'invitation_recipients' => 'Ladungsliste',
             'protocol_markdown' => 'Protokollvorlage',
-            'protocol_odt' => 'Protokollvorlage ODT',
+            'protocol_odt' => $this->t('Protokollvorlage ODT'),
             'resolution_markdown' => 'Beschlussdokument',
-            default => 'Dokument',
+            default => $this->t('Dokument'),
         };
     }
 

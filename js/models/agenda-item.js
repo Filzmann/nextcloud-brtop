@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
     const { Model } = window.OCA.BrTop.Shared.models;
     const { ProtocolBlock } = window.BRTop.models;
 
@@ -41,16 +42,16 @@
 
         kindLabel() {
             if (this.kind() === 'section') {
-                return 'Gliederung';
+                return translate('brtop', translate('brtop', 'Gliederung'));
             }
             if (this.kind() === 'report') {
-                return 'Bericht';
+                return translate('brtop', translate('brtop', 'Bericht'));
             }
             if (this.isResolutionItem()) {
                 const count = this.resolutionCount();
-                return count > 1 ? `${count} Beschlüsse` : 'Beschluss';
+                return count > 1 ? `${count} Beschlüsse` : translate('brtop', translate('brtop', 'Beschluss'));
             }
-            return 'Beratung';
+            return translate('brtop', translate('brtop', 'Beratung'));
         }
 
         isResolutionItem() {

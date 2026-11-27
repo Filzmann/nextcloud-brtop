@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\BrTop\Service;
 
 use OCA\BrTop\Repository\DocumentTemplateRepositoryInterface;
+use OCP\IL10N;
 
 final class DocumentTemplateService implements DocumentTemplateProvider {
     private const TEXT_DEFAULTS = [
@@ -14,16 +15,21 @@ final class DocumentTemplateService implements DocumentTemplateProvider {
         'resolution_markdown' => "{{RESOLUTION_BODY}}\n",
     ];
 
-    public function __construct(
-        private DocumentTemplateRepositoryInterface $repository,
+    public function __construct(private DocumentTemplateRepositoryInterface $repository,
         private DocumentTemplateEngine $engine,
         private OdtTemplateValidator $odtValidator,
         private string $builtInOdtPath = '',
-        private ?BrtopLogger $logger = null
-    ) {
+        private ?BrtopLogger $logger = null,
+        private ?IL10N $l10n = null) {
         if ($this->builtInOdtPath === '') {
             $this->builtInOdtPath = __DIR__ . '/../../templates/odt/protokoll-template.odt';
         }
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function active(string $templateKey): array {
@@ -89,17 +95,17 @@ final class DocumentTemplateService implements DocumentTemplateProvider {
         }
 
         return $this->render($preview, [
-            'SALUTATION' => 'Guten Tag,',
-            'INVITATION_INTRO' => 'hiermit laden wir zur Sitzung ein.',
+            'SALUTATION' => $this->t('Guten Tag,'),
+            'INVITATION_INTRO' => $this->t('hiermit laden wir zur Sitzung ein.'),
             'MEETING_DETAILS' => "Sitzung: Beispielsitzung\nDatum: 27.10.2026\nUhrzeit: 10:00\nOrt: Sitzungsraum",
-            'RECIPIENT_SUMMARY' => 'Geladene BR-Mitglieder: 7',
+            'RECIPIENT_SUMMARY' => $this->t('Geladene BR-Mitglieder: 7'),
             'AGENDA' => "1. Bericht\n2. Beratung",
-            'CLOSING' => 'Viele Grüße',
-            'SENDER' => 'Der Betriebsrat',
-            'SUBJECT' => 'Ladung zur Sitzung am 27.10.2026',
-            'EMAIL_BODY' => 'Beispiel für die Einladungs-E-Mail.',
-            'COUNCIL_NAME' => 'Betriebsrat Beispielorganisation',
-            'COUNCIL_ADDRESS' => 'Beispielweg 1, 12345 Beispielstadt',
+            'CLOSING' => $this->t('Viele Grüße'),
+            'SENDER' => $this->t('Der Betriebsrat'),
+            'SUBJECT' => $this->t('Ladung zur Sitzung am 27.10.2026'),
+            'EMAIL_BODY' => $this->t('Beispiel für die Einladungs-E-Mail.'),
+            'COUNCIL_NAME' => $this->t('Betriebsrat Beispielorganisation'),
+            'COUNCIL_ADDRESS' => $this->t('Beispielweg 1, 12345 Beispielstadt'),
             'ISSUE_PLACE' => 'Beispielstadt',
             'PROTOCOL_BODY' => "# Protokollvorlage\n\nFester fachlicher Protokollblock.",
             'RESOLUTION_BODY' => "# Beschlussdokument\n\nFester fachlicher Beschlussblock.",

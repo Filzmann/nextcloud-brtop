@@ -16,21 +16,27 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Throwable;
 
 /** Fachlich berechtigte BR-Konfiguration; native Administration allein erteilt kein Recht. */
 final class DocumentConfigurationController extends Controller {
-    public function __construct(
-        IRequest $request,
+    public function __construct(IRequest $request,
         private IUserSession $userSession,
         private BrAccessService $access,
         private BrtopSettingsService $settings,
         private DocumentTemplateService $templates,
-        private BrtopLogger $logger
-    ) {
+        private BrtopLogger $logger,
+        private ?IL10N $l10n = null) {
         parent::__construct(Application::APP_ID, $request);
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     #[NoCSRFRequired]
@@ -139,14 +145,14 @@ final class DocumentConfigurationController extends Controller {
             $this->access->assertPermission($user?->getUID() ?? '', BrPermissionService::SETTINGS_MANAGE);
             return new JSONResponse($callback());
         } catch (AccessDeniedException $e) {
-            return new JSONResponse(['ok' => false, 'message' => $e->getMessage()], Http::STATUS_FORBIDDEN);
+            return new JSONResponse(['ok' => false, 'message' => $this->t($e->getMessage())], Http::STATUS_FORBIDDEN);
         } catch (\InvalidArgumentException $e) {
-            return new JSONResponse(['ok' => false, 'message' => $e->getMessage()], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['ok' => false, 'message' => $this->t($e->getMessage())], Http::STATUS_BAD_REQUEST);
         } catch (Throwable $e) {
             $this->logger->error($action, $e, $context);
             return new JSONResponse([
                 'ok' => false,
-                'message' => 'Die Dokumentkonfiguration konnte nicht verarbeitet werden. Details stehen im Nextcloud-Log.',
+                'message' => $this->t('Die Dokumentkonfiguration konnte nicht verarbeitet werden. Details stehen im Nextcloud-Log.'),
             ], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
