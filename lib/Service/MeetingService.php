@@ -19,7 +19,8 @@ class MeetingService {
         private MeetingStore $meetingStore,
         private MeetingRepository $meetingRepository,
         private DocumentRepository $documentRepository,
-        private ProtocolBlockStore $protocolBlockStore
+        private ProtocolBlockStore $protocolBlockStore,
+        private ?SprechstundenberichtService $sprechstundenbericht = null
     ) {
     }
 
@@ -84,6 +85,7 @@ class MeetingService {
             $meetingId = $meeting->save();
 
             $this->agendaService->addTemplateItems($meetingId, $items);
+            $this->sprechstundenbericht?->appendToMeeting($meetingId, $uid);
 
             return $meetingId;
         });

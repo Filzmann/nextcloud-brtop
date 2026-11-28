@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Unreleased: Cross-App-Consumer „Bericht aus den Sprechstunden“ — `SprechstundenberichtGateway` (fail-closed, V1-Vertrag `brsprechstundenbuch`) + `SprechstundenberichtService::appendToMeeting` hängt an `planNextRegular` den TOP „Bericht aus den Sprechstunden“ mit Sub-TOP je Sprechstunde (Metadaten: Datum, Mitglied, Anzahlen) an; ohne Provider bleibt die Sitzung unverändert. Tests inkl. Stichtag-Logik und Negativfälle; CI checkt brsprechstundenbuch für den Vertrag aus.
+
 - min-version auf Nextcloud 33 angehoben: NC 29–32 sind offiziell EOL (25.11.2026); der RC-Kompatibilitätsgate zeigte auf NC 29 eine nicht vorhandene private API (`AppManager::getEnabledApps()`).
 - Zustandslose Browserbausteine aus `flz_shared` 0.1.0 werden als geprüftes,
   app-lokales Bundle unter `window.OCA.BrTop.Shared` ausgeliefert. LocalBase-

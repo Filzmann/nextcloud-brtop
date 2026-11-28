@@ -375,6 +375,8 @@
   "Sitzungsprozess bearbeiten": "Edit meeting process",
   "Snapshot zum Zeitpunkt der Einladung. Spätere Gruppenänderungen verändern diese Liste nicht.": "Snapshot at the time of the invitation. Later group changes do not alter this list.",
   "Speichern": "Save",
+  "Sprechstunde vom {datum} ({mitglied}): {eintraege} Einträge ({wichtige} wichtig), {faelle} Einzelfälle.": "Consultation hour on {date} ({member}): {entries} entries ({important} important), {cases} individual cases.",
+  "Sprechstundenbericht {datum} ({mitglied})": "Consultation-hours report {date} ({member})",
   "Stammdaten speichern": "Save master data",
   "Status": "Status",
   "Sub-TOPs sind nur bis Ebene 3 möglich.": "Sub-items are only possible up to level 3.",

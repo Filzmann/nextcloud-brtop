@@ -54,6 +54,12 @@ jobs:
           repository: Filzmann/nextcloud-flz-permission-matrix
           ref: c88751dd5f392ab0f6bdb15b45e66fcda2069ca9
           path: flz_permission_matrix
+      - name: brsprechstundenbuch für Sprechstundenbericht-Vertrag-Tests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-brsprechstundenbuch
+          ref: main
+          path: brsprechstundenbuch
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
         with:
@@ -114,6 +120,12 @@ jobs:
           repository: Filzmann/nextcloud-flz-permission-matrix
           ref: c88751dd5f392ab0f6bdb15b45e66fcda2069ca9
           path: flz_permission_matrix
+      - name: brsprechstundenbuch für Sprechstundenbericht-Vertrag-Tests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-brsprechstundenbuch
+          ref: main
+          path: brsprechstundenbuch
       - name: Node.js einrichten
         uses: actions/setup-node@v6
         with:
