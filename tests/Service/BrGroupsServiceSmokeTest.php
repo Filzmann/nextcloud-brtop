@@ -6,9 +6,6 @@ namespace OCP {
     if (!interface_exists(IGroupManager::class)) {
         interface IGroupManager { public function groupExists($gid); public function createGroup($gid); public function get($gid); }
     }
-    if (!interface_exists(IAppConfig::class)) {
-        interface IAppConfig { public function getValueString(string $appId, string $key, string $default = ""): string; public function setValueString(string $appId, string $key, string $value): void; }
-    }
     if (!interface_exists(IConfig::class)) {
         interface IConfig { public function getAppValue($appName, $key, $default = ""); }
     }
@@ -20,11 +17,10 @@ namespace OCA\BrTop\AppInfo {
 
 namespace OCA\BrTop\Tests {
     use OCA\BrTop\Service\BrGroupsService;
+    use OCA\BrTop\Service\BrRoleGateway;
     use OCA\BrTop\Service\BrtopSettingsService;
-    use OCA\LocalBase\Organization\BrGroupDefinition;
-    use OCA\LocalBase\Organization\BrGroupSettingsService;
-    use OCA\LocalBase\Service\GroupProvisioningService;
-    use OCP\IAppConfig;
+    use OCA\BrTop\Vendor\Filzmann\Shared\Service\GroupProvisioningService;
+    use OCA\FlzPermissionMatrix\PublicApi\V1\BrRoleSnapshot;
     use OCP\IConfig;
     use OCP\IGroupManager;
 
@@ -52,18 +48,6 @@ namespace OCA\BrTop\Tests {
             }
         };
     };
-    $newAppConfig = static function (string $initial = ''): IAppConfig {
-        return new class($initial) implements IAppConfig {
-            public array $values = [];
-            public array $writes = [];
-            public function __construct(string $initial) { if ($initial !== '') $this->values['br_group_definition'] = $initial; }
-            public function getValueString(string $appId, string $key, string $default = ''): string { return $this->values[$key] ?? $default; }
-            public function setValueString(string $appId, string $key, string $value): void {
-                $this->values[$key] = $value;
-                $this->writes[] = [$appId, $key, $value];
-            }
-        };
-    };
     $legacySettings = static function (string $memberGroup): BrtopSettingsService {
         $config = new class($memberGroup) implements IConfig {
             public function __construct(private string $memberGroup) {}
@@ -73,32 +57,33 @@ namespace OCA\BrTop\Tests {
         };
         return new BrtopSettingsService($config);
     };
+    $gateway = static function (?BrRoleSnapshot $snapshot): BrRoleGateway {
+        return new class($snapshot) extends BrRoleGateway {
+            public function __construct(private ?BrRoleSnapshot $snapshotValue) {}
+            public function snapshot(): ?BrRoleSnapshot { return $this->snapshotValue; }
+        };
+    };
 
-    $groupManager = $newGroupManager(['BR Custom' => ['chair'], 'Betriebsrat-Vorsitzende' => ['chair']]);
-    $appConfig = $newAppConfig();
+    // Kanonischer Vertrag aus flz_permission_matrix: Gruppennamen kommen aus dem V1-Snapshot.
+    $groupManager = $newGroupManager(['BR Mitglieder' => ['a'], 'BR Vorsitz' => ['a']]);
     $provisioning = new GroupProvisioningService($groupManager);
-    $contract = new BrGroupSettingsService($appConfig, $provisioning);
-    $service = new BrGroupsService($provisioning, $contract, $legacySettings('BR Custom'));
-    assertSameValue(['Betriebsrat-Stellvertreter'], $service->ensureRequiredGroups(), 'The migration should create only missing role groups around the legacy member group.');
-    assertSameValue('BR Custom', $contract->validatedDefinition()->groupId(BrGroupDefinition::MEMBER), 'The legacy BRTop member group must be imported into the shared contract.');
-    assertSameValue([], $service->ensureRequiredGroups(), 'A persisted valid BR group contract must be idempotent.');
+    $service = new BrGroupsService(
+        $provisioning,
+        $gateway(new BrRoleSnapshot(true, 5, 5, 'BR Mitglieder', 'BR Vorsitz', 'BR Vize')),
+        $legacySettings('BR Custom'),
+    );
+    assertSameValue(['BR Mitglieder', 'BR Vorsitz', 'BR Vize'], array_values($service->requiredGroups()), 'Runtime group names must come from the canonical BR role V1 snapshot.');
+    assertSameValue(['BR Vize'], $service->ensureRequiredGroups(), 'Only missing role groups must be created.');
+    assertSameValue([], $service->ensureRequiredGroups(), 'Ensuring groups must be idempotent.');
+    assertSameValue('BR Mitglieder', $service->memberGroupName(), 'Access checks must receive the configured BR member group.');
+    assertSameValue('BR Vorsitz', $service->chairGroupName(), 'Access checks must receive the configured BR chair group.');
+    assertSameValue('BR Vize', $service->deputyGroupName(), 'Access checks must receive the configured BR deputy group.');
 
-    $invalidGroups = $newGroupManager(['BR Custom' => ['member'], 'Betriebsrat-Vorsitzende' => ['outsider'], 'Betriebsrat-Stellvertreter' => []]);
-    $invalidConfig = $newAppConfig();
-    $invalidProvisioning = new GroupProvisioningService($invalidGroups);
-    $invalidService = new BrGroupsService($invalidProvisioning, new BrGroupSettingsService($invalidConfig, $invalidProvisioning), $legacySettings('BR Custom'));
-    assertThrows(static fn() => $invalidService->ensureRequiredGroups(), \DomainException::class, 'Chair and deputy group members must also belong to the configured BR member group.');
-    assertSameValue([], $invalidConfig->writes, 'A contradictory native group hierarchy must not persist a shared contract.');
-
-    $customDefinition = json_encode(['version' => 1, 'revision' => 4, 'groups' => ['member' => 'BR Mitglieder', 'chair' => 'BR Vorsitz', 'deputy' => 'BR Vize']], JSON_THROW_ON_ERROR);
-    $customGroups = $newGroupManager(['BR Mitglieder' => ['a'], 'BR Vorsitz' => ['a'], 'BR Vize' => []]);
-    $customConfig = $newAppConfig($customDefinition);
-    $customProvisioning = new GroupProvisioningService($customGroups);
-    $customService = new BrGroupsService($customProvisioning, new BrGroupSettingsService($customConfig, $customProvisioning), $legacySettings('Ignored legacy group'));
-    assertSameValue(['BR Mitglieder', 'BR Vorsitz', 'BR Vize'], $customService->requiredGroups(), 'Runtime group names must come from the persisted LocalBase contract.');
-    assertSameValue('BR Mitglieder', $customService->memberGroupName(), 'Access checks must receive the configured BR member group.');
-    assertSameValue([], $customService->ensureRequiredGroups(), 'A valid persisted contract must not create or rename native groups.');
-    assertSameValue([], $customConfig->writes, 'A valid persisted contract must remain the single source without consumer rewrites.');
+    // Fallback ohne Provider: Legacy-Mitgliedergruppe plus Standard-Rollengruppen.
+    $fallbackGroups = $newGroupManager(['BR Custom' => ['chair'], 'Betriebsrat-Vorsitzende' => ['chair']]);
+    $fallbackService = new BrGroupsService(new GroupProvisioningService($fallbackGroups), $gateway(null), $legacySettings('BR Custom'));
+    assertSameValue(['BR Custom', 'Betriebsrat-Vorsitzende', 'Betriebsrat-Stellvertreter'], array_values($fallbackService->requiredGroups()), 'Without a provider the legacy member group and default role groups must be used.');
+    assertSameValue(['Betriebsrat-Stellvertreter'], $fallbackService->ensureRequiredGroups(), 'The fallback should create only missing role groups around the legacy member group.');
 
     echo 'BrGroupsService smoke tests passed' . PHP_EOL;
 }

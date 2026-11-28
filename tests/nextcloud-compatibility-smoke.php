@@ -5,7 +5,7 @@ declare(strict_types=1);
 use OCA\BrTop\Service\TemporaryAdminAccessService;
 use OCA\BrTop\Repository\MeetingRepository;
 use OCA\BrTop\Service\FileExportService;
-use OCA\LocalBase\PublicApi\V1\BrMembershipSnapshotService;
+use OCA\FlzPermissionMatrix\PublicApi\V1\BrRoleSnapshotService;
 use OCP\Files\File;
 use OCP\Files\IRootFolder;
 use OCP\IGroupManager;
@@ -28,14 +28,14 @@ return [
     'uiPath' => '/index.php/apps/brtop/',
     'preGrantUiStatuses' => [200],
     'postGrantUiStatuses' => [200],
-    // canManage() requires an active LocalBase BR membership snapshot (seeded
+    // canManage() requires an active flz_permission_matrix BR role snapshot (seeded
     // by the compatibility stage) plus membership in the member and br_dpo
     // groups; grantManagerGroups adds br_dpo, the membership is ensured here so
     // that pre-grant probes stay false for membership-based apps like brstunden.
     'grantService' => static function (string $uid): void {
-        $snapshot = OCP\Server::get(BrMembershipSnapshotService::class)->snapshot();
+        $snapshot = OCP\Server::get(BrRoleSnapshotService::class)->snapshot();
         if (!$snapshot->isValid()) {
-            throw new RuntimeException('Der LocalBase-BR-Mitgliedervertrag ist nicht gueltig.');
+            throw new RuntimeException('Der BR-Rollenvertrag (flz_permission_matrix V1) ist nicht gueltig.');
         }
         $groups = OCP\Server::get(IGroupManager::class);
         $user = OCP\Server::get(IUserManager::class)->get($uid);

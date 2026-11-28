@@ -14,34 +14,6 @@ namespace OCP {
     }
 }
 
-namespace OCA\LocalBase\PublicApi\V1 {
-    if (!class_exists(BrMembershipSnapshot::class, false)) {
-        final class BrMembershipSnapshot {
-            public const CONTRACT_VERSION = '1.0';
-            public function __construct(
-                private bool $valid,
-                private string $version = '1.0',
-                private ?string $member = 'br-members',
-                private ?string $chair = 'br-chair',
-                private ?string $deputy = 'br-deputy',
-            ) {}
-            public function isValid(): bool { return $this->valid; }
-            public function contractVersion(): string { return $this->version; }
-            public function definitionVersion(): int { return 1; }
-            public function definitionRevision(): int { return 3; }
-            public function memberGroupId(): ?string { return $this->member; }
-            public function chairGroupId(): ?string { return $this->chair; }
-            public function deputyGroupId(): ?string { return $this->deputy; }
-        }
-    }
-    if (!class_exists(BrMembershipSnapshotService::class, false)) {
-        class BrMembershipSnapshotService {
-            public function __construct(public BrMembershipSnapshot $value) {}
-            public function snapshot(): BrMembershipSnapshot { return $this->value; }
-        }
-    }
-}
-
 namespace OCA\BrTop\AppInfo {
     if (!class_exists(Application::class, false)) {
         final class Application { public const APP_ID = 'brtop'; }
@@ -54,8 +26,8 @@ namespace OCA\BrTop\Tests {
     use OCA\BrTop\Service\BrPermissionService;
     use OCA\BrTop\Service\BrRoleService;
     use OCA\BrTop\Service\TemporaryAdminAccessChecker;
-    use OCA\LocalBase\PublicApi\V1\BrMembershipSnapshot;
-    use OCA\LocalBase\PublicApi\V1\BrMembershipSnapshotService;
+    use OCA\BrTop\Service\BrRoleGateway;
+    use OCA\FlzPermissionMatrix\PublicApi\V1\BrRoleSnapshot;
     use OCP\IConfig;
     use OCP\IGroupManager;
 
@@ -101,7 +73,11 @@ namespace OCA\BrTop\Tests {
             };
         }
     };
-    $snapshotProvider = new BrMembershipSnapshotService(new BrMembershipSnapshot(true));
+    $snapshotProvider = new class extends BrRoleGateway {
+        public ?BrRoleSnapshot $value;
+        public function __construct() { $this->value = new BrRoleSnapshot(true, 1, 3, 'br-members', 'br-chair', 'br-deputy'); }
+        public function snapshot(): ?BrRoleSnapshot { return $this->value; }
+    };
     $roles = new BrRoleService($snapshotProvider, $groups);
     $config = new class implements IConfig {
         public array $values = [];
@@ -138,8 +114,8 @@ namespace OCA\BrTop\Tests {
     $groups->users['dpo']['groups'] = [];
     assertSameValue(false, $permissions->has('dpo', BrPermissionService::ADMIN_ACCESS_MANAGE), 'Verlust der BR-Mitgliedschaft muss die Zuweisung sofort deaktivieren.');
 
-    $snapshotProvider->value = new BrMembershipSnapshot(false);
-    assertSameValue(false, $permissions->has('member', BrPermissionService::SESSION_READ), 'Ungültiger LocalBase-Vertrag muss geschlossen verweigern.');
+    $snapshotProvider->value = new BrRoleSnapshot(false, 1, 0, null, null, null);
+    assertSameValue(false, $permissions->has('member', BrPermissionService::SESSION_READ), 'Ungültiger BR-Rollenvertrag muss geschlossen verweigern.');
     assertThrows(static fn() => $assignments->replace('chair', ['member']), AccessDeniedException::class, 'Ungültiger Vertrag darf keine Zuweisung erlauben.');
 
     echo "BRTop permission service tests passed\n";

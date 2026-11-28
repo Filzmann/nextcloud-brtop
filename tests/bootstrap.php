@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 $workspaceRoot = dirname(__DIR__, 2);
 $appRoot = dirname(__DIR__);
+require_once $appRoot . '/vendor/flz-shared/php/vendor/autoload.php';
 
 spl_autoload_register(static function (string $class) use ($workspaceRoot, $appRoot): void {
     $prefixes = [
         'OCA\\LocalBase\\Tests\\Support\\' => $workspaceRoot . '/localbase/tests/Support/',
         'OCA\\LocalBase\\' => $workspaceRoot . '/localbase/lib/',
         'OCA\\FlzDataProtection\\' => $appRoot . '/tests/stubs/FlzDataProtection/',
+        'OCA\\FlzPermissionMatrix\\' => $workspaceRoot . '/flz_permission_matrix/lib/',
         'OCA\\BrTop\\' => $appRoot . '/lib/',
     ];
 

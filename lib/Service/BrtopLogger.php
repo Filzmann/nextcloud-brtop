@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\BrTop\Service;
 
 use OCA\BrTop\AppInfo\Application;
-use OCA\LocalBase\Service\AppLogger;
+use OCA\BrTop\Vendor\Filzmann\Shared\Service\AppLogger;
 use Throwable;
 
 class BrtopLogger {

@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace OCA\BrTop\Service;
 
-use OCA\LocalBase\PublicApi\V1\BrMembershipSnapshot;
-use OCA\LocalBase\PublicApi\V1\BrMembershipSnapshotService;
+use OCA\FlzPermissionMatrix\PublicApi\V1\BrRoleSnapshot;
 use OCP\IGroupManager;
 use Throwable;
 
-/** Fail-closed consumer of the public LocalBase BR membership V1 contract. */
+/** Fail-closed consumer of the public flz_permission_matrix BR role V1 contract. */
 final class BrRoleService {
     public function __construct(
-        private BrMembershipSnapshotService $snapshots,
+        private BrRoleGateway $roles,
         private IGroupManager $groups,
     ) {}
 
@@ -95,10 +94,10 @@ final class BrRoleService {
         }
     }
 
-    private function validSnapshot(): ?BrMembershipSnapshot {
+    private function validSnapshot(): ?BrRoleSnapshot {
         try {
-            $snapshot = $this->snapshots->snapshot();
-            if ($snapshot->contractVersion() !== BrMembershipSnapshot::CONTRACT_VERSION
+            $snapshot = $this->roles->snapshot();
+            if ($snapshot->contractVersion() !== BrRoleSnapshot::CONTRACT_VERSION
                 || !$snapshot->isValid()
                 || $snapshot->definitionVersion() < 1
                 || $snapshot->definitionRevision() < 1
