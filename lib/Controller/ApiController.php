@@ -20,7 +20,7 @@ use OCA\BrTop\Service\MeetingStateService;
 use OCA\BrTop\Service\LegislatureService;
 use OCA\BrTop\Service\ProtocolBlockService;
 use OCA\BrTop\Service\BrPermissionService;
-use OCA\LocalBase\Controller\ApiResponder;
+use OCA\BrTop\Vendor\Filzmann\Shared\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;

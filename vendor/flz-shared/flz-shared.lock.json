@@ -1,0 +1,19 @@
+{
+    "schema": 1,
+    "app_id": "brtop",
+    "app_namespace": "BrTop",
+    "php_namespace": "OCA\\BrTop\\Vendor\\Filzmann\\Shared",
+    "browser_global": "window.OCA.BrTop.Shared",
+    "packages": {
+        "php": {
+            "name": "filzmann/shared-runtime",
+            "version": "0.3.0",
+            "sha256": "dca70d390fc47bef9b67bf219b50a664a3581be01e8b953d5d972648e9a8c130"
+        },
+        "browser": {
+            "name": "@filzmann/shared-browser",
+            "version": "0.1.0",
+            "sha256": "1c40294520dbfc9fd82c6696075ee14a65b0c9798fad05797ba00bebbe34a4d7"
+        }
+    }
+}

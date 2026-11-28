@@ -4,48 +4,50 @@ declare(strict_types=1);
 
 namespace OCA\BrTop\Service;
 
-use OCA\LocalBase\Organization\BrGroupDefinition;
-use OCA\LocalBase\Organization\BrGroupSettingsService;
-use OCA\LocalBase\Service\GroupProvisioningService;
+use OCA\BrTop\Vendor\Filzmann\Shared\Service\GroupProvisioningService;
 
 class BrGroupsService {
+    private const DEFAULT_GROUPS = [
+        'member' => 'Betriebsrat',
+        'chair' => 'Betriebsrat-Vorsitzende',
+        'deputy' => 'Betriebsrat-Stellvertreter',
+    ];
+
     public function __construct(
         private GroupProvisioningService $groups,
-        private BrGroupSettingsService $settings,
+        private BrRoleGateway $roles,
         private BrtopSettingsService $legacySettings,
     ) {
     }
 
+    /** @return array<string,string> */
     public function requiredGroups(): array {
-        $state = $this->settings->state();
-        $definition = $state['persisted']
-            ? $this->settings->validatedDefinition()
-            : BrGroupDefinition::defaults($this->legacySettings->legacyMemberGroupName());
-
-        return array_values($definition->groups());
-    }
-
-    public function ensureRequiredGroups(): array {
-        $state = $this->settings->state();
-        if ($state['persisted']) {
-            $this->settings->validatedDefinition();
-            return [];
+        $snapshot = $this->roles->snapshot();
+        if ($snapshot !== null) {
+            return [
+                'member' => (string)$snapshot->memberGroupId(),
+                'chair' => (string)$snapshot->chairGroupId(),
+                'deputy' => (string)$snapshot->deputyGroupId(),
+            ];
         }
 
-        $created = $this->groups->ensureGroups($this->requiredGroups());
-        $this->settings->initializeFromLegacyMemberGroup($this->legacySettings->legacyMemberGroupName());
-        return $created;
+        return ['member' => $this->legacySettings->legacyMemberGroupName()] + self::DEFAULT_GROUPS;
+    }
+
+    /** @return list<string> */
+    public function ensureRequiredGroups(): array {
+        return $this->groups->ensureGroups(array_values($this->requiredGroups()));
     }
 
     public function memberGroupName(): string {
-        return $this->settings->validatedDefinition()->groupId(BrGroupDefinition::MEMBER);
+        return $this->requiredGroups()['member'];
     }
 
     public function chairGroupName(): string {
-        return $this->settings->validatedDefinition()->groupId(BrGroupDefinition::CHAIR);
+        return $this->requiredGroups()['chair'];
     }
 
     public function deputyGroupName(): string {
-        return $this->settings->validatedDefinition()->groupId(BrGroupDefinition::DEPUTY);
+        return $this->requiredGroups()['deputy'];
     }
 }

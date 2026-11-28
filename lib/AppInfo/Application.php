@@ -30,6 +30,7 @@ class Application extends App implements IBootstrap {
     public const APP_ID = 'brtop';
 
     public function __construct(array $urlParams = []) {
+        require_once dirname(__DIR__, 2) . '/vendor/flz-shared/php/vendor/autoload.php';
         parent::__construct(self::APP_ID, $urlParams);
     }
 

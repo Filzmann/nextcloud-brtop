@@ -14,7 +14,7 @@
     <dependencies>
         <nextcloud min-version="33" max-version="35"/>
         <app>calendar</app>
-        <app>localbase</app>
+        <app>flz_permission_matrix</app>
         <app>orgsuite</app>
     </dependencies>
     <settings>

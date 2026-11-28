@@ -1,6 +1,7 @@
 OC.L10N.register(
     "brtop",
     {
+  "Der kanonische BR-Rollenvertrag (flz_permission_matrix V1) ist nicht gültig verfügbar; BRTop verweigert fachliche Rechte.":"The canonical BR role contract (flz_permission_matrix V1) is not validly available; BRTop denies business rights.",
     " Beschlüsse vorgesehen]" : " resolutions planned]",
     " Sitze)" : " seats)",
     " Sitzen sichergestellt" : " seats secured",

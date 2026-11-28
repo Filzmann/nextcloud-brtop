@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\BrTop\Model;
 
-use OCA\LocalBase\Model\ModelApiTrait;
+use OCA\BrTop\Vendor\Filzmann\Shared\Model\ModelApiTrait;
 use OCA\BrTop\Store\MeetingStore;
 use OCP\IL10N;
 
