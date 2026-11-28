@@ -12,6 +12,7 @@ spl_autoload_register(static function (string $class) use ($workspaceRoot, $appR
         'OCA\\LocalBase\\' => $workspaceRoot . '/localbase/lib/',
         'OCA\\FlzDataProtection\\' => $appRoot . '/tests/stubs/FlzDataProtection/',
         'OCA\\FlzPermissionMatrix\\' => $workspaceRoot . '/flz_permission_matrix/lib/',
+        'OCA\\BrSprechstundenbuch\\' => $workspaceRoot . '/brsprechstundenbuch/lib/',
         'OCA\\BrTop\\' => $appRoot . '/lib/',
     ];
 

@@ -1,6 +1,8 @@
 OC.L10N.register(
     "brtop",
     {
+  "Sprechstunde vom {datum} ({mitglied}): {eintraege} Einträge ({wichtige} wichtig), {faelle} Einzelfälle.":"Consultation hour on {date} ({member}): {entries} entries ({important} important), {cases} individual cases.",
+  "Sprechstundenbericht {datum} ({mitglied})":"Consultation-hours report {date} ({member})",
   "Der kanonische BR-Rollenvertrag (flz_permission_matrix V1) ist nicht gültig verfügbar; BRTop verweigert fachliche Rechte.":"The canonical BR role contract (flz_permission_matrix V1) is not validly available; BRTop denies business rights.",
     " Beschlüsse vorgesehen]" : " resolutions planned]",
     " Sitze)" : " seats)",
