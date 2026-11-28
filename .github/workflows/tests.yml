@@ -42,6 +42,18 @@ jobs:
           repository: Filzmann/nextcloud-localbase
           ref: ${{ steps.localbase-ref.outputs.ref }}
           path: localbase
+      - name: Organisationsprovider für Vertragstests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-organization
+          ref: bcd5b03fab962feef08720d13ee340b043855488
+          path: flz_organization
+      - name: Berechtigungsmatrix für BR-Rollenvertrag-Tests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-permission-matrix
+          ref: c88751dd5f392ab0f6bdb15b45e66fcda2069ca9
+          path: flz_permission_matrix
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
         with:
@@ -90,6 +102,18 @@ jobs:
           repository: Filzmann/nextcloud-localbase
           ref: ${{ steps.localbase-ref.outputs.ref }}
           path: localbase
+      - name: Organisationsprovider für Vertragstests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-organization
+          ref: bcd5b03fab962feef08720d13ee340b043855488
+          path: flz_organization
+      - name: Berechtigungsmatrix für BR-Rollenvertrag-Tests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-permission-matrix
+          ref: c88751dd5f392ab0f6bdb15b45e66fcda2069ca9
+          path: flz_permission_matrix
       - name: Node.js einrichten
         uses: actions/setup-node@v6
         with:
